@@ -73,6 +73,7 @@ public class EditTestsDialog extends JDialog {
 		JButton newTest = new JButton("New");
 		newTest.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				saveCurrentTest();
 				int index = EditTestsDialog.this.tests.size();
 				EditTestsDialog.this.tests.add(new Test("", "", index));
 				setSelectedTest(index);

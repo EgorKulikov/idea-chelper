@@ -108,8 +108,10 @@ public class Utilities {
 	}
 
 	public static void updateDefaultTask(Task task) {
-		defaultConfiguration = task.setDirectory(null);
+		if (task != null)
+			defaultConfiguration = task.setDirectory(null);
 	}
+
 	public static Task getDefaultTask() {
 		return defaultConfiguration;
 	}

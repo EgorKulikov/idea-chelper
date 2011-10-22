@@ -5,10 +5,10 @@ package net.egork.chelper.task;
  */
 public class Encoding {
 	public static String encode(String s) {
-		return s.replace(":", "/:").replace(";", "/;");
+		return s.replace(":", "/:").replace(";", "/;").replace("_", "/_").replace("\n", "/__");
 	}
 
 	public static String decode(String s) {
-		return s.replace("/:", ":").replace("/;", ";");
+		return s.replace("/__", "\n").replace("/_", "_").replace("/:", ":").replace("/;", ";");
 	}
 }

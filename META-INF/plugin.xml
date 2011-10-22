@@ -18,9 +18,8 @@
 
   <actions>
     <!-- Add your actions here -->
-      <action id="newTask" class="net.egork.chelper.actions.NewTaskAction" text="Task" icon="/icons/taskIcon.png" description="New task creation">
+      <action id="newTaskCustom" class="net.egork.chelper.actions.NewTaskAction" text="Task" icon="/icons/taskIcon.png" description="New task creation">
           <add-to-group group-id="NewGroup" anchor="first"/>
-          <keyboard-shortcut keymap="$default" first-keystroke="alt F2"/>
       </action>
       <action id="editTests" class="net.egork.chelper.actions.EditTestsAction" text="Edit Tests"
               description="Edit tests for current task" icon="/icons/editTests.png">
@@ -33,6 +32,10 @@
       </action>
       <action id="deleteTask" class="net.egork.chelper.actions.DeleteTaskAction" text="Delete Task" icon="/icons/delete.png"
               description="Deletes current task and all associated files"/>
+      <action id="newTask" class="net.egork.chelper.actions.NewTaskDefaultAction" text="New Task"
+              icon="/icons/taskIcon.png" description="Creating new task in default directory">
+          <keyboard-shortcut keymap="$default" first-keystroke="alt F2"/>
+      </action>
   </actions>
 
   <extensions defaultExtensionNs="com.intellij">

@@ -2,13 +2,11 @@ package net.egork.chelper.task;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
-import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import net.egork.chelper.Utilities;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,7 +35,7 @@ public class TopCoderTask {
 	}
 
 	public void createSourceFile() {
-		ApplicationManager.getApplication().runReadAction(new Runnable() {
+		ApplicationManager.getApplication().runWriteAction(new Runnable() {
 			public void run() {
 				PsiFile originalSource = Utilities.getPsiFile(project, Utilities.getData(project).defaultDir + "/" +
 					name + ".java");
@@ -46,23 +44,13 @@ public class TopCoderTask {
 				final StringBuilder text = new StringBuilder();
 				text.append(textParts[0]);
 				text.append(textParts[1]);
-				ApplicationManager.getApplication().invokeLater(new Runnable() {
-					public void run() {
-						String outputDirectory = Utilities.getData(project).topcoderDir;
-						VirtualFile directory = Utilities.createDirectoryIfMissing(project, outputDirectory);
-						if (directory == null)
-							return;
-						final VirtualFile file = Utilities.writeTextFile(directory, name + ".java", text.toString());
-						Utilities.synchronizeFile(file);
-						Utilities.getData(project).queue.run(new com.intellij.openapi.progress.Task.Backgroundable(
-							project, "Creating source file") {
-							public void run(@NotNull ProgressIndicator indicator) {
-								indicator.setText("Removing unused code");
-								Task.removeUnusedCode(project, file, name, signature.name);
-							}
-						});
-					}
-				});
+				String outputDirectory = Utilities.getData(project).topcoderDir;
+				VirtualFile directory = Utilities.createDirectoryIfMissing(project, outputDirectory);
+				if (directory == null)
+					return;
+				final VirtualFile file = Utilities.writeTextFile(directory, name + ".java", text.toString());
+				Utilities.synchronizeFile(file);
+				Task.removeUnusedCode(project, file, name, signature.name);
 			}
 		});
 	}

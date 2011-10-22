@@ -1,41 +1,14 @@
 package net.egork.chelper.task;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.JavaDirectoryService;
-import com.intellij.psi.JavaPsiFacade;
-import com.intellij.psi.PsiAnonymousClass;
-import com.intellij.psi.PsiArrayType;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiClassType;
-import com.intellij.psi.PsiDirectory;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiElementVisitor;
-import com.intellij.psi.PsiField;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiImportStatement;
-import com.intellij.psi.PsiManager;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiMethodCallExpression;
-import com.intellij.psi.PsiNewExpression;
-import com.intellij.psi.PsiParameter;
-import com.intellij.psi.PsiReference;
-import com.intellij.psi.PsiType;
-import com.intellij.psi.PsiVariable;
+import com.intellij.psi.*;
 import com.intellij.psi.impl.PsiClassImplUtil;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import net.egork.chelper.Utilities;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Egor Kulikov (kulikov@devexperts.com)
@@ -269,7 +242,7 @@ public class Task {
 	}
 
 	public void createSourceFile() {
-		ApplicationManager.getApplication().runReadAction(new Runnable() {
+		ApplicationManager.getApplication().runWriteAction(new Runnable() {
 			public void run() {
 				Set<String> toImport = new HashSet<String>();
 				toImport.add("import java.io.InputStream;");
@@ -285,23 +258,13 @@ public class Task {
 				text.append(textParts[0]);
 				text.append(generateMainClass());
 				text.append(textParts[1]);
-				ApplicationManager.getApplication().invokeLater(new Runnable() {
-					public void run() {
-						String outputDirectory = Utilities.getData(project).outputDirectory;
-						VirtualFile directory = Utilities.createDirectoryIfMissing(project, outputDirectory);
-						if (directory == null)
-							return;
-						final VirtualFile file = Utilities.writeTextFile(directory, "Main.java", text.toString());
-						Utilities.synchronizeFile(file);
-						Utilities.getData(project).queue.run(new com.intellij.openapi.progress.Task.Backgroundable(
-							project, "Creating source file") {
-							public void run(@NotNull ProgressIndicator indicator) {
-								indicator.setText("Removing unused code");
-								removeUnusedCode(project, file, "Main", "main");
-							}
-						});
-					}
-				});
+				String outputDirectory = Utilities.getData(project).outputDirectory;
+				VirtualFile directory = Utilities.createDirectoryIfMissing(project, outputDirectory);
+				if (directory == null)
+					return;
+				final VirtualFile file = Utilities.writeTextFile(directory, "Main.java", text.toString());
+				Utilities.synchronizeFile(file);
+				removeUnusedCode(project, file, "Main", "main");
 			}
 		});
 	}
@@ -347,67 +310,58 @@ public class Task {
 	public static void removeUnusedCode(final Project project, final VirtualFile virtualFile, final String mainClass,
 		final String mainMethod)
 	{
-		ApplicationManager.getApplication().invokeLater(new Runnable() {
-			public void run() {
-				ApplicationManager.getApplication().runWriteAction(new Runnable() {
-					public void run() {
-						PsiFile file = PsiManager.getInstance(project).findFile(virtualFile);
-						if (file == null)
-							return;
-						while (true) {
-							final List<PsiElement> toRemove = new ArrayList<PsiElement>();
-							file.acceptChildren(new PsiElementVisitor() {
-								private boolean visitElementImpl(PsiElement element) {
-									if (element instanceof PsiMethod)
-										toRemove.addAll(Arrays.asList(((PsiMethod) element).getModifierList().getAnnotations()));
-									if (!(element instanceof PsiClass) && !(element instanceof PsiMethod) && !(element instanceof PsiField))
-										return true;
-									if (element instanceof PsiMethod && PsiClassImplUtil.isMainMethod(
-										(PsiMethod) element))
-										return false;
-									if (element instanceof PsiMethod && ((PsiMethod) element).findSuperMethods().length != 0)
-										return false;
-									if (element instanceof PsiMethod && ((PsiMethod) element).isConstructor())
-										return false;
-									if (element instanceof PsiAnonymousClass)
-										return false;
-									if (element instanceof PsiMethod && mainMethod.equals(((PsiMethod) element).getName())) {
-										PsiElement parent = element.getParent();
-										if (parent instanceof PsiClass && mainClass.equals(((PsiClass) parent).getQualifiedName()))
-											return false;
-									}
-									if (element instanceof PsiClass && mainClass.equals(((PsiClass) element).getQualifiedName()))
-										return true;
-									for (PsiReference reference : ReferencesSearch.search(element)) {
-										PsiElement referenceElement = reference.getElement();
-										while (referenceElement != null && referenceElement != element)
-											referenceElement = referenceElement.getParent();
-										if (referenceElement == null)
-											return element instanceof PsiClass;
-									}
-									toRemove.add(element);
-									return false;
-								}
-
-								@Override
-								public void visitElement(PsiElement element) {
-									if (visitElementImpl(element))
-										element.acceptChildren(this);
-								}
-							});
-							if (toRemove.isEmpty())
-								break;
-							for (PsiElement element : toRemove) {
-								if (element.isValid())
-									element.delete();
-							}
-						}
-						Utilities.synchronizeFile(virtualFile);
+		PsiFile file = PsiManager.getInstance(project).findFile(virtualFile);
+		if (file == null)
+			return;
+		while (true) {
+			final List<PsiElement> toRemove = new ArrayList<PsiElement>();
+			file.acceptChildren(new PsiElementVisitor() {
+				private boolean visitElementImpl(PsiElement element) {
+					if (element instanceof PsiMethod)
+						toRemove.addAll(Arrays.asList(((PsiMethod) element).getModifierList().getAnnotations()));
+					if (!(element instanceof PsiClass) && !(element instanceof PsiMethod) && !(element instanceof PsiField))
+						return true;
+					if (element instanceof PsiMethod && PsiClassImplUtil.isMainMethod(
+						(PsiMethod) element))
+						return false;
+					if (element instanceof PsiMethod && ((PsiMethod) element).findSuperMethods().length != 0)
+						return false;
+					if (element instanceof PsiMethod && ((PsiMethod) element).isConstructor())
+						return false;
+					if (element instanceof PsiAnonymousClass)
+						return false;
+					if (element instanceof PsiMethod && mainMethod.equals(((PsiMethod) element).getName())) {
+						PsiElement parent = element.getParent();
+						if (parent instanceof PsiClass && mainClass.equals(((PsiClass) parent).getQualifiedName()))
+							return false;
 					}
-				});
+					if (element instanceof PsiClass && mainClass.equals(((PsiClass) element).getQualifiedName()))
+						return true;
+					for (PsiReference reference : ReferencesSearch.search(element)) {
+						PsiElement referenceElement = reference.getElement();
+						while (referenceElement != null && referenceElement != element)
+							referenceElement = referenceElement.getParent();
+						if (referenceElement == null)
+							return element instanceof PsiClass;
+					}
+					toRemove.add(element);
+					return false;
+				}
 
+				@Override
+				public void visitElement(PsiElement element) {
+					if (visitElementImpl(element))
+						element.acceptChildren(this);
+				}
+			});
+			if (toRemove.isEmpty())
+				break;
+			for (PsiElement element : toRemove) {
+				if (element.isValid())
+					element.delete();
 			}
-		});
+		}
+		Utilities.synchronizeFile(virtualFile);
 	}
 
 	private String generateMainClass() {

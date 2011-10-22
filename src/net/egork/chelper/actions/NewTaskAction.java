@@ -22,11 +22,7 @@ public class NewTaskAction extends CreateElementActionBase {
 	@NotNull
 	@Override
 	protected PsiElement[] invokeDialog(Project project, PsiDirectory psiDirectory) {
-		try {
-			return create(null, psiDirectory);
-		} catch (Exception e) {
-			return PsiElement.EMPTY_ARRAY;
-		}
+		return create(null, psiDirectory);
 	}
 
 	@Override
@@ -35,7 +31,11 @@ public class NewTaskAction extends CreateElementActionBase {
 
 	@NotNull
 	@Override
-	protected PsiElement[] create(String s, PsiDirectory psiDirectory) throws Exception {
+	protected PsiElement[] create(String s, PsiDirectory psiDirectory) {
+		return createTask(s, psiDirectory);
+	}
+
+	public static PsiElement[] createTask(String s, PsiDirectory psiDirectory) {
 		if (!Utilities.isJavaDirectory(psiDirectory))
 			return PsiElement.EMPTY_ARRAY;
 		Task task = CreateTaskDialog.showDialog(psiDirectory, s);

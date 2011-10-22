@@ -2,18 +2,11 @@ package net.egork.chelper.configurations;
 
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.Executor;
-import com.intellij.execution.configurations.ConfigurationFactory;
-import com.intellij.execution.configurations.JavaCommandLineState;
-import com.intellij.execution.configurations.JavaParameters;
-import com.intellij.execution.configurations.JavaRunConfigurationModule;
-import com.intellij.execution.configurations.ModuleBasedConfiguration;
-import com.intellij.execution.configurations.RunConfiguration;
-import com.intellij.execution.configurations.RunProfileState;
+import com.intellij.execution.configurations.*;
 import com.intellij.execution.filters.TextConsoleBuilderImpl;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.options.SettingsEditor;
-import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.InvalidDataException;
@@ -55,15 +48,7 @@ public class TaskConfiguration extends ModuleBasedConfiguration<JavaRunConfigura
 	public RunProfileState getState(@NotNull Executor executor, @NotNull ExecutionEnvironment env)
 		throws ExecutionException
 	{
-
-		Utilities.getData(configuration.project).queue.run(new com.intellij.openapi.progress.Task.Backgroundable(
-			configuration.project, "Creating source file")
-		{
-			public void run(@NotNull ProgressIndicator indicator) {
-				indicator.setText("Building source file");
-				configuration.createSourceFile();
-			}
-		});
+		configuration.createSourceFile();
 		JavaCommandLineState state = new JavaCommandLineState(env) {
 			@Override
 			protected JavaParameters createJavaParameters() throws ExecutionException {

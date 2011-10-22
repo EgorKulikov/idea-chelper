@@ -52,11 +52,7 @@ public class ArchiveAction extends AnAction {
 						VfsUtil.copyFile(this, checkerFile, directory);
 						checkerFile.delete(this);
 						manager.removeConfiguration(manager.getSelectedConfiguration());
-						RunConfiguration[] allConfigurations = manager.getAllConfigurations();
-						if (allConfigurations.length != 0) {
-							manager.setActiveConfiguration(new RunnerAndConfigurationSettingsImpl(manager, allConfigurations[0],
-								false));
-						}
+						setOtherConfiguration(manager);
 					} catch (IOException ignored) {
 					}
 				}
@@ -82,15 +78,19 @@ public class ArchiveAction extends AnAction {
 						if (topcoderFile != null)
 							topcoderFile.delete(this);
 						manager.removeConfiguration(manager.getSelectedConfiguration());
-						RunConfiguration[] allConfigurations = manager.getAllConfigurations();
-						if (allConfigurations.length != 0) {
-							manager.setActiveConfiguration(new RunnerAndConfigurationSettingsImpl(manager, allConfigurations[0],
-								false));
-						}
+						setOtherConfiguration(manager);
 					} catch (IOException ignored) {
 					}
 				}
 			});
+		}
+	}
+
+	public static void setOtherConfiguration(RunManagerImpl manager) {
+		RunConfiguration[] allConfigurations = manager.getAllConfigurations();
+		for (RunConfiguration configuration : allConfigurations) {
+			if (configuration instanceof TaskConfiguration || configuration instanceof TopCoderConfiguration)
+				manager.setActiveConfiguration(new RunnerAndConfigurationSettingsImpl(manager, configuration, false));
 		}
 	}
 }

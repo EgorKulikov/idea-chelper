@@ -1,0 +1,42 @@
+<idea-plugin version="2">
+  <name>CHelper</name>
+  <description>Inlines library code and provides testing framework</description>
+  <version>0.2</version>
+  <vendor>Egor Kulikov</vendor>
+  <idea-version since-build="8000"/>
+
+  <application-components>
+    <!-- Add your application components here -->
+      <component>
+          <implementation-class>net.egork.chelper.CHelperMain</implementation-class>
+      </component>
+  </application-components>
+
+  <project-components>
+    <!-- Add your project components here -->
+  </project-components>
+
+  <actions>
+    <!-- Add your actions here -->
+      <action id="newTask" class="net.egork.chelper.actions.NewTaskAction" text="Task" icon="/icons/taskIcon.png" description="New task creation">
+          <add-to-group group-id="NewGroup" anchor="first"/>
+          <keyboard-shortcut keymap="$default" first-keystroke="alt F2"/>
+      </action>
+      <action id="editTests" class="net.egork.chelper.actions.EditTestsAction" text="Edit Tests"
+              description="Edit tests for current task" icon="/icons/editTests.png">
+          <add-to-group group-id="RunMenu" anchor="first"/>
+          <keyboard-shortcut keymap="$default" first-keystroke="alt F5"/>
+      </action>
+      <action id="archiveTask" class="net.egork.chelper.actions.ArchiveAction" text="Archive Task"
+              description="Archives current task"  icon="/icons/archive.png">
+          <keyboard-shortcut keymap="$default" first-keystroke="alt F6"/>
+      </action>
+      <action id="deleteTask" class="net.egork.chelper.actions.DeleteTaskAction" text="Delete Task" icon="/icons/delete.png"
+              description="Deletes current task and all associated files"/>
+  </actions>
+
+  <extensions defaultExtensionNs="com.intellij">
+      <configurationType implementation="net.egork.chelper.configurations.TaskConfigurationType"/>
+      <configurationType implementation="net.egork.chelper.configurations.TopCoderConfigurationType"/>
+  </extensions>
+</idea-plugin>

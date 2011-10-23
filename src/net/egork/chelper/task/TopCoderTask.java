@@ -163,8 +163,15 @@ public class TopCoderTask {
 			final String finalOriginalText = originalText;
 			ApplicationManager.getApplication().runWriteAction(new Runnable() {
 				public void run() {
-					Utilities.writeTextFile(Utilities.getFile(project, Utilities.getData(project).defaultDir),
-						name + ".java", finalOriginalText);
+					String defaultDir = Utilities.getData(project).defaultDir;
+					String packageName = Utilities.getPackage(Utilities.getPsiDirectory(project, defaultDir));
+					if (packageName != null && packageName.length() != 0) {
+						Utilities.writeTextFile(Utilities.getFile(project, defaultDir),
+							name + ".java", "package " + packageName + ";\n\n" + finalOriginalText);
+					} else {
+						Utilities.writeTextFile(Utilities.getFile(project, defaultDir),
+							name + ".java", finalOriginalText);
+					}
 				}
 			});
 			FileEditorManager.getInstance(project).openFile(Utilities.getFile(project,

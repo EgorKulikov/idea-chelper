@@ -7,7 +7,7 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import net.egork.chelper.configurations.TaskConfiguration;
-import net.egork.chelper.Utilities;
+import net.egork.chelper.util.Utilities;
 import net.egork.chelper.configurations.TopCoderConfiguration;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.TopCoderTask;

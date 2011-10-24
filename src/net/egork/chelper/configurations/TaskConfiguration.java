@@ -12,7 +12,9 @@ import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.WriteExternalException;
 import com.intellij.psi.PsiDirectory;
-import net.egork.chelper.Utilities;
+import net.egork.chelper.util.EncodingUtilities;
+import net.egork.chelper.util.FileUtilities;
+import net.egork.chelper.util.Utilities;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.ui.TaskConfigurationEditor;
 import org.jdom.Element;
@@ -53,7 +55,7 @@ public class TaskConfiguration extends ModuleBasedConfiguration<JavaRunConfigura
 			@Override
 			protected JavaParameters createJavaParameters() throws ExecutionException {
 				JavaParameters parameters = new JavaParameters();
-				PsiDirectory directory = Utilities.getPsiDirectory(configuration.project, configuration.location);
+				PsiDirectory directory = FileUtilities.getPsiDirectory(configuration.project, configuration.location);
 				Module module = ProjectRootManager.getInstance(configuration.project).getFileIndex().getModuleForFile(
 					directory.getVirtualFile());
 				parameters.configureByModule(module, JavaParameters.JDK_AND_CLASSES);
@@ -61,10 +63,10 @@ public class TaskConfiguration extends ModuleBasedConfiguration<JavaRunConfigura
 				parameters.getVMParametersList().add("-Xmx" + configuration.heapMemory);
 				parameters.getVMParametersList().add("-Xms" + configuration.stackMemory);
 				parameters.getProgramParametersList().add(Utilities.getData(configuration.project).inputClass);
-				parameters.getProgramParametersList().add(Utilities.getFQN(configuration.project,
+				parameters.getProgramParametersList().add(FileUtilities.getFQN(configuration.project,
 					directory, configuration.name));
 				parameters.getProgramParametersList().add(configuration.testType.name());
-				parameters.getProgramParametersList().add(configuration.encodeTests());
+				parameters.getProgramParametersList().add(EncodingUtilities.encodeTests(configuration.tests));
 				return parameters;
 			}
 		};
@@ -83,7 +85,7 @@ public class TaskConfiguration extends ModuleBasedConfiguration<JavaRunConfigura
 	@Override
 	public void readExternal(Element element) throws InvalidDataException {
 		super.readExternal(element);
-		configuration = Task.read(element.getChildText("taskConf"), getProject());
+		configuration = EncodingUtilities.readTask(element.getChildText("taskConf"), getProject());
 	}
 
 	@Override
@@ -91,6 +93,6 @@ public class TaskConfiguration extends ModuleBasedConfiguration<JavaRunConfigura
 		super.writeExternal(element);
 		Element configurationElement = new Element("taskConf");
 		element.addContent(configurationElement);
-		configurationElement.setText(configuration.toString());
+		configurationElement.setText(EncodingUtilities.encodeTask(configuration));
 	}
 }

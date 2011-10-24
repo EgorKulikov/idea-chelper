@@ -36,6 +36,8 @@
               icon="/icons/taskIcon.png" description="Creating new task in default directory">
           <keyboard-shortcut keymap="$default" first-keystroke="alt F2"/>
       </action>
+      <action id="codeforces" class="net.egork.chelper.actions.CodeforcesAction" text="Create Codeforces tasks" icon="/icons/codeforces.png"
+              description="Creates tasks for Codeforces contest"/>
   </actions>
 
   <extensions defaultExtensionNs="com.intellij">

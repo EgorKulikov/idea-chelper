@@ -3,7 +3,7 @@ package net.egork.chelper.ui;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBScrollPane;
-import net.egork.chelper.Utilities;
+import net.egork.chelper.util.FileUtilities;
 import net.egork.chelper.task.Test;
 import sun.awt.VariableGridLayout;
 
@@ -46,7 +46,7 @@ public class EditTestsDialog extends JDialog {
 		JPanel mainPanel = new JPanel(mainLayout);
 		JPanel selectorAndButtonsPanel = new JPanel(new BorderLayout());
 		selectorAndButtonsPanel.add(new JLabel("Tests:"), BorderLayout.NORTH);
-		testList = new JBList(tests);
+		testList = new JBList((Object[])tests);
 		testList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		testList.setLayoutOrientation(JList.VERTICAL);
 		testList.addMouseListener(new MouseAdapter() {
@@ -121,7 +121,7 @@ public class EditTestsDialog extends JDialog {
 		setSelectedTest(Math.min(0, tests.length - 1));
 		pack();
 		setSize(600, 400);
-		setLocation(Utilities.getLocation(project, this.getSize()));
+		setLocation(FileUtilities.getLocation(project, this.getSize()));
 	}
 
 	private void setSelectedTest(int index) {

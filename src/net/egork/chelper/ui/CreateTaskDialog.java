@@ -2,7 +2,8 @@ package net.egork.chelper.ui;
 
 import com.intellij.openapi.ui.VerticalFlowLayout;
 import com.intellij.psi.PsiDirectory;
-import net.egork.chelper.Utilities;
+import net.egork.chelper.util.FileUtilities;
+import net.egork.chelper.util.Utilities;
 import net.egork.chelper.task.StreamConfiguration;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.TestType;
@@ -112,7 +113,7 @@ public class CreateTaskDialog extends JDialog {
 		setContentPane(main);
 		onChange();
 		pack();
-		Point center = Utilities.getLocation(task.project, main.getSize());
+		Point center = FileUtilities.getLocation(task.project, main.getSize());
 		setLocation(center);
 	}
 
@@ -137,7 +138,7 @@ public class CreateTaskDialog extends JDialog {
 
 	public static Task showDialog(PsiDirectory directory, String defaultName) {
 		Task task = Utilities.getDefaultTask().setName(defaultName == null ? "Task" : defaultName).
-			setDirectory(Utilities.getRelativePath(directory.getProject().getBaseDir(), directory.getVirtualFile())).
+			setDirectory(FileUtilities.getRelativePath(directory.getProject().getBaseDir(), directory.getVirtualFile())).
 			setProject(directory.getProject());
 		CreateTaskDialog dialog = new CreateTaskDialog(task, defaultName == null);
 		dialog.setVisible(true);

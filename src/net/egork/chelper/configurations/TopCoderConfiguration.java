@@ -12,7 +12,10 @@ import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.WriteExternalException;
 import com.intellij.psi.PsiDirectory;
-import net.egork.chelper.Utilities;
+import net.egork.chelper.util.CodeGenerationUtilities;
+import net.egork.chelper.util.EncodingUtilities;
+import net.egork.chelper.util.FileUtilities;
+import net.egork.chelper.util.Utilities;
 import net.egork.chelper.task.TopCoderTask;
 import net.egork.chelper.ui.TopCoderConfigurationEditor;
 import org.jdom.Element;
@@ -49,12 +52,12 @@ public class TopCoderConfiguration extends ModuleBasedConfiguration<JavaRunConfi
 	public RunProfileState getState(@NotNull Executor executor, @NotNull ExecutionEnvironment env)
 		throws ExecutionException
 	{
-		configuration.createSourceFile();
+		CodeGenerationUtilities.createSourceFile(configuration);
 		JavaCommandLineState state = new JavaCommandLineState(env) {
 			@Override
 			protected JavaParameters createJavaParameters() throws ExecutionException {
 				JavaParameters parameters = new JavaParameters();
-				PsiDirectory directory = Utilities.getPsiDirectory(configuration.project,
+				PsiDirectory directory = FileUtilities.getPsiDirectory(configuration.project,
 					Utilities.getData(configuration.project).defaultDir);
 				Module module = ProjectRootManager.getInstance(configuration.project).getFileIndex().getModuleForFile(
 					directory.getVirtualFile());
@@ -63,7 +66,7 @@ public class TopCoderConfiguration extends ModuleBasedConfiguration<JavaRunConfi
 				parameters.getVMParametersList().add("-Xmx64M");
 				parameters.getProgramParametersList().add(configuration.getSignature());
 				parameters.getProgramParametersList().add(configuration.getFQN());
-				parameters.getProgramParametersList().add(configuration.encodeTests());
+				parameters.getProgramParametersList().add(EncodingUtilities.encodeTopCoderTests(configuration.tests));
 				return parameters;
 			}
 		};
@@ -82,7 +85,7 @@ public class TopCoderConfiguration extends ModuleBasedConfiguration<JavaRunConfi
 	@Override
 	public void readExternal(Element element) throws InvalidDataException {
 		super.readExternal(element);
-		configuration = TopCoderTask.read(element.getChildText("taskConf"), getProject());
+		configuration = EncodingUtilities.decodeTopCoderTask(element.getChildText("taskConf"), getProject());
 	}
 
 	@Override
@@ -90,7 +93,7 @@ public class TopCoderConfiguration extends ModuleBasedConfiguration<JavaRunConfi
 		super.writeExternal(element);
 		Element configurationElement = new Element("taskConf");
 		element.addContent(configurationElement);
-		configurationElement.setText(configuration.toString());
+		configurationElement.setText(EncodingUtilities.encodeTask(configuration));
 	}
 
 }

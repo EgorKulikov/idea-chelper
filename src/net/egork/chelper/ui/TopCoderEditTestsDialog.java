@@ -3,7 +3,7 @@ package net.egork.chelper.ui;
 import com.intellij.openapi.ui.VerticalFlowLayout;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBScrollPane;
-import net.egork.chelper.Utilities;
+import net.egork.chelper.util.FileUtilities;
 import net.egork.chelper.task.TopCoderTask;
 import net.egork.chelper.task.TopCoderTest;
 import sun.awt.VariableGridLayout;
@@ -124,7 +124,7 @@ public class TopCoderEditTestsDialog extends JDialog {
 		setSelectedTest(Math.min(0, task.tests.length - 1));
 		pack();
 		setSize(600, 400);
-		setLocation(Utilities.getLocation(task.project, this.getSize()));
+		setLocation(FileUtilities.getLocation(task.project, this.getSize()));
 	}
 
 	private JPanel createPanel(String label, JTextField editor) {

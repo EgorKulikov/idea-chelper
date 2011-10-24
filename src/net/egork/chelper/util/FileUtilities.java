@@ -1,14 +1,11 @@
-package net.egork.chelper;
+package net.egork.chelper.util;
 
 import com.intellij.ide.IdeView;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.actionSystem.LangDataKeys;
-import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
-import com.intellij.openapi.project.ProjectManagerAdapter;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.WindowManager;
@@ -17,9 +14,6 @@ import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiPackage;
-import net.egork.chelper.task.StreamConfiguration;
-import net.egork.chelper.task.Task;
-import net.egork.chelper.task.TestType;
 
 import javax.swing.JComponent;
 import java.awt.Dimension;
@@ -27,34 +21,12 @@ import java.awt.Point;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
 /**
  * @author Egor Kulikov (kulikov@devexperts.com)
  */
-public class Utilities {
-	private static Map<Project, ProjectData> eligibleProjects = new HashMap<Project, ProjectData>();
-	private static Task defaultConfiguration = new Task(null, null, TestType.SINGLE, StreamConfiguration.STANDARD,
-		StreamConfiguration.STANDARD, "256M", "64M", null);
-
-	public static void addListeners() {
-		ProjectManager.getInstance().addProjectManagerListener(new ProjectManagerAdapter() {
-			@Override
-			public void projectOpened(Project project) {
-				ProjectData configuration = ProjectData.load(project);
-				if (configuration != null)
-					eligibleProjects.put(project, configuration);
-			}
-
-			@Override
-			public void projectClosed(Project project) {
-				eligibleProjects.remove(project);
-			}
-		});
-	}
-
+public class FileUtilities {
 	public static Properties loadProperties(VirtualFile file) {
 		InputStream is = getInputStream(file);
 		if (is == null)
@@ -81,14 +53,6 @@ public class Utilities {
 		}
 	}
 
-	public static boolean isEligible(DataContext dataContext) {
-		return eligibleProjects.containsKey(getProject(dataContext));
-	}
-
-	public static Project getProject(DataContext dataContext) {
-		return PlatformDataKeys.PROJECT.getData(dataContext);
-	}
-
 	public static PsiDirectory getDirectory(DataContext dataContext) {
 		IdeView view = getView(dataContext);
 		if (view == null)
@@ -105,19 +69,6 @@ public class Utilities {
 
 	public static boolean isJavaDirectory(PsiDirectory directory) {
 		return directory != null && JavaDirectoryService.getInstance().getPackage(directory) != null;
-	}
-
-	public static void updateDefaultTask(Task task) {
-		if (task != null)
-			defaultConfiguration = task.setDirectory(null);
-	}
-
-	public static Task getDefaultTask() {
-		return defaultConfiguration;
-	}
-
-	public static ProjectData getData(Project project) {
-		return eligibleProjects.get(project);
 	}
 
 	public static VirtualFile writeTextFile(final VirtualFile location, final String fileName, final String fileContent)

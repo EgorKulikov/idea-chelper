@@ -26,20 +26,4 @@ public class TopCoderTest {
 	public TopCoderTest setIndex(int index) {
 		return new TopCoderTest(arguments, result, index);
 	}
-
-	public String encode() {
-		StringBuilder builder = new StringBuilder();
-		for (String argument : arguments)
-			builder.append(Encoding.encode(argument)).append(Test.SEPARATOR);
-		builder.append(Encoding.encode(result));
-		return builder.toString();
-	}
-
-	public static TopCoderTest decode(int index, String s) {
-		String[] tokens = s.split(Test.SEPARATOR, -1);
-		String[] arguments = new String[tokens.length - 1];
-		for (int i = 0; i < arguments.length; i++)
-			arguments[i] = Encoding.decode(tokens[i]);
-		return new TopCoderTest(arguments, Encoding.decode(tokens[arguments.length]), index);
-	}
 }

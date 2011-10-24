@@ -10,7 +10,8 @@ import com.intellij.psi.PsiElement;
 import com.intellij.util.IncorrectOperationException;
 import net.egork.chelper.configurations.TaskConfiguration;
 import net.egork.chelper.configurations.TaskConfigurationType;
-import net.egork.chelper.Utilities;
+import net.egork.chelper.util.FileUtilities;
+import net.egork.chelper.util.Utilities;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.ui.CreateTaskDialog;
 import org.jetbrains.annotations.NotNull;
@@ -36,7 +37,7 @@ public class NewTaskAction extends CreateElementActionBase {
 	}
 
 	public static PsiElement[] createTask(String s, PsiDirectory psiDirectory) {
-		if (!Utilities.isJavaDirectory(psiDirectory))
+		if (!FileUtilities.isJavaDirectory(psiDirectory))
 			return PsiElement.EMPTY_ARRAY;
 		Task task = CreateTaskDialog.showDialog(psiDirectory, s);
 		if (task == null)
@@ -72,7 +73,7 @@ public class NewTaskAction extends CreateElementActionBase {
 	protected boolean isAvailable(DataContext dataContext) {
 		if (!Utilities.isEligible(dataContext))
 			return false;
-		PsiDirectory directory = Utilities.getDirectory(dataContext);
-		return Utilities.isJavaDirectory(directory);
+		PsiDirectory directory = FileUtilities.getDirectory(dataContext);
+		return FileUtilities.isJavaDirectory(directory);
 	}
 }

@@ -1,6 +1,7 @@
 package net.egork.chelper;
 
 import com.intellij.openapi.components.ApplicationComponent;
+import net.egork.chelper.util.Utilities;
 import org.jetbrains.annotations.NotNull;
 
 /**

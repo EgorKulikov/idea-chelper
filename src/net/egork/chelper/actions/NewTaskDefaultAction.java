@@ -10,7 +10,8 @@ import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import net.egork.chelper.ProjectData;
-import net.egork.chelper.Utilities;
+import net.egork.chelper.util.FileUtilities;
+import net.egork.chelper.util.Utilities;
 
 /**
  * @author Egor Kulikov (egor@egork.net)
@@ -21,7 +22,7 @@ public class NewTaskDefaultAction extends AnAction {
 			return;
 		Project project = Utilities.getProject(e.getDataContext());
 		ProjectData data = Utilities.getData(project);
-		PsiDirectory directory = Utilities.getPsiDirectory(project, data.defaultDir);
+		PsiDirectory directory = FileUtilities.getPsiDirectory(project, data.defaultDir);
 		if (directory == null)
 			return;
 		PsiElement[] result = NewTaskAction.createTask(null, directory);
@@ -32,7 +33,7 @@ public class NewTaskDefaultAction extends AnAction {
 					continue;
 				FileEditorManager.getInstance(project).openFile(virtualFile, true);
 			} else if (element instanceof PsiClass) {
-				FileEditorManager.getInstance(project).openFile(Utilities.getFile(project,
+				FileEditorManager.getInstance(project).openFile(FileUtilities.getFile(project,
 					Utilities.getData(project).defaultDir + "/" + ((PsiClass) element).getName() + ".java"), true);
 			}
 		}

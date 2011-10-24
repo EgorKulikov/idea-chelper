@@ -9,8 +9,6 @@ public class Test {
 	public final String input;
 	public final String output;
 
-	public static final String SEPARATOR = ";;";
-
 	public Test(String input, String output, int index) {
 		this.input = input;
 		this.output = output;
@@ -25,16 +23,7 @@ public class Test {
 		return "Test #" + index + ": " + inputRepresentation;
 	}
 
-	public static Test decode(int index, String test) {
-		String[] tokens = test.split(SEPARATOR, -1);
-		return new Test(Encoding.decode(tokens[0]), Encoding.decode(tokens[1]), index);
-	}
-
 	public Test setIndex(int index) {
 		return new Test(input, output, index);
-	}
-
-	public String encode() {
-		return Encoding.encode(input) + SEPARATOR + Encoding.encode(output);
 	}
 }

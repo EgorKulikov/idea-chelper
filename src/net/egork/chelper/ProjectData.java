@@ -8,6 +8,8 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileAdapter;
 import com.intellij.openapi.vfs.VirtualFileEvent;
 import com.intellij.openapi.vfs.VirtualFileManager;
+import net.egork.chelper.util.CodeGenerationUtilities;
+import net.egork.chelper.util.FileUtilities;
 import net.egork.chelper.configurations.TopCoderConfiguration;
 import net.egork.chelper.configurations.TopCoderConfigurationType;
 import net.egork.chelper.task.TopCoderTask;
@@ -29,10 +31,10 @@ public class ProjectData {
 
 	public ProjectData(Properties properties, final Project project) {
 		inputClass = properties.getProperty("inputClass", "java.util.Scanner");
-		excludedPackages = properties.getProperty("exclude", "java.,javax.,com.sun.").split(",");
-		outputDirectory = properties.getProperty("output", "output");
+		excludedPackages = properties.getProperty("excludePackages", "java.,javax.,com.sun.").split(",");
+		outputDirectory = properties.getProperty("outputDirectory", "output");
 		author = properties.getProperty("author", "");
-		archive = properties.getProperty("archive", "archive/unsorted");
+		archive = properties.getProperty("archiveDirectory", "archive/unsorted");
 		defaultDir = properties.getProperty("defaultDirectory", "main");
 		topcoderDir = properties.getProperty("topcoderDirectory", "topcoder");
 		queue = new BackgroundTaskQueue(project, "Building task");
@@ -40,9 +42,9 @@ public class ProjectData {
 			@Override
 			public void fileCreated(VirtualFileEvent event) {
 				VirtualFile file = event.getFile();
-				if (file.getParent() != Utilities.getFile(project, topcoderDir) || !"java".equals(file.getExtension()))
+				if (file.getParent() != FileUtilities.getFile(project, topcoderDir) || !"java".equals(file.getExtension()))
 					return;
-				TopCoderTask task = TopCoderTask.parseFile(event.getFile(), project);
+				TopCoderTask task = CodeGenerationUtilities.parseTopCoderStub(event.getFile(), project);
 				if (task != null) {
 					RunManagerImpl manager = RunManagerImpl.getInstanceImpl(project);
 					RunnerAndConfigurationSettingsImpl configuration = new RunnerAndConfigurationSettingsImpl(manager,
@@ -64,7 +66,7 @@ public class ProjectData {
 		VirtualFile config = root.findChild("chelper.properties");
 		if (config == null)
 			return null;
-		Properties properties = Utilities.loadProperties(config);
+		Properties properties = FileUtilities.loadProperties(config);
 		if (properties == null)
 			return null;
 		return new ProjectData(properties, project);

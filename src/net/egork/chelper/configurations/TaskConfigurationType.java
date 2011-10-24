@@ -5,7 +5,7 @@ import com.intellij.execution.configurations.ConfigurationType;
 import com.intellij.execution.configurations.RunConfiguration;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
-import net.egork.chelper.Utilities;
+import net.egork.chelper.util.Utilities;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Icon;

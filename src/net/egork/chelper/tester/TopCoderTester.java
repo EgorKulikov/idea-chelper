@@ -3,6 +3,7 @@ package net.egork.chelper.tester;
 import net.egork.chelper.task.MethodSignature;
 import net.egork.chelper.task.Test;
 import net.egork.chelper.task.TopCoderTest;
+import net.egork.chelper.util.EncodingUtilities;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -144,7 +145,7 @@ public class TopCoderTester {
 		String[] tokens = s.split("::", -1);
 		TopCoderTest[] tests = new TopCoderTest[tokens.length];
 		for (int i = 0; i < tests.length; i++)
-			tests[i] = TopCoderTest.decode(i, tokens[i]);
+			tests[i] = EncodingUtilities.decodeTopCoderTest(i, tokens[i]);
 		return tests;
 	}
 }

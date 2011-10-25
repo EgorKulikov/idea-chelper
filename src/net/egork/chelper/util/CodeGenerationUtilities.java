@@ -385,6 +385,8 @@ public class CodeGenerationUtilities {
 	}
 
 	public static void createUnitTest(Task task) {
+		if (!Utilities.getData(task.project).enableUnitTests)
+			return;
 		Calendar calendar = Calendar.getInstance();
 		int year = calendar.get(Calendar.YEAR);
 		int month = calendar.get(Calendar.MONTH);
@@ -415,6 +417,8 @@ public class CodeGenerationUtilities {
 	}
 
 	public static void createUnitTest(TopCoderTask task) {
+		if (!Utilities.getData(task.project).enableUnitTests)
+			return;
 		Calendar calendar = Calendar.getInstance();
 		int year = calendar.get(Calendar.YEAR);
 		int month = calendar.get(Calendar.MONTH);

@@ -27,6 +27,7 @@ public class ProjectData {
 	public final String defaultDir;
 	public final String topcoderDir;
 	public final String testDir;
+	public final boolean enableUnitTests;
 
 	public ProjectData(Properties properties, final Project project) {
 		inputClass = properties.getProperty("inputClass", "java.util.Scanner");
@@ -37,6 +38,7 @@ public class ProjectData {
 		defaultDir = properties.getProperty("defaultDirectory", "main");
 		topcoderDir = properties.getProperty("topcoderDirectory", "topcoder");
 		testDir = properties.getProperty("testDirectory", "lib/test");
+		enableUnitTests = Boolean.valueOf(properties.getProperty("enableUnitTests", "false"));
 		VirtualFileManager.getInstance().addVirtualFileListener(new VirtualFileAdapter() {
 			@Override
 			public void fileCreated(VirtualFileEvent event) {

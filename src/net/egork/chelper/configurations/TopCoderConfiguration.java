@@ -66,7 +66,7 @@ public class TopCoderConfiguration extends ModuleBasedConfiguration<JavaRunConfi
 				parameters.getVMParametersList().add("-Xmx64M");
 				parameters.getProgramParametersList().add(configuration.getSignature());
 				parameters.getProgramParametersList().add(configuration.getFQN());
-				parameters.getProgramParametersList().add(EncodingUtilities.encodeTopCoderTests(configuration.tests));
+				parameters.getProgramParametersList().add(EncodingUtilities.encodeTests(configuration.tests));
 				return parameters;
 			}
 		};

@@ -27,6 +27,13 @@ public class TopCoderTester {
 		throws InterruptedException, InvocationTargetException, ClassNotFoundException, NoSuchMethodException,
 		InstantiationException, IllegalAccessException
 	{
+		test(args);
+	}
+
+	public static boolean test(String...args)
+		throws InterruptedException, InvocationTargetException, ClassNotFoundException, NoSuchMethodException,
+		InstantiationException, IllegalAccessException
+	{
 		Locale.setDefault(Locale.US);
 		List<Verdict> verdicts = new ArrayList<Verdict>();
 		long maximalTime = 0;
@@ -86,7 +93,7 @@ public class TopCoderTester {
 			for (int i = 0; i < verdicts.size(); i++)
 				System.out.println("Test #" + i + ": " + verdicts.get(i));
 		}
-		Thread.currentThread().join(100L);
+		return ok;
 	}
 
 	private static String check(Object actual, String expectedOutput, Class outputClass)

@@ -64,7 +64,7 @@ public class EncodingUtilities {
 		return builder.toString();
 	}
 
-	public static String encodeTopCoderTests(TopCoderTest[] tests) {
+	public static String encodeTests(TopCoderTest[] tests) {
 		if (tests.length == 0)
 			return "empty";
 		StringBuilder builder = new StringBuilder();
@@ -139,7 +139,7 @@ public class EncodingUtilities {
 		StringBuilder builder = new StringBuilder();
 		builder.append(task.name).append(TOKEN_SEPARATOR).append(task.signature == null ? "" : task.signature).append(
 			TOKEN_SEPARATOR);
-		builder.append(encodeTopCoderTests(task.tests));
+		builder.append(encodeTests(task.tests));
 		return builder.toString();
 	}
 

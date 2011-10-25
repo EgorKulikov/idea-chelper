@@ -36,7 +36,7 @@ public class ArchiveAction extends AnAction {
 		RunConfiguration configuration = selectedConfiguration.getConfiguration();
 		if (configuration instanceof TaskConfiguration) {
 			String archiveDir = Utilities.getData(project).archive;
-			final VirtualFile directory = FileUtilities.getFile(project, archiveDir);
+			final VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, archiveDir);
 			if (directory == null)
 				return;
 			final Task task = ((TaskConfiguration) configuration).getConfiguration();
@@ -64,10 +64,11 @@ public class ArchiveAction extends AnAction {
 		}
 		if (configuration instanceof TopCoderConfiguration) {
 			String archiveDir = Utilities.getData(project).archive;
-			final VirtualFile directory = FileUtilities.getFile(project, archiveDir);
+			final VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, archiveDir);
 			if (directory == null)
 				return;
 			final TopCoderTask task = ((TopCoderConfiguration) configuration).getConfiguration();
+			CodeGenerationUtilities.createUnitTest(task);
 			ApplicationManager.getApplication().runWriteAction(new Runnable() {
 				public void run() {
 					try {

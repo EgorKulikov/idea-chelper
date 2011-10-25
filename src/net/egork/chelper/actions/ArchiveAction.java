@@ -11,6 +11,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import net.egork.chelper.configurations.TaskConfiguration;
+import net.egork.chelper.util.CodeGenerationUtilities;
 import net.egork.chelper.util.FileUtilities;
 import net.egork.chelper.util.Utilities;
 import net.egork.chelper.configurations.TopCoderConfiguration;
@@ -39,6 +40,7 @@ public class ArchiveAction extends AnAction {
 			if (directory == null)
 				return;
 			final Task task = ((TaskConfiguration) configuration).getConfiguration();
+			CodeGenerationUtilities.createUnitTest(task);
 			ApplicationManager.getApplication().runWriteAction(new Runnable() {
 				public void run() {
 					try {

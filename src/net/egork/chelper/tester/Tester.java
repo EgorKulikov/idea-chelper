@@ -25,9 +25,14 @@ public class Tester {
 			OK, WA, RTE
 		}
 
-	public static void main(String[] args)
-		throws InterruptedException, InvocationTargetException, ClassNotFoundException, NoSuchMethodException,
-		InstantiationException, IllegalAccessException
+	public static void main(String[] args) throws InterruptedException, InvocationTargetException,
+		ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException
+	{
+		test(args);
+	}
+
+	public static boolean test(String...args) throws InvocationTargetException, ClassNotFoundException,
+		NoSuchMethodException, InstantiationException, IllegalAccessException
 	{
 		Locale.setDefault(Locale.US);
 		List<Verdict> verdicts = new ArrayList<Verdict>();
@@ -96,7 +101,7 @@ public class Tester {
 			for (int i = 0; i < verdicts.size(); i++)
 				System.out.println("Test #" + i + ": " + verdicts.get(i));
 		}
-		Thread.currentThread().join(100L);
+		return ok;
 	}
 
 	private static String check(Class checkerClass, Class readerClass, Object input, Object expectedOutput,

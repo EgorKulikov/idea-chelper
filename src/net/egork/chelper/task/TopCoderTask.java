@@ -29,7 +29,7 @@ public class TopCoderTask {
 	}
 
 	public String getFQN() {
-		return FileUtilities.getFQN(project, FileUtilities.getPsiDirectory(project,
+		return FileUtilities.getFQN(FileUtilities.getPsiDirectory(project,
 			Utilities.getData(project).defaultDir), name);
 	}
 

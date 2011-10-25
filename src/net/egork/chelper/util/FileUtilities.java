@@ -100,6 +100,14 @@ public class FileUtilities {
 		return location.findChild(fileName);
 	}
 
+	public static String readTextFile(VirtualFile file) {
+		try {
+			return VfsUtil.loadText(file);
+		} catch (IOException e) {
+			return null;
+		}
+	}
+
 	public static PsiDirectory getPsiDirectory(Project project, String location) {
 		VirtualFile file = getFile(project, location);
 		if (file == null)
@@ -140,7 +148,7 @@ public class FileUtilities {
 		return packageName;
 	}
 
-	public static String getFQN(Project project, PsiDirectory directory, String name) {
+	public static String getFQN(PsiDirectory directory, String name) {
 		String packageName = getPackage(directory);
 		if (packageName == null || packageName.length() == 0)
 			return name;
@@ -154,15 +162,19 @@ public class FileUtilities {
 		return PsiManager.getInstance(project).findFile(file);
 	}
 
-	public static VirtualFile createDirectoryIfMissing(Project project, String location) {
-		VirtualFile baseDir = project.getBaseDir();
-		if (baseDir == null)
-			return null;
-		try {
-			return VfsUtil.createDirectoryIfMissing(baseDir, location);
-		} catch (IOException e) {
-			return null;
-		}
+	public static VirtualFile createDirectoryIfMissing(final Project project, final String location) {
+		ApplicationManager.getApplication().runWriteAction(new Runnable() {
+			public void run() {
+				VirtualFile baseDir = project.getBaseDir();
+				if (baseDir == null)
+					return;
+				try {
+					VfsUtil.createDirectoryIfMissing(baseDir, location);
+				} catch (IOException ignored) {
+				}
+			}
+		});
+		return getFile(project, location);
 	}
 
 	public static void synchronizeFile(VirtualFile file) {

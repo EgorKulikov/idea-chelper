@@ -63,7 +63,7 @@ public class TaskConfiguration extends ModuleBasedConfiguration<JavaRunConfigura
 				parameters.getVMParametersList().add("-Xmx" + configuration.heapMemory);
 				parameters.getVMParametersList().add("-Xms" + configuration.stackMemory);
 				parameters.getProgramParametersList().add(Utilities.getData(configuration.project).inputClass);
-				parameters.getProgramParametersList().add(FileUtilities.getFQN(configuration.project,
+				parameters.getProgramParametersList().add(FileUtilities.getFQN(
 					directory, configuration.name));
 				parameters.getProgramParametersList().add(configuration.testType.name());
 				parameters.getProgramParametersList().add(EncodingUtilities.encodeTests(configuration.tests));

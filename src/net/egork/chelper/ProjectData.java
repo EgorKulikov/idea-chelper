@@ -2,17 +2,16 @@ package net.egork.chelper;
 
 import com.intellij.execution.impl.RunManagerImpl;
 import com.intellij.execution.impl.RunnerAndConfigurationSettingsImpl;
-import com.intellij.openapi.progress.BackgroundTaskQueue;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileAdapter;
 import com.intellij.openapi.vfs.VirtualFileEvent;
 import com.intellij.openapi.vfs.VirtualFileManager;
-import net.egork.chelper.util.CodeGenerationUtilities;
-import net.egork.chelper.util.FileUtilities;
 import net.egork.chelper.configurations.TopCoderConfiguration;
 import net.egork.chelper.configurations.TopCoderConfigurationType;
 import net.egork.chelper.task.TopCoderTask;
+import net.egork.chelper.util.CodeGenerationUtilities;
+import net.egork.chelper.util.FileUtilities;
 
 import java.util.Properties;
 
@@ -21,13 +20,13 @@ import java.util.Properties;
  */
 public class ProjectData {
 	public final String inputClass;
-	public final BackgroundTaskQueue queue;
 	public final String[] excludedPackages;
 	public final String outputDirectory;
 	public final String author;
 	public final String archive;
 	public final String defaultDir;
 	public final String topcoderDir;
+	public final String testDir;
 
 	public ProjectData(Properties properties, final Project project) {
 		inputClass = properties.getProperty("inputClass", "java.util.Scanner");
@@ -37,7 +36,7 @@ public class ProjectData {
 		archive = properties.getProperty("archiveDirectory", "archive/unsorted");
 		defaultDir = properties.getProperty("defaultDirectory", "main");
 		topcoderDir = properties.getProperty("topcoderDirectory", "topcoder");
-		queue = new BackgroundTaskQueue(project, "Building task");
+		testDir = properties.getProperty("testDirectory", "lib/test");
 		VirtualFileManager.getInstance().addVirtualFileListener(new VirtualFileAdapter() {
 			@Override
 			public void fileCreated(VirtualFileEvent event) {

@@ -32,7 +32,7 @@ public class Tester {
 	}
 
 	public static boolean test(String...args) throws InvocationTargetException, ClassNotFoundException,
-		NoSuchMethodException, InstantiationException, IllegalAccessException
+		NoSuchMethodException, InstantiationException, IllegalAccessException, InterruptedException
 	{
 		Locale.setDefault(Locale.US);
 		List<Verdict> verdicts = new ArrayList<Verdict>();
@@ -101,6 +101,7 @@ public class Tester {
 			for (int i = 0; i < verdicts.size(); i++)
 				System.out.println("Test #" + i + ": " + verdicts.get(i));
 		}
+		Thread.currentThread().join(100L);
 		return ok;
 	}
 

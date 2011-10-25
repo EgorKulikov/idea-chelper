@@ -93,6 +93,7 @@ public class TopCoderTester {
 			for (int i = 0; i < verdicts.size(); i++)
 				System.out.println("Test #" + i + ": " + verdicts.get(i));
 		}
+		Thread.currentThread().join(100L);
 		return ok;
 	}
 

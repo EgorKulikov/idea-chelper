@@ -29,6 +29,7 @@ import java.awt.event.KeyEvent;
  */
 public class CreateTaskDialog extends JDialog {
 	private Task task;
+	private boolean isOk = false;
 	private final JTextField taskName;
 	private final JComboBox testType;
 	private final JComboBox inputType;
@@ -46,9 +47,12 @@ public class CreateTaskDialog extends JDialog {
 		taskName = new JTextField(task.name);
 		taskName.setEditable(canEditName);
 		testType = new JComboBox(TestType.values());
+		testType.setSelectedItem(task.testType);
 		inputType = new JComboBox(StreamConfiguration.StreamType.values());
+		inputType.setSelectedItem(task.input.type);
 		inputName = new JTextField(task.input.fileName == null ? "input.txt" : task.input.fileName);
 		outputType = new JComboBox(StreamConfiguration.StreamType.values());
+		outputType.setSelectedItem(task.output.type);
 		outputName = new JTextField(task.output.fileName == null ? "output.txt" : task.output.fileName);
 		heapMemory = new JTextField(task.heapMemory);
 		stackMemory = new JTextField(task.stackMemory);
@@ -65,6 +69,7 @@ public class CreateTaskDialog extends JDialog {
 		Action saveAction = new AbstractAction() {
 			public void actionPerformed(ActionEvent e) {
 				onChange();
+				isOk = true;
 				setVisible(false);
 			}
 		};
@@ -152,7 +157,8 @@ public class CreateTaskDialog extends JDialog {
 			taskName.requestFocusInWindow();
 			taskName.setSelectionStart(0);
 			taskName.setSelectionEnd(taskName.getText().length());
-		}
+		} else if (!isOk)
+			task = null;
 		super.setVisible(b);
 	}
 }

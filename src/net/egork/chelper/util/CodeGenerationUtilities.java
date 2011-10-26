@@ -528,6 +528,8 @@ public class CodeGenerationUtilities {
 		}
 
 		private void addClass(PsiClass aClass) {
+			if (!(aClass.getScope() instanceof PsiFile))
+				return;
 			if (!shouldSkip(aClass)) {
 				if (!set.contains(aClass)) {
 					set.add(aClass);
@@ -557,8 +559,9 @@ public class CodeGenerationUtilities {
 			} else if (element instanceof PsiNewExpression) {
 				processType(((PsiNewExpression) element).getType());
 			} else if (element instanceof PsiReferenceExpression) {
-				for (PsiType type : ((PsiReferenceExpression) element).getTypeParameters())
-					processType(type);
+				PsiElement resolved = ((PsiReferenceExpression) element).resolve();
+				if (resolved instanceof PsiClass)
+					addClass((PsiClass) resolved);
 			}
 			element.acceptChildren(this);
 		}

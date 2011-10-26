@@ -47,7 +47,7 @@ public class Utilities {
 
 	public static void updateDefaultTask(Task task) {
 		if (task != null)
-			defaultConfiguration = task.setDirectory(null).setProject(null);
+			defaultConfiguration = task.setDirectory(null).setProject(null).setName("Task");
 	}
 
 	public static Task getDefaultTask() {

@@ -63,7 +63,7 @@ public class TopCoderTester {
 				Object actual = run(taskClass, methodSignature, test);
 				time = System.currentTimeMillis() - time;
 				maximalTime = Math.max(time, maximalTime);
-				System.out.println(actual);
+				System.out.println(print(methodSignature.result, actual));
 				System.out.print("Verdict: ");
 				String checkResult = check(actual, test.result, methodSignature.result);
 				if (checkResult == null) {
@@ -95,6 +95,18 @@ public class TopCoderTester {
 		}
 		Thread.currentThread().join(100L);
 		return ok;
+	}
+
+	private static String print(Class result, Object actual) {
+		if (result == int[].class)
+			return Arrays.toString((int[])actual);
+		if (result == long[].class)
+			return Arrays.toString((long[])actual);
+		if (result == double[].class)
+			return Arrays.toString((double[])actual);
+		if (result == String[].class)
+			return Arrays.toString((String[])actual);
+		return actual.toString();
 	}
 
 	private static String check(Object actual, String expectedOutput, Class outputClass)

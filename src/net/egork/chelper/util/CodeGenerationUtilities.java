@@ -4,27 +4,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.JavaDirectoryService;
-import com.intellij.psi.JavaPsiFacade;
-import com.intellij.psi.PsiAnonymousClass;
-import com.intellij.psi.PsiArrayType;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiClassType;
-import com.intellij.psi.PsiDirectory;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiElementVisitor;
-import com.intellij.psi.PsiField;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiImportStatement;
-import com.intellij.psi.PsiManager;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiMethodCallExpression;
-import com.intellij.psi.PsiNewExpression;
-import com.intellij.psi.PsiPackage;
-import com.intellij.psi.PsiParameter;
-import com.intellij.psi.PsiReference;
-import com.intellij.psi.PsiType;
-import com.intellij.psi.PsiVariable;
+import com.intellij.psi.*;
 import com.intellij.psi.impl.PsiClassImplUtil;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import net.egork.chelper.task.MethodSignature;
@@ -304,7 +284,7 @@ public class CodeGenerationUtilities {
 			return null;
 		String signatureText = text.substring(0, methodSignatureEnd).trim();
 		MethodSignature methodSignature = MethodSignature.parse(signatureText);
-		String testStart = "switch( casenum ) {";
+		String testStart = "switch";
 		int testStartIndex = text.indexOf(testStart);
 		if (testStartIndex == -1)
 			return null;
@@ -576,6 +556,9 @@ public class CodeGenerationUtilities {
 				}
 			} else if (element instanceof PsiNewExpression) {
 				processType(((PsiNewExpression) element).getType());
+			} else if (element instanceof PsiReferenceExpression) {
+				for (PsiType type : ((PsiReferenceExpression) element).getTypeParameters())
+					processType(type);
 			}
 			element.acceptChildren(this);
 		}

@@ -113,8 +113,16 @@ public class Tester {
 		Method check = checkerClass.getMethod("check", readerClass, readerClass, readerClass);
 		Object checker = checkerClass.getConstructor().newInstance();
 		String checkResult = (String)check.invoke(checker, input, expectedOutput, actualOutput);
-		if (checkResult == null || checkResult.length() != 0)
+		if (checkResult != null && checkResult.length() != 0)
 			return checkResult;
+		if (checkResult == null) {
+			try {
+				readerClass.getMethod("next").invoke(actualOutput);
+				return "Excessive output";
+			} catch (Throwable e) {
+				return checkResult;
+			}
+		}
 		Method next = readerClass.getMethod("next");
 		double certainty = (Double) checkerClass.getMethod("getCertainty").invoke(checker);
 		int index = 0;

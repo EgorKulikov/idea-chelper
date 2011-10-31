@@ -20,6 +20,7 @@ import java.util.Properties;
  */
 public class ProjectData {
 	public final String inputClass;
+	public final String outputClass;
 	public final String[] excludedPackages;
 	public final String outputDirectory;
 	public final String author;
@@ -31,6 +32,7 @@ public class ProjectData {
 
 	public ProjectData(Properties properties, final Project project) {
 		inputClass = properties.getProperty("inputClass", "java.util.Scanner");
+		outputClass = properties.getProperty("outputClass", "java.io.PrintWriter");
 		excludedPackages = properties.getProperty("excludePackages", "java.,javax.,com.sun.").split(",");
 		outputDirectory = properties.getProperty("outputDirectory", "output");
 		author = properties.getProperty("author", "");

@@ -159,7 +159,10 @@ public class CodeGenerationUtilities {
 		String inputClassShort = inputClass.substring(inputClass.lastIndexOf('.') + 1);
 		builder.append("\t\t").append(inputClassShort).append(" in = new ").append(inputClassShort).
 			append("(inputStream);\n");
-		builder.append("\t\tPrintWriter out = new PrintWriter(outputStream);\n");
+		String outputClass = Utilities.getData(task.project).outputClass;
+		String outputClassShort = outputClass.substring(outputClass.lastIndexOf('.') + 1);
+		builder.append("\t\t").append(outputClassShort).append(" out = new ").append(outputClassShort).
+			append("(outputStream);\n");
 		builder.append("\t\t").append(task.name).append(" solver = new ").append(task.name).append("();\n");
 		switch (task.testType) {
 		case SINGLE:
@@ -250,15 +253,18 @@ public class CodeGenerationUtilities {
 		PsiDirectory directory = FileUtilities.getPsiDirectory(task.project, task.location);
 		String inputClass = Utilities.getData(task.project).inputClass;
 		String inputClassShort = inputClass.substring(inputClass.lastIndexOf('.') + 1);
+		String outputClass = Utilities.getData(task.project).outputClass;
+		String outputClassShort = outputClass.substring(outputClass.lastIndexOf('.') + 1);
 		StringBuilder builder = new StringBuilder();
 		String packageName = FileUtilities.getPackage(directory);
 		if (packageName != null && packageName.length() != 0)
 			builder.append("package ").append(packageName).append(";\n\n");
 		builder.append("import ").append(inputClass).append(";\n");
-		builder.append("import java.io.PrintWriter;\n");
+		builder.append("import ").append(outputClass).append(";\n");
 		builder.append("\n");
 		builder.append("public class ").append(task.name).append(" {\n");
-		builder.append("\tpublic void solve(int testNumber, ").append(inputClassShort).append(" in, PrintWriter out) {\n");
+		builder.append("\tpublic void solve(int testNumber, ").append(inputClassShort).append(" in, ").
+			append(outputClassShort).append(" out) {\n");
 		builder.append("\t}\n");
 		builder.append("}\n");
 		return builder.toString();
@@ -437,7 +443,8 @@ public class CodeGenerationUtilities {
 			.append(FileUtilities.getFQN(FileUtilities.getPsiDirectory(task.project, path), task.name))
 			.append("\",\n");
 		builder.append("\t\t\t\"").append(task.testType.name()).append("\",\n");
-		builder.append("\t\t\t\"").append(escape(EncodingUtilities.encodeTests(task.tests))).append("\"))\n");
+		builder.append("\t\t\t\"").append(escape(EncodingUtilities.encodeTests(task.tests))).append("\",\n");
+		builder.append("\t\t\t\"").append(Utilities.getData(task.project).outputClass).append("\"))\n");
 		builder.append("\t\t{\n");
 		builder.append("\t\t\tAssert.fail();\n");
 		builder.append("\t\t}\n");

@@ -67,6 +67,7 @@ public class TaskConfiguration extends ModuleBasedConfiguration<JavaRunConfigura
 					directory, configuration.name));
 				parameters.getProgramParametersList().add(configuration.testType.name());
 				parameters.getProgramParametersList().add(EncodingUtilities.encodeTests(configuration.tests));
+				parameters.getProgramParametersList().add(Utilities.getData(configuration.project).outputClass);
 				return parameters;
 			}
 		};

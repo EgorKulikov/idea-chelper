@@ -5,17 +5,11 @@ import net.egork.chelper.task.TestType;
 import net.egork.chelper.util.EncodingUtilities;
 
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Egor Kulikov (kulikov@devexperts.com)
@@ -46,9 +40,15 @@ public class Tester {
 		List<Test> tests = new ArrayList<Test>();
 		tests.addAll(Arrays.asList(decode(args[argumentIndex++])));
 		tests.addAll(addGeneratedTests(fqn, tests.size()));
+		String writerFQN;
+		if (argumentIndex != args.length)
+			writerFQN = args[argumentIndex++];
+		else
+			writerFQN = "java.io.PrintWriter";
 		for (int i = argumentIndex; i < args.length; i++)
 			testCases.add(Integer.parseInt(args[i]));
 		Class readerClass = Class.forName(readerFQN);
+		Class writerClass = Class.forName(writerFQN);
 		Class taskClass = Class.forName(fqn);
 		Class checkerClass = Class.forName(fqn + "Checker");
 		for (Test test : tests) {
@@ -56,7 +56,8 @@ public class Tester {
 				continue;
 			System.out.println("Test #" + test.index + ":");
 			Object in = readerClass.getConstructor(InputStream.class).newInstance(new StringInputStream(test.input));
-			StringWriter out = new StringWriter(test.output.length());
+			StringWriter writer = new StringWriter(test.output.length());
+			Object out = writerClass.getConstructor(Writer.class).newInstance(writer);
 			System.out.println("Input:");
 			System.out.println(test.input);
 			System.out.println("Expected output:");
@@ -64,10 +65,10 @@ public class Tester {
 			System.out.println("Execution result:");
 			long time = System.currentTimeMillis();
 			try {
-				run(in, new PrintWriter(out), taskClass, readerClass, testType);
+				run(in, out, taskClass, readerClass, writerClass, testType);
 				time = System.currentTimeMillis() - time;
 				maximalTime = Math.max(time, maximalTime);
-				String result = out.getBuffer().toString();
+				String result = writer.getBuffer().toString();
 				System.out.println(result);
 				System.out.print("Verdict: ");
 				String checkResult = check(checkerClass, readerClass,
@@ -152,11 +153,12 @@ public class Tester {
 		}
 	}
 
-	private static void run(Object in, PrintWriter out, Class taskClass, Class readerClass, TestType testType)
+	private static void run(Object in, Object out, Class taskClass, Class readerClass, Class writerClass,
+		TestType testType)
 		throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException
 	{
 		Object solver = taskClass.getConstructor().newInstance();
-		Method solve = taskClass.getMethod("solve", int.class, readerClass, PrintWriter.class);
+		Method solve = taskClass.getMethod("solve", int.class, readerClass, writerClass);
 		if (testType == TestType.SINGLE) {
 			solve.invoke(solver, 1, in, out);
 			return;

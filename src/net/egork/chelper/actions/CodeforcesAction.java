@@ -12,6 +12,7 @@ import net.egork.chelper.task.Task;
 import net.egork.chelper.task.Test;
 import net.egork.chelper.task.TestType;
 import net.egork.chelper.util.Utilities;
+import org.apache.commons.lang.StringEscapeUtils;
 
 import javax.swing.JOptionPane;
 import java.io.IOException;
@@ -120,7 +121,8 @@ public class CodeforcesAction extends AnAction {
 						break;
 					String testOutput = text.substring(0, position).replace("<br />", "\n");
 					text = text.substring(position);
-					tests.add(new Test(testInput, testOutput, tests.size()));
+					tests.add(new Test(StringEscapeUtils.unescapeHtml(testInput),
+						StringEscapeUtils.unescapeHtml(testOutput), tests.size()));
 				}
 				String name = "Task" + c;
 				Task task = new Task(name, Utilities.getData(project).defaultDir, TestType.SINGLE, inputType,

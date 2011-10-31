@@ -95,31 +95,33 @@ public class MethodSignature {
 			return Double.parseDouble(value);
 		else if (aClass == String.class) {
 			return getString(value);
-		} else if (aClass == String[].class) {
-			value = value.substring(1, value.length() - 1);
-			String[] tokens = mySplit(value);
-			String[] result = new String[tokens.length];
-			for (int j = 0; j < tokens.length; j++)
-				result[j] = getString(tokens[j]);
-			return result;
 		} else {
-			value = value.substring(1, value.length() - 1);
-			String[] tokens = value.trim().split(",");
-			if (aClass == int[].class) {
-				int[] result = new int[tokens.length];
+			if (value.charAt(0) == '{')
+				value = value.substring(1, value.length() - 1);
+			if (aClass == String[].class) {
+				String[] tokens = mySplit(value);
+				String[] result = new String[tokens.length];
 				for (int j = 0; j < tokens.length; j++)
-					result[j] = Integer.parseInt(tokens[j].trim());
+					result[j] = getString(tokens[j]);
 				return result;
-			} else if (aClass == long[].class) {
-				long[] result = new long[tokens.length];
-				for (int j = 0; j < tokens.length; j++)
-					result[j] = Long.parseLong(tokens[j].trim());
-				return result;
-			} else if (aClass == double[].class) {
-				double[] result = new double[tokens.length];
-				for (int j = 0; j < tokens.length; j++)
-					result[j] = Double.parseDouble(tokens[j].trim());
-				return result;
+			} else {
+				String[] tokens = value.trim().split(",");
+				if (aClass == int[].class) {
+					int[] result = new int[tokens.length];
+					for (int j = 0; j < tokens.length; j++)
+						result[j] = Integer.parseInt(tokens[j].trim());
+					return result;
+				} else if (aClass == long[].class) {
+					long[] result = new long[tokens.length];
+					for (int j = 0; j < tokens.length; j++)
+						result[j] = Long.parseLong(tokens[j].trim());
+					return result;
+				} else if (aClass == double[].class) {
+					double[] result = new double[tokens.length];
+					for (int j = 0; j < tokens.length; j++)
+						result[j] = Double.parseDouble(tokens[j].trim());
+					return result;
+				}
 			}
 		}
 		return null;

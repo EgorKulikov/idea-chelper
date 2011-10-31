@@ -138,22 +138,6 @@ public class TopCoderTester {
 		return solve.invoke(solver, signature.generateArguments(test));
 	}
 
-	private static Collection<? extends Test> addGeneratedTests(String fqn, int initialTestCount)
-		throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException,
-		InstantiationException
-	{
-		fqn += "Checker";
-		Class aClass = Class.forName(fqn);
-		Object checker = aClass.getConstructor().newInstance();
-		Method method = aClass.getMethod("generateTests");
-		//noinspection unchecked
-		Collection<? extends Test> tests = (Collection<? extends Test>) method.invoke(checker);
-		Collection<Test> result = new ArrayList<Test>(tests.size());
-		for (Test test : tests)
-			result.add(test.setIndex(initialTestCount++));
-		return result;
-	}
-
 	private static TopCoderTest[] decode(String s, MethodSignature methodSignature) {
 		if ("empty".equals(s))
 			return new TopCoderTest[0];

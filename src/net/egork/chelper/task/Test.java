@@ -8,11 +8,17 @@ public class Test {
 	public final int index;
 	public final String input;
 	public final String output;
+	public final boolean active;
 
 	public Test(String input, String output, int index) {
+		this(input, output, index, true);
+	}
+
+	public Test(String input, String output, int index, boolean active) {
 		this.input = input;
 		this.output = output;
 		this.index = index;
+		this.active = active;
 	}
 
 	@Override
@@ -24,6 +30,10 @@ public class Test {
 	}
 
 	public Test setIndex(int index) {
-		return new Test(input, output, index);
+		return new Test(input, output, index, active);
+	}
+
+	public Test setActive(boolean active) {
+		return new Test(input, output, index, active);
 	}
 }

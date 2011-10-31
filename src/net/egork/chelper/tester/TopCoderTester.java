@@ -7,20 +7,14 @@ import net.egork.chelper.util.EncodingUtilities;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Egor Kulikov (kulikov@devexperts.com)
  */
 public class TopCoderTester {
 	private static enum Verdict {
-			OK, WA, RTE
+			OK, WA, RTE, SKIPPED
 		}
 
 	public static void main(String[] args)
@@ -38,19 +32,20 @@ public class TopCoderTester {
 		List<Verdict> verdicts = new ArrayList<Verdict>();
 		long maximalTime = 0;
 		boolean ok = true;
-		Set<Integer> testCases = new HashSet<Integer>();
 		int argumentIndex = 0;
 		String signature = args[argumentIndex++];
 		MethodSignature methodSignature = MethodSignature.parse(signature);
 		String fqn = args[argumentIndex++];
 		List<TopCoderTest> tests = new ArrayList<TopCoderTest>();
-		tests.addAll(Arrays.asList(decode(args[argumentIndex++])));
-		for (int i = argumentIndex; i < args.length; i++)
-			testCases.add(Integer.parseInt(args[i]));
+		tests.addAll(Arrays.asList(decode(args[argumentIndex], methodSignature)));
 		Class taskClass = Class.forName(fqn);
 		for (TopCoderTest test : tests) {
-			if (!testCases.isEmpty() && !testCases.contains(test.index))
+			if (!test.active) {
+				verdicts.add(Verdict.SKIPPED);
+				System.out.println("Test #" + test.index + ": SKIPPED");
+				System.out.println("------------------------------------------------------------------");
 				continue;
+			}
 			System.out.println("Test #" + test.index + ":");
 			System.out.println("Input:");
 			for (String argument : test.arguments)
@@ -159,13 +154,13 @@ public class TopCoderTester {
 		return result;
 	}
 
-	private static TopCoderTest[] decode(String s) {
+	private static TopCoderTest[] decode(String s, MethodSignature methodSignature) {
 		if ("empty".equals(s))
 			return new TopCoderTest[0];
 		String[] tokens = s.split("::", -1);
 		TopCoderTest[] tests = new TopCoderTest[tokens.length];
 		for (int i = 0; i < tests.length; i++)
-			tests[i] = EncodingUtilities.decodeTopCoderTest(i, tokens[i]);
+			tests[i] = EncodingUtilities.decodeTopCoderTest(i, tokens[i], methodSignature.arguments.length);
 		return tests;
 	}
 }

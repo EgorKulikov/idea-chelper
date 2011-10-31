@@ -7,20 +7,10 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.PsiClassImplUtil;
 import com.intellij.psi.search.searches.ReferencesSearch;
-import net.egork.chelper.task.MethodSignature;
-import net.egork.chelper.task.StreamConfiguration;
-import net.egork.chelper.task.Task;
-import net.egork.chelper.task.TopCoderTask;
-import net.egork.chelper.task.TopCoderTest;
+import net.egork.chelper.task.*;
 
-import javax.swing.JOptionPane;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import javax.swing.*;
+import java.util.*;
 
 /**
  * @author Egor Kulikov (kulikov@devexperts.com)
@@ -373,6 +363,9 @@ public class CodeGenerationUtilities {
 	public static void createUnitTest(Task task) {
 		if (!Utilities.getData(task.project).enableUnitTests)
 			return;
+		Test[] tests = task.tests;
+		for (int i = 0, testsLength = tests.length; i < testsLength; i++)
+			tests[i] = tests[i].setActive(true);
 		Calendar calendar = Calendar.getInstance();
 		int year = calendar.get(Calendar.YEAR);
 		int month = calendar.get(Calendar.MONTH);
@@ -405,6 +398,9 @@ public class CodeGenerationUtilities {
 	public static void createUnitTest(TopCoderTask task) {
 		if (!Utilities.getData(task.project).enableUnitTests)
 			return;
+		TopCoderTest[] tests = task.tests;
+		for (int i = 0, testsLength = tests.length; i < testsLength; i++)
+			tests[i] = tests[i].setActive(true);
 		Calendar calendar = Calendar.getInstance();
 		int year = calendar.get(Calendar.YEAR);
 		int month = calendar.get(Calendar.MONTH);

@@ -16,7 +16,7 @@ import java.util.*;
  */
 public class Tester {
 	private static enum Verdict {
-			OK, WA, RTE
+			OK, WA, RTE, SKIPPED
 		}
 
 	public static void main(String[] args) throws InterruptedException, InvocationTargetException,
@@ -32,7 +32,6 @@ public class Tester {
 		List<Verdict> verdicts = new ArrayList<Verdict>();
 		long maximalTime = 0;
 		boolean ok = true;
-		Set<Integer> testCases = new HashSet<Integer>();
 		int argumentIndex = 0;
 		String readerFQN = args[argumentIndex++];
 		String fqn = args[argumentIndex++];
@@ -42,18 +41,20 @@ public class Tester {
 		tests.addAll(addGeneratedTests(fqn, tests.size()));
 		String writerFQN;
 		if (argumentIndex != args.length)
-			writerFQN = args[argumentIndex++];
+			writerFQN = args[argumentIndex];
 		else
 			writerFQN = "java.io.PrintWriter";
-		for (int i = argumentIndex; i < args.length; i++)
-			testCases.add(Integer.parseInt(args[i]));
 		Class readerClass = Class.forName(readerFQN);
 		Class writerClass = Class.forName(writerFQN);
 		Class taskClass = Class.forName(fqn);
 		Class checkerClass = Class.forName(fqn + "Checker");
 		for (Test test : tests) {
-			if (!testCases.isEmpty() && !testCases.contains(test.index))
+			if (!test.active) {
+				verdicts.add(Tester.Verdict.SKIPPED);
+				System.out.println("Test #" + test.index + ": SKIPPED");
+				System.out.println("------------------------------------------------------------------");
 				continue;
+			}
 			System.out.println("Test #" + test.index + ":");
 			Object in = readerClass.getConstructor(InputStream.class).newInstance(new StringInputStream(test.input));
 			StringWriter writer = new StringWriter(test.output.length());

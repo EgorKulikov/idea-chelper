@@ -218,14 +218,15 @@ public class CodeGenerationUtilities {
 			builder.append("package ").append(packageName).append(";\n\n");
 		builder.append("import ").append(inputClass).append(";\n");
 		builder.append("import net.egork.chelper.task.Test;\n");
+		builder.append("import net.egork.chelper.tester.Verdict;\n");
 		builder.append("\n");
 		builder.append("import java.util.Collection;\n");
 		builder.append("import java.util.Collections;\n");
 		builder.append("\n");
 		builder.append("public class ").append(task.name).append("Checker {\n");
-		builder.append("\tpublic String check(").append(inputClassShort).append(" input, ").append(inputClassShort)
+		builder.append("\tpublic Verdict check(").append(inputClassShort).append(" input, ").append(inputClassShort)
 			.append(" expected, ").append(inputClassShort).append(" actual) {\n");
-		builder.append("\t\treturn \"\";\n");
+		builder.append("\t\treturn Verdict.UNDECIDED;\n");
 		builder.append("\t}\n");
 		builder.append("\n");
 		builder.append("\tpublic double getCertainty() {\n");

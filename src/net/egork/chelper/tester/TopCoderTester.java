@@ -1,22 +1,20 @@
 package net.egork.chelper.tester;
 
 import net.egork.chelper.task.MethodSignature;
-import net.egork.chelper.task.Test;
 import net.egork.chelper.task.TopCoderTest;
 import net.egork.chelper.util.EncodingUtilities;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * @author Egor Kulikov (kulikov@devexperts.com)
  */
 public class TopCoderTester {
-	private static enum Verdict {
-			OK, WA, RTE, SKIPPED
-		}
-
 	public static void main(String[] args)
 		throws InterruptedException, InvocationTargetException, ClassNotFoundException, NoSuchMethodException,
 		InstantiationException, IllegalAccessException
@@ -60,22 +58,18 @@ public class TopCoderTester {
 				maximalTime = Math.max(time, maximalTime);
 				System.out.println(print(methodSignature.result, actual));
 				System.out.print("Verdict: ");
-				String checkResult = check(actual, test.result, methodSignature.result);
-				if (checkResult == null) {
-					System.out.print("OK");
-					verdicts.add(Verdict.OK);
-				} else {
-					System.out.print("WA (" + checkResult + ")");
-					verdicts.add(Verdict.WA);
-					ok = false;
-				}
+				Verdict checkResult = check(actual, test.result, methodSignature.result);
+				verdicts.add(checkResult);
+				System.out.print(checkResult);
 				System.out.printf(" in %.3f s.\n", time / 1000.);
+				if (checkResult.type != Verdict.VerdictType.OK)
+					ok = false;
 			} catch (Throwable e) {
 				if (e instanceof InvocationTargetException)
 					e = e.getCause();
 				System.out.println("Exception thrown:");
 				e.printStackTrace(System.out);
-				verdicts.add(Verdict.RTE);
+				verdicts.add(new Verdict(Verdict.VerdictType.RTE, e.getClass().getSimpleName()));
 				ok = false;
 			}
 			System.out.println("------------------------------------------------------------------");
@@ -104,7 +98,7 @@ public class TopCoderTester {
 		return actual.toString();
 	}
 
-	private static String check(Object actual, String expectedOutput, Class outputClass)
+	private static Verdict check(Object actual, String expectedOutput, Class outputClass)
 		throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException
 	{
 		Object expected = MethodSignature.resolve(outputClass, expectedOutput);
@@ -119,15 +113,16 @@ public class TopCoderTester {
 		if (outputClass == double.class) {
 			double expectedValue = (Double) expected;
 			double actualValue = (Double) actual;
-			return verdict(Math.abs(expectedValue - actualValue) <= 1e-9 * Math.max(Math.abs(expectedValue), 1));
+			double delta = Math.abs(expectedValue - actualValue);
+			if (delta <= 1e-9 * Math.max(Math.abs(expectedValue), 1))
+				return new Verdict(Verdict.VerdictType.OK, "Absolute difference " + delta);
+			return Verdict.WA;
 		}
 		return verdict(expected.equals(actual));
 	}
 
-	private static String verdict(boolean equals) {
-		if (equals)
-			return null;
-		return "Wrong answer";
+	private static Verdict verdict(boolean equals) {
+		return equals ? Verdict.OK : Verdict.WA;
 	}
 
 	private static Object run(Class taskClass, MethodSignature signature, TopCoderTest test)

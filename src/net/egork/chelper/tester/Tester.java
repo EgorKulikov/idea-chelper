@@ -15,10 +15,6 @@ import java.util.*;
  * @author Egor Kulikov (kulikov@devexperts.com)
  */
 public class Tester {
-	private static enum Verdict {
-			OK, WA, RTE, SKIPPED
-		}
-
 	public static void main(String[] args) throws InterruptedException, InvocationTargetException,
 		ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException
 	{
@@ -50,7 +46,7 @@ public class Tester {
 		Class checkerClass = Class.forName(fqn + "Checker");
 		for (Test test : tests) {
 			if (!test.active) {
-				verdicts.add(Tester.Verdict.SKIPPED);
+				verdicts.add(Verdict.SKIPPED);
 				System.out.println("Test #" + test.index + ": SKIPPED");
 				System.out.println("------------------------------------------------------------------");
 				continue;
@@ -72,25 +68,21 @@ public class Tester {
 				String result = writer.getBuffer().toString();
 				System.out.println(result);
 				System.out.print("Verdict: ");
-				String checkResult = check(checkerClass, readerClass,
+				Verdict checkResult = check(checkerClass, readerClass,
 					readerClass.getConstructor(InputStream.class).newInstance(new StringInputStream(test.input)),
 					readerClass.getConstructor(InputStream.class).newInstance(new StringInputStream(test.output)),
 					readerClass.getConstructor(InputStream.class).newInstance(new StringInputStream(result)));
-				if (checkResult == null) {
-					System.out.print("OK");
-					verdicts.add(Verdict.OK);
-				} else {
-					System.out.print("WA (" + checkResult + ")");
-					verdicts.add(Verdict.WA);
-					ok = false;
-				}
+				verdicts.add(checkResult);
+				System.out.print(checkResult);
 				System.out.printf(" in %.3f s.\n", time / 1000.);
+				if (checkResult.type != Verdict.VerdictType.OK)
+					ok = false;
 			} catch (Throwable e) {
 				if (e instanceof InvocationTargetException)
 					e = e.getCause();
 				System.out.println("Exception thrown:");
 				e.printStackTrace(System.out);
-				verdicts.add(Verdict.RTE);
+				verdicts.add(new Verdict(Verdict.VerdictType.RTE, e.getClass().getSimpleName()));
 				ok = false;
 			}
 			System.out.println("------------------------------------------------------------------");
@@ -107,26 +99,37 @@ public class Tester {
 		return ok;
 	}
 
-	private static String check(Class checkerClass, Class readerClass, Object input, Object expectedOutput,
+	private static Verdict check(Class checkerClass, Class readerClass, Object input, Object expectedOutput,
 		Object actualOutput)
 		throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException
 	{
 		Method check = checkerClass.getMethod("check", readerClass, readerClass, readerClass);
 		Object checker = checkerClass.getConstructor().newInstance();
-		String checkResult = (String)check.invoke(checker, input, expectedOutput, actualOutput);
-		if (checkResult != null && checkResult.length() != 0)
-			return checkResult;
+		Object checkResult = check.invoke(checker, input, expectedOutput, actualOutput);
+		Verdict verdict;
+		if (checkResult == null || checkResult instanceof String) {
+			if (checkResult == null)
+				verdict = Verdict.OK;
+			else if (checkResult.equals(""))
+				verdict = Verdict.UNDECIDED;
+			else
+				verdict = new Verdict(Verdict.VerdictType.WA, (String) checkResult);
+		} else
+			verdict = (Verdict) checkResult;
 		if (checkResult == null) {
 			try {
 				readerClass.getMethod("next").invoke(actualOutput);
-				return "Excessive output";
+				return new Verdict(Verdict.VerdictType.PE, "Excessive output");
 			} catch (Throwable e) {
-				return checkResult;
+				return verdict;
 			}
 		}
+		if (verdict != Verdict.UNDECIDED)
+			return verdict;
 		Method next = readerClass.getMethod("next");
 		double certainty = (Double) checkerClass.getMethod("getCertainty").invoke(checker);
 		int index = 0;
+		double maxDelta = 0;
 		while (true) {
 			String expectedToken;
 			try {
@@ -135,28 +138,32 @@ public class Tester {
 				try {
 					next.invoke(actualOutput);
 				} catch (Throwable t) {
-					return null;
+					if (maxDelta != 0)
+						return new Verdict(Verdict.VerdictType.OK, "Maximal absolute difference is " + maxDelta);
+					return Verdict.OK;
 				}
-				return "Only " + index + " tokens were expected";
+				return new Verdict(Verdict.VerdictType.PE, "Only " + index + " tokens were expected");
 			}
 			String actualToken;
 			try {
 				actualToken = (String) next.invoke(actualOutput);
 			} catch (Throwable e) {
-				return "More than " + index + " tokens were expected";
+				return new Verdict(Verdict.VerdictType.PE, "More than " + index + " tokens were expected");
 			}
 			if (!expectedToken.equals(actualToken)) {
 				if (certainty != 0) {
 					try {
 						double expectedValue = Double.parseDouble(expectedToken);
 						double actualValue = Double.parseDouble(actualToken);
-						if (Math.abs(actualValue - expectedValue) / Math.max(Math.abs(expectedValue), 1) > certainty)
-							return "Mismatch at index " + index;
+						double delta = Math.abs(actualValue - expectedValue);
+						maxDelta = Math.max(delta, maxDelta);
+						if (delta / Math.max(Math.abs(expectedValue), 1) > certainty)
+							return new Verdict(Verdict.VerdictType.WA, "Mismatch at index " + index);
 					} catch (NumberFormatException e) {
-						return "Mismatch at index " + index;
+						return new Verdict(Verdict.VerdictType.WA, "Mismatch at index " + index);
 					}
 				} else
-					return "Mismatch at index " + index;
+					return new Verdict(Verdict.VerdictType.WA, "Mismatch at index " + index);
 			}
 			index++;
 		}

@@ -33,11 +33,15 @@
       <action id="deleteTask" class="net.egork.chelper.actions.DeleteTaskAction" text="Delete Task" icon="/icons/delete.png"
               description="Deletes current task and all associated files"/>
       <action id="newTask" class="net.egork.chelper.actions.NewTaskDefaultAction" text="New Task"
-              icon="/icons/taskIcon.png" description="Creating new task in default directory">
+              icon="/icons/newTask.png" description="Creating new task in default directory">
           <keyboard-shortcut keymap="$default" first-keystroke="alt F2"/>
       </action>
       <action id="codeforces" class="net.egork.chelper.actions.CodeforcesAction" text="Create Codeforces tasks" icon="/icons/codeforces.png"
               description="Creates tasks for Codeforces contest"/>
+      <action id="copySource" class="net.egork.chelper.actions.CopyAction" text="Copy Source"
+              icon="/icons/copy.png" description="Copies source to clipboard">
+          <keyboard-shortcut keymap="$default" first-keystroke="alt F8"/>
+      </action>
   </actions>
 
   <extensions defaultExtensionNs="com.intellij">

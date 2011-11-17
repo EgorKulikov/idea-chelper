@@ -26,6 +26,7 @@ public class NewTaskDefaultAction extends AnAction {
 			return;
 		Project project = Utilities.getProject(e.getDataContext());
 		ProjectData data = Utilities.getData(project);
+		FileUtilities.createDirectoryIfMissing(project, data.defaultDir);
 		PsiDirectory directory = FileUtilities.getPsiDirectory(project, data.defaultDir);
 		if (directory == null)
 			return;

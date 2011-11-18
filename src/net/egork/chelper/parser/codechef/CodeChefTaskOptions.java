@@ -1,14 +1,14 @@
-package net.egork.chelper.parser.codeforces;
+package net.egork.chelper.parser.codechef;
 
 import net.egork.chelper.parser.TaskOptions;
 
 /**
- * @author Egor Kulikov (kulikov@devexperts.com)
+ * @author Egor Kulikov (egor@egork.net)
  */
-public class CodeforcesTaskOptions implements TaskOptions {
-	public static final CodeforcesTaskOptions INSTANCE = new CodeforcesTaskOptions();
+public class CodeChefTaskOptions implements TaskOptions {
+	public static final CodeChefTaskOptions INSTANCE = new CodeChefTaskOptions();
 
-	private CodeforcesTaskOptions() {
+	private CodeChefTaskOptions() {
 	}
 
 	public boolean shouldProvideTestType() {

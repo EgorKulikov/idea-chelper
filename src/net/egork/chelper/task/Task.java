@@ -66,6 +66,7 @@ public class Task {
 	public PsiElement initialize() {
 		if (location == null)
 			return null;
+		FileUtilities.createDirectoryIfMissing(project, location);
 		PsiDirectory directory = FileUtilities.getPsiDirectory(project, location);
 		if (directory == null)
 			return null;

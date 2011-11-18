@@ -1,19 +1,15 @@
 package net.egork.chelper.actions;
 
-import com.intellij.execution.impl.RunManagerImpl;
-import com.intellij.execution.impl.RunnerAndConfigurationSettingsImpl;
 import com.intellij.ide.actions.CreateElementActionBase;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiElement;
 import com.intellij.util.IncorrectOperationException;
-import net.egork.chelper.configurations.TaskConfiguration;
-import net.egork.chelper.configurations.TaskConfigurationType;
-import net.egork.chelper.util.FileUtilities;
-import net.egork.chelper.util.Utilities;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.ui.CreateTaskDialog;
+import net.egork.chelper.util.FileUtilities;
+import net.egork.chelper.util.Utilities;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -45,12 +41,7 @@ public class NewTaskAction extends CreateElementActionBase {
 		PsiElement main = task.initialize();
 		if (main == null)
 			return PsiElement.EMPTY_ARRAY;
-		RunManagerImpl manager = RunManagerImpl.getInstanceImpl(main.getProject());
-		RunnerAndConfigurationSettingsImpl configuration = new RunnerAndConfigurationSettingsImpl(manager,
-			new TaskConfiguration(task.name, main.getProject(), task,
-			TaskConfigurationType.INSTANCE.getConfigurationFactories()[0]), false);
-		manager.addConfiguration(configuration, false);
-		manager.setActiveConfiguration(configuration);
+		Utilities.createConfiguration(task, true);
 		return new PsiElement[]{main};
 	}
 

@@ -1,5 +1,8 @@
 package net.egork.chelper.util;
 
+import com.intellij.execution.RunnerAndConfigurationSettings;
+import com.intellij.execution.impl.RunManagerImpl;
+import com.intellij.execution.impl.RunnerAndConfigurationSettingsImpl;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -12,6 +15,8 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import net.egork.chelper.ProjectData;
+import net.egork.chelper.configurations.TaskConfiguration;
+import net.egork.chelper.configurations.TaskConfigurationType;
 import net.egork.chelper.task.StreamConfiguration;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.TestType;
@@ -87,5 +92,19 @@ public class Utilities {
 		center.x -= size.getWidth() / 2;
 		center.y -= size.getHeight() / 2;
 		return center;
+	}
+
+	public static RunnerAndConfigurationSettings createConfiguration(Task task, boolean setActive) {
+		RunManagerImpl manager = RunManagerImpl.getInstanceImpl(task.project);
+		RunnerAndConfigurationSettings old = manager.findConfigurationByName(task.name);
+		if (old != null)
+			manager.removeConfiguration(old);
+		RunnerAndConfigurationSettingsImpl configuration = new RunnerAndConfigurationSettingsImpl(manager,
+			new TaskConfiguration(task.name, task.project, task,
+			TaskConfigurationType.INSTANCE.getConfigurationFactories()[0]), false);
+		manager.addConfiguration(configuration, false);
+		if (setActive)
+			manager.setActiveConfiguration(configuration);
+		return configuration;
 	}
 }

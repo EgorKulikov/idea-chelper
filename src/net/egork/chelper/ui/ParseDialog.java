@@ -45,15 +45,6 @@ public class ParseDialog extends JDialog {
 
 	private ParseDialog(final Project project, final boolean parseContest) {
 		super(null, parseContest ? "Parse Contest" : "Parse Task", ModalityType.APPLICATION_MODAL);
-		final Map<Parser, JPanel> parserRenderers = new HashMap<Parser, JPanel>();
-		for (Parser parser : (parseContest ? ParseContestAction.PARSERS : ParseTaskAction.PARSERS)) {
-			JPanel panel = new JPanel(new BorderLayout());
-			panel.add(BorderLayout.WEST, new JLabel(parser.getIcon()));
-			JLabel label = new JLabel(parser.getName());
-			label.setBackground(getBackground());
-			panel.add(BorderLayout.CENTER, label);
-			parserRenderers.put(parser, panel);
-		}
 		JPanel contentPanel = new JPanel(new VerticalFlowLayout());
 		final JComboBox parserCombo = new JComboBox(parseContest ? ParseContestAction.PARSERS : ParseTaskAction.PARSERS);
 		parserCombo.setRenderer(new ListCellRenderer() {

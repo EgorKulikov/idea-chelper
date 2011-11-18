@@ -8,19 +8,16 @@ import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.wm.WindowManager;
 import com.intellij.psi.JavaDirectoryService;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiPackage;
 
-import javax.swing.JComponent;
-import java.awt.Dimension;
-import java.awt.Point;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
 import java.util.Properties;
 
 /**
@@ -130,16 +127,6 @@ public class FileUtilities {
 		return file.getPath().substring(baseDir.getPath().length());
 	}
 
-	public static Point getLocation(Project project, Dimension size) {
-		JComponent component = WindowManager.getInstance().getIdeFrame(project).getComponent();
-		Point center = component.getLocationOnScreen();
-		center.x += component.getWidth() / 2;
-		center.y += component.getHeight() / 2;
-		center.x -= size.getWidth() / 2;
-		center.y -= size.getHeight() / 2;
-		return center;
-	}
-
 	public static String getPackage(PsiDirectory directory) {
 		PsiPackage aPackage = JavaDirectoryService.getInstance().getPackage(directory);
 		String packageName = null;
@@ -179,5 +166,15 @@ public class FileUtilities {
 
 	public static void synchronizeFile(VirtualFile file) {
 		FileDocumentManager.getInstance().saveDocument(FileDocumentManager.getInstance().getDocument(file));
+	}
+
+	public static String getWebPageContent(String address) throws IOException {
+		URL url = new URL(address);
+		InputStream input = url.openStream();
+		StringBuilder builder = new StringBuilder();
+		int nextByte;
+		while ((nextByte = input.read()) != -1)
+			builder.append((char)nextByte);
+		return builder.toString();
 	}
 }

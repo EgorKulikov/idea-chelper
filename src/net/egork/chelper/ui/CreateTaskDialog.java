@@ -118,7 +118,7 @@ public class CreateTaskDialog extends JDialog {
 		setContentPane(main);
 		onChange();
 		pack();
-		Point center = FileUtilities.getLocation(task.project, main.getSize());
+		Point center = Utilities.getLocation(task.project, main.getSize());
 		setLocation(center);
 	}
 

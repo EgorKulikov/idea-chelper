@@ -5,7 +5,7 @@ import com.intellij.openapi.ui.VerticalFlowLayout;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBScrollPane;
 import net.egork.chelper.task.Test;
-import net.egork.chelper.util.FileUtilities;
+import net.egork.chelper.util.Utilities;
 import sun.awt.VariableGridLayout;
 
 import javax.swing.*;
@@ -165,7 +165,7 @@ public class EditTestsDialog extends JDialog {
 		setSelectedTest(Math.min(0, tests.length - 1));
 		pack();
 		setSize(600, 400);
-		setLocation(FileUtilities.getLocation(project, this.getSize()));
+		setLocation(Utilities.getLocation(project, this.getSize()));
 	}
 
 	private JCheckBox createCheckBox(final Test test) {

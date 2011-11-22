@@ -1,5 +1,6 @@
 package net.egork.chelper.parser.codeforces;
 
+import net.egork.chelper.parser.StringParser;
 import net.egork.chelper.parser.TaskParser;
 import net.egork.chelper.task.StreamConfiguration;
 import net.egork.chelper.task.Task;
@@ -8,6 +9,7 @@ import net.egork.chelper.util.FileUtilities;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,88 +34,47 @@ public class CodeforcesTaskParser extends CodeforcesParser implements TaskParser
 		} catch (IOException e) {
 			return null;
 		}
-		int position = text.indexOf("<div class=\"memory-limit\">");
-		if (position == -1)
+		StringParser parser = new StringParser(text);
+		try {
+			parser.advance(false, "<div class=\"memory-limit\">");
+			parser.advance(true, "</div>");
+			String heapMemory = parser.advance(false, "</div>").split(" ")[0] + "M";
+			parser.advance(false, "<div class=\"input-file\">");
+			parser.advance(true, "</div>");
+			String inputFileName = parser.advance(false, "</div>");
+			StreamConfiguration inputType;
+			if ("standard input".equals(inputFileName))
+				inputType = StreamConfiguration.STANDARD;
+			else
+				inputType = new StreamConfiguration(StreamConfiguration.StreamType.CUSTOM, inputFileName);
+			parser.advance(false, "<div class=\"output-file\">");
+			parser.advance(true, "</div>");
+			String outputFileName = parser.advance(false, "</div>");
+			StreamConfiguration outputType;
+			if ("standard output".equals(outputFileName))
+				outputType = StreamConfiguration.STANDARD;
+			else
+				outputType = new StreamConfiguration(StreamConfiguration.StreamType.CUSTOM, outputFileName);
+			List<Test> tests = new ArrayList<Test>();
+			while (true) {
+				try {
+					parser.advance(false, "<div class=\"input\">");
+					parser.advance(true, "<pre class=\"content\">");
+					String testInput = parser.advance(false, "</pre>").replace("<br />", "\n");
+					parser.advance(false, "<div class=\"output\">");
+					parser.advance(true, "<pre class=\"content\">");
+					String testOutput = parser.advance(false, "</pre>").replace("<br />", "\n");
+					tests.add(new Test(StringEscapeUtils.unescapeHtml(testInput),
+						StringEscapeUtils.unescapeHtml(testOutput), tests.size()));
+				} catch (ParseException e) {
+					break;
+				}
+			}
+			String name = "Task" + id;
+			return new Task(name, predefined.location, predefined.testType, inputType, outputType, heapMemory, "64M",
+				predefined.project, tests.toArray(new Test[tests.size()]));
+		} catch (ParseException e) {
 			return null;
-		text = text.substring(position);
-		position = text.indexOf("</div>");
-		if (position == -1)
-			return null;
-		text = text.substring(position + 6);
-		position = text.indexOf("</div>");
-		if (position == -1)
-			return null;
-		String heapMemory = text.substring(0, position).split(" ")[0] + "M";
-		text = text.substring(position);
-		position = text.indexOf("<div class=\"input-file\">");
-		if (position == -1)
-			return null;
-		text = text.substring(position);
-		position = text.indexOf("</div>");
-		if (position == -1)
-			return null;
-		text = text.substring(position + 6);
-		position = text.indexOf("</div>");
-		if (position == -1)
-			return null;
-		String inputFileName = text.substring(0, position);
-		text = text.substring(position);
-		StreamConfiguration inputType;
-		if ("standard input".equals(inputFileName))
-			inputType = StreamConfiguration.STANDARD;
-		else
-			inputType = new StreamConfiguration(StreamConfiguration.StreamType.CUSTOM, inputFileName);
-		position = text.indexOf("<div class=\"output-file\">");
-		if (position == -1)
-			return null;
-		text = text.substring(position);
-		position = text.indexOf("</div>");
-		if (position == -1)
-			return null;
-		text = text.substring(position + 6);
-		position = text.indexOf("</div>");
-		if (position == -1)
-			return null;
-		String outputFileName = text.substring(0, position);
-		text = text.substring(position);
-		StreamConfiguration outputType;
-		if ("standard output".equals(outputFileName))
-			outputType = StreamConfiguration.STANDARD;
-		else
-			outputType = new StreamConfiguration(StreamConfiguration.StreamType.CUSTOM, outputFileName);
-		List<Test> tests = new ArrayList<Test>();
-		while (true) {
-			position = text.indexOf("<div class=\"input\">");
-			if (position == -1)
-				break;
-			text = text.substring(position);
-			position = text.indexOf("<pre class=\"content\">");
-			if (position == -1)
-				break;
-			text = text.substring(position + 21);
-			position = text.indexOf("</pre>");
-			if (position == -1)
-				break;
-			String testInput = text.substring(0, position).replace("<br />", "\n");
-			text = text.substring(position);
-			position = text.indexOf("<div class=\"output\">");
-			if (position == -1)
-				break;
-			text = text.substring(position);
-			position = text.indexOf("<pre class=\"content\">");
-			if (position == -1)
-				break;
-			text = text.substring(position + 21);
-			position = text.indexOf("</pre>");
-			if (position == -1)
-				break;
-			String testOutput = text.substring(0, position).replace("<br />", "\n");
-			text = text.substring(position);
-			tests.add(new Test(StringEscapeUtils.unescapeHtml(testInput),
-				StringEscapeUtils.unescapeHtml(testOutput), tests.size()));
 		}
-		String name = "Task" + id;
-		return new Task(name, predefined.location, predefined.testType, inputType, outputType, heapMemory, "64M",
-			predefined.project, tests.toArray(new Test[tests.size()]));
 	}
 }

@@ -1,4 +1,4 @@
-package net.egork.chelper.parser.codechef;
+package net.egork.chelper.parser.eolimp;
 
 import net.egork.chelper.parser.ContestParser;
 import net.egork.chelper.parser.StringParser;
@@ -13,28 +13,25 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * @author Egor Kulikov (egor@egork.net)
+ * @author Egor Kulikov (kulikov@devexperts.com)
  */
-public class CodeChefContestParser extends CodeChefParser implements ContestParser {
-	public static final CodeChefContestParser INSTANCE = new CodeChefContestParser();
-
-	private CodeChefContestParser() {
-	}
+public class EOlimpContestParser extends EOlimpParser implements ContestParser {
+	public static final EOlimpContestParser INSTANCE = new EOlimpContestParser();
 
 	public Collection<String> parse(String id) {
 		String mainPage;
 		try {
-			mainPage = FileUtilities.getWebPageContent("http://www.codechef.com/" + id);
+			mainPage = FileUtilities.getWebPageContent("http://www.e-olimp.com/en/competitions/" + id);
 		} catch (IOException e) {
 			return Collections.emptyList();
 		}
 		List<String> tasks = new ArrayList<String>();
 		StringParser parser = new StringParser(mainPage);
+		char letter = 'A';
 		while (true) {
 			try {
-				parser.advance(false, "<tr class=\"problemrow\">");
-				parser.advance(true, "/problems/");
-				tasks.add(id + " " + parser.advance(false, "\""));
+				parser.advance(true, "<a href='problems/");
+				tasks.add(parser.advance(false, "'>") + " " + letter++);
 			} catch (ParseException e) {
 				break;
 			}
@@ -43,6 +40,6 @@ public class CodeChefContestParser extends CodeChefParser implements ContestPars
 	}
 
 	public TaskParser getTaskParser() {
-		return CodeChefTaskParser.INSTANCE;
+		return EOlimpTaskParser.INSTANCE;
 	}
 }

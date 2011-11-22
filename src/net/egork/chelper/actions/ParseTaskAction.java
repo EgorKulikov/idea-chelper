@@ -7,6 +7,7 @@ import com.intellij.psi.PsiElement;
 import net.egork.chelper.parser.TaskParser;
 import net.egork.chelper.parser.codechef.CodeChefTaskParser;
 import net.egork.chelper.parser.codeforces.CodeforcesTaskParser;
+import net.egork.chelper.parser.eolimp.EOlimpTaskParser;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.ui.ParseDialog;
 import net.egork.chelper.util.Utilities;
@@ -15,7 +16,8 @@ import net.egork.chelper.util.Utilities;
  * @author Egor Kulikov (kulikov@devexperts.com)
  */
 public class ParseTaskAction extends AnAction {
-	public static final TaskParser[] PARSERS = {CodeforcesTaskParser.INSTANCE, CodeChefTaskParser.INSTANCE};
+	public static final TaskParser[] PARSERS = {CodeforcesTaskParser.INSTANCE, CodeChefTaskParser.INSTANCE,
+		EOlimpTaskParser.INSTANCE};
 
 	public void actionPerformed(AnActionEvent e) {
 		if (!Utilities.isEligible(e.getDataContext()))

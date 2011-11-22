@@ -1,5 +1,6 @@
 package net.egork.chelper.parser.codechef;
 
+import net.egork.chelper.parser.StringParser;
 import net.egork.chelper.parser.TaskParser;
 import net.egork.chelper.task.StreamConfiguration;
 import net.egork.chelper.task.Task;
@@ -8,6 +9,10 @@ import net.egork.chelper.util.FileUtilities;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * @author Egor Kulikov (egor@egork.net)
@@ -33,97 +38,69 @@ public class CodeChefTaskParser extends CodeChefParser implements TaskParser {
 		} catch (IOException e) {
 			return null;
 		}
-		int position = text.indexOf("<div class=\"prob\">");
-		if (position == -1)
+		StringParser parser = new StringParser(text);
+		Pattern pattern = Pattern.compile(".*<p>.*</p>.*", Pattern.DOTALL);
+		try {
+			parser.advance(false, "<div class=\"prob\">");
+			parser.advance(true, "<h1>");
+			String taskID = getTaskID(parser.advance(false, "</h1>"));
+			parser.dropTail("<table cellspacing=\"0\" cellpadding=\"0\" align=\"left\">");
+			List<Test> tests = new ArrayList<Test>();
+			int index = 0;
+			while (true) {
+				try {
+					parser.advance(true, "Input", "Sample input", "Sample Input");
+					if (parser.length() != 0 && parser.charAt(0) == ':')
+						parser.advance(1);
+					String input = parser.advance(true, "Output", "Sample output", "Sample Output");
+					if (parser.length() != 0 && parser.charAt(0) == ':')
+						parser.advance(1);
+					String output = parser.advance(false, "Input", "Sample input", "Sample Input", "<b>",
+						"<h", "</div>", "<p>");
+					if (pattern.matcher(input).matches() || input.contains("</p><p>"))
+						continue;
+					input = dropTags(input).replace("<br />\n", "\n").replace("<br />", "\n");
+					output = dropTags(output).replace("<br />\n", "\n").replace("<br />", "\n");
+					if (input.contains("<") || output.contains("<"))
+						continue;
+					tests.add(new Test(StringEscapeUtils.unescapeHtml(input), StringEscapeUtils.unescapeHtml(output),
+						index++));
+				} catch (ParseException e) {
+					break;
+				}
+			}
+			if (tests.isEmpty())
+				return null;
+			return new Task(taskID, predefined.location, predefined.testType, StreamConfiguration.STANDARD,
+				StreamConfiguration.STANDARD, "256M", "64M", predefined.project, tests.toArray(new Test[tests.size()]));
+		} catch (ParseException e) {
 			return null;
-		text = text.substring(position);
-		position = text.indexOf("<h1>");
-		if (position == -1)
-			return null;
-		text = text.substring(position + 4);
-		position = text.indexOf("</h1>");
-		if (position == -1)
-			return null;
-		String taskID = getTaskID(StringEscapeUtils.unescapeHtml(text.substring(0, position)));
-		text = text.substring(position);
-		position = text.indexOf("<div id=\"comments\">");
-		if (position != -1)
-			text = text.substring(0, position);
-		Test test;
-		position = text.lastIndexOf("Example");
-		if (position != -1)
-			text = text.substring(position);
-		position = text.lastIndexOf("Sample input");
-		if (position != -1)
-			text = text.substring(position);
-		position = text.lastIndexOf("Sample Input");
-		if (position != -1)
-			text = text.substring(position);
-		position = text.indexOf("nput");
-		if (position == -1)
-			return null;
-		text = text.substring(position + 4);
-		if (text.startsWith(":"))
-			text = text.substring(1);
-		int bracketLevel = 0;
-		while (true) {
-			char head = text.charAt(0);
-			if (head == '<')
-				bracketLevel++;
-			if (bracketLevel == 0 && head != ' ' && head != '\n')
-				break;
-			if (head == '>')
-				bracketLevel--;
-			text = text.substring(1);
 		}
-		position = text.indexOf("utput");
-		if (position == -1)
-			return null;
-		String input = text.substring(0, position - 1);
-		if (input.endsWith("Sample "))
-			input = input.substring(0, input.length() - 7);
-		text = text.substring(position + 5);
-		if (text.startsWith(":"))
-			text = text.substring(1);
-		while (true) {
-			char head = input.charAt(input.length() - 1);
-			if (head == '>')
-				bracketLevel++;
-			if (bracketLevel == 0 && head != ' ' && head != '\n')
+	}
+
+	private String dropTags(String s) {
+		int bracket = 0;
+		while (s.length() != 0) {
+			char c = s.charAt(0);
+			if (c == '<')
+				bracket++;
+			else if (bracket == 0 && c != ' ' && c != '\n')
 				break;
-			if (head == '<')
-				bracketLevel--;
-			input = input.substring(0, input.length() - 1);
+			else if (c == '>')
+				bracket--;
+			s = s.substring(1);
 		}
-		input = input.replace("<br />\n", "\n").replace("<br />", "\n");
-		input = StringEscapeUtils.unescapeHtml(input);
-		if (!input.endsWith("\n"))
-			input += "\n";
-		while (true) {
-			char head = text.charAt(0);
-			if (head == '<')
-				bracketLevel++;
-			if (bracketLevel == 0 && head != ' ' && head != '\n')
+		while (s.length() != 0) {
+			char c = s.charAt(s.length() - 1);
+			if (c == '>')
+				bracket++;
+			else if (bracket == 0 && c != ' ' && c != '\n')
 				break;
-			if (head == '>')
-				bracketLevel--;
-			text = text.substring(1);
+			else if (c == '<')
+				bracket--;
+			s = s.substring(0, s.length() - 1);
 		}
-		position = text.indexOf("<b>");
-		int altPosition = text.indexOf("</pre>");
-		if (position == -1 || altPosition != -1 && altPosition < position)
-			position = altPosition;
-		altPosition = text.indexOf("</div>");
-		if (position == -1 || altPosition != -1 && altPosition < position)
-			position = altPosition;
-		if (position == -1)
-			return null;
-		String output = text.substring(0, position);
-		output = output.replace("<br />\n", "\n").replace("<br />", "\n");
-		output = StringEscapeUtils.unescapeHtml(output);
-		test = new Test(input, output, 0);
-		return new Task(taskID, predefined.location, predefined.testType, StreamConfiguration.STANDARD,
-			StreamConfiguration.STANDARD, "256M", "64M", predefined.project, new Test[]{test});
+		return s + "\n";
 	}
 
 	private String getTaskID(String title) {

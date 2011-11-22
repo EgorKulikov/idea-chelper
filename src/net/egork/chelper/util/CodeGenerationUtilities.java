@@ -75,9 +75,6 @@ public class CodeGenerationUtilities {
 						toRemove.addAll(Arrays.asList(((PsiMethod) element).getModifierList().getAnnotations()));
 					if (!(element instanceof PsiClass) && !(element instanceof PsiMethod) && !(element instanceof PsiField))
 						return true;
-					if (element instanceof PsiMethod && PsiClassImplUtil.isMainMethod(
-						(PsiMethod) element))
-						return false;
 					if (element instanceof PsiMethod && ((PsiMethod) element).findSuperMethods().length != 0)
 						return false;
 					if (element instanceof PsiMethod && ((PsiMethod) element).isConstructor())

@@ -33,7 +33,7 @@ import java.util.Map;
 public class Utilities {
 	private static Map<Project, ProjectData> eligibleProjects = new HashMap<Project, ProjectData>();
 	private static Task defaultConfiguration = new Task(null, null, TestType.SINGLE, StreamConfiguration.STANDARD,
-		StreamConfiguration.STANDARD, "256M", "64M", null);
+		StreamConfiguration.STANDARD, "256M", "64M", null, true);
 
 	public static void addListeners() {
 		ProjectManager.getInstance().addProjectManagerListener(new ProjectManagerAdapter() {

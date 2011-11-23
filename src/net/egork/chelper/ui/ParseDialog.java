@@ -13,28 +13,14 @@ import net.egork.chelper.task.Task;
 import net.egork.chelper.task.TestType;
 import net.egork.chelper.util.Utilities;
 
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.ListCellRenderer;
-import javax.swing.UIManager;
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.GridLayout;
-import java.awt.Point;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Egor Kulikov (kulikov@devexperts.com)
@@ -108,7 +94,7 @@ public class ParseDialog extends JDialog {
 					(StreamConfiguration.StreamType) outputType.getSelectedItem(), outputType.getSelectedItem() ==
 					StreamConfiguration.StreamType.CUSTOM ? outputFileName.getText() : null) : null,
 					options.shouldProvideHeapMemory() ? heapMemory.getText() : null,
-					options.shouldProvideStackMemory() ? stackMemory.getText() : null, project);
+					options.shouldProvideStackMemory() ? stackMemory.getText() : null, project, true);
 				List<Task> tasks = new ArrayList<Task>();
 				for (String id : taskIDs) {
 					Task task = taskParser.parse(id, predefined);

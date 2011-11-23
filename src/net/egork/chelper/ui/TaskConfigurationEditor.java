@@ -10,12 +10,7 @@ import net.egork.chelper.task.TestType;
 import org.jetbrains.annotations.NotNull;
 import sun.awt.VariableGridLayout;
 
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -33,6 +28,7 @@ public class TaskConfigurationEditor extends SettingsEditor<TaskConfiguration> {
 	private final JTextField outputFileName = new JTextField();
 	private final JTextField heapMemory = new JTextField();
 	private final JTextField stackMemory = new JTextField();
+	private final JCheckBox truncate = new JCheckBox("Truncate big input/output");
 	private TaskConfiguration taskConfiguration;
 	private JComponent inputPanel;
 	private JComponent outputPanel;
@@ -53,6 +49,7 @@ public class TaskConfigurationEditor extends SettingsEditor<TaskConfiguration> {
 			"output.txt");
 		heapMemory.setText(base.heapMemory);
 		stackMemory.setText(base.stackMemory);
+		truncate.setSelected(base.truncate);
 	}
 
 	@Override
@@ -77,7 +74,7 @@ public class TaskConfigurationEditor extends SettingsEditor<TaskConfiguration> {
 			inputType.getSelectedItem() == StreamConfiguration.StreamType.CUSTOM ? inputFileName.getText() : null),
 			new StreamConfiguration((StreamConfiguration.StreamType) outputType.getSelectedItem(),
 			outputType.getSelectedItem() == StreamConfiguration.StreamType.CUSTOM ? outputFileName.getText() : null),
-			heapMemory.getText(), stackMemory.getText(), old.project, old.tests);
+			heapMemory.getText(), stackMemory.getText(), old.project, truncate.isSelected(), old.tests);
 		s.setConfiguration(task);
 		s.setName(task.name);
 	}
@@ -95,6 +92,7 @@ public class TaskConfigurationEditor extends SettingsEditor<TaskConfiguration> {
 		panel.add(outputPanel);
 		panel.add(labelAndComponent("Heap memory: ", heapMemory));
 		panel.add(labelAndComponent("Stack memory: ", stackMemory));
+		panel.add(truncate);
 		inputType.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				ensureVisibility();

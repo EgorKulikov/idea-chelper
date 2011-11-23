@@ -83,15 +83,13 @@ public class EncodingUtilities {
 
 	public static String encodeTask(Task task) {
 		StringBuilder builder = new StringBuilder();
-		builder.append(task.name).append(TOKEN_SEPARATOR).append(task.location).append(TOKEN_SEPARATOR).append(task.testType).append(
-			TOKEN_SEPARATOR).
-			append(task.input.type).append(TOKEN_SEPARATOR).
+		builder.append(task.name).append(TOKEN_SEPARATOR).append(task.location).append(TOKEN_SEPARATOR).
+			append(task.testType).append(TOKEN_SEPARATOR).append(task.input.type).append(TOKEN_SEPARATOR).
 			append(task.input.type == StreamConfiguration.StreamType.CUSTOM ? task.input.fileName : "").append(
-			TOKEN_SEPARATOR).
-			append(task.output.type).append(TOKEN_SEPARATOR).
+			TOKEN_SEPARATOR).append(task.output.type).append(TOKEN_SEPARATOR).
 			append(task.output.type == StreamConfiguration.StreamType.CUSTOM ? task.output.fileName : "").append(
-			TOKEN_SEPARATOR).
-			append(task.heapMemory).append(TOKEN_SEPARATOR).append(task.stackMemory).append(TOKEN_SEPARATOR);
+			TOKEN_SEPARATOR).append(task.heapMemory).append(TOKEN_SEPARATOR).append(task.stackMemory).
+			append(TOKEN_SEPARATOR).append(task.truncate).append(TOKEN_SEPARATOR);
 		builder.append(encodeTests(task.tests));
 		return builder.toString();
 	}
@@ -126,15 +124,19 @@ public class EncodingUtilities {
 			outputFileName = tokens[6];
 		String heapMemory = tokens[7];
 		String stackMemory = tokens[8];
-		if ("empty".equals(tokens[9])) {
+		int index = 9;
+		boolean truncate = true;
+		if (tokens[index].equals("true") || tokens[index].equals("false"))
+			truncate =  Boolean.parseBoolean(tokens[index++]);
+		if ("empty".equals(tokens[index])) {
 			return new Task(name, location, testType, new StreamConfiguration(inputType, inputFileName),
-				new StreamConfiguration(outputType, outputFileName), heapMemory, stackMemory, project);
+				new StreamConfiguration(outputType, outputFileName), heapMemory, stackMemory, project, truncate);
 		}
-		Test[] tests = new Test[tokens.length - 9];
+		Test[] tests = new Test[tokens.length - index];
 		for (int i = 0; i < tests.length; i++)
-			tests[i] = decodeTest(i, tokens[9 + i]);
+			tests[i] = decodeTest(i, tokens[index + i]);
 		return new Task(name, location, testType, new StreamConfiguration(inputType, inputFileName),
-			new StreamConfiguration(outputType, outputFileName), heapMemory, stackMemory, project, tests);
+			new StreamConfiguration(outputType, outputFileName), heapMemory, stackMemory, project, truncate, tests);
 	}
 
 	public static String encodeTask(TopCoderTask task) {

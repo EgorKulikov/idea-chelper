@@ -26,15 +26,17 @@ public class Task {
 	public final String heapMemory;
 	public final String stackMemory;
 	public final Project project;
+	public final boolean truncate;
 
 	public Task(String name, String location, TestType testType, StreamConfiguration input,
-		StreamConfiguration output, String heapMemory, String stackMemory, Project project)
+		StreamConfiguration output, String heapMemory, String stackMemory, Project project, boolean truncate)
 	{
-		this(name, location, testType, input, output, heapMemory, stackMemory, project, new Test[0]);
+		this(name, location, testType, input, output, heapMemory, stackMemory, project, truncate, new Test[0]);
 	}
 
 	public Task(String name, String location, TestType testType, StreamConfiguration input,
-		StreamConfiguration output, String heapMemory, String stackMemory, Project project, Test[] tests)
+		StreamConfiguration output, String heapMemory, String stackMemory, Project project, boolean truncate,
+		Test[] tests)
 	{
 		this.name = name;
 		this.location = location;
@@ -45,22 +47,23 @@ public class Task {
 		this.heapMemory = heapMemory;
 		this.stackMemory = stackMemory;
 		this.project = project;
+		this.truncate = truncate;
 	}
 
 	public Task setName(String name) {
-		return new Task(name, location, testType, input, output, heapMemory, stackMemory, project, tests);
+		return new Task(name, location, testType, input, output, heapMemory, stackMemory, project, truncate, tests);
 	}
 
 	public Task setDirectory(String location) {
-		return new Task(name, location, testType, input, output, heapMemory, stackMemory, project, tests);
+		return new Task(name, location, testType, input, output, heapMemory, stackMemory, project, truncate, tests);
 	}
 
 	public Task setTests(Test[] tests) {
-		return new Task(name, location, testType, input, output, heapMemory, stackMemory, project, tests);
+		return new Task(name, location, testType, input, output, heapMemory, stackMemory, project, truncate, tests);
 	}
 
 	public Task setProject(Project project) {
-		return new Task(name, location, testType, input, output, heapMemory, stackMemory, project, tests);
+		return new Task(name, location, testType, input, output, heapMemory, stackMemory, project, truncate, tests);
 	}
 
 	public PsiElement initialize() {

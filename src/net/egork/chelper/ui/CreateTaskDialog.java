@@ -137,7 +137,7 @@ public class CreateTaskDialog extends JDialog {
 			inputName.isVisible() ? inputName.getText().trim() : null), new StreamConfiguration(
 			(StreamConfiguration.StreamType) outputType.getSelectedItem(),
 			outputType.isVisible() ? outputName.getText().trim() : null), heapMemory.getText().trim(),
-			stackMemory.getText().trim(), task.project);
+			stackMemory.getText().trim(), task.project, true);
 		pack();
 	}
 

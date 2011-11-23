@@ -37,9 +37,12 @@ public class Tester {
 		tests.addAll(addGeneratedTests(fqn, tests.size()));
 		String writerFQN;
 		if (argumentIndex != args.length)
-			writerFQN = args[argumentIndex];
+			writerFQN = args[argumentIndex++];
 		else
 			writerFQN = "java.io.PrintWriter";
+		boolean truncate = true;
+		if (argumentIndex < args.length)
+			truncate = Boolean.parseBoolean(args[argumentIndex]);
 		Class readerClass = Class.forName(readerFQN);
 		Class writerClass = Class.forName(writerFQN);
 		Class taskClass = Class.forName(fqn);
@@ -56,9 +59,9 @@ public class Tester {
 			StringWriter writer = new StringWriter(test.output.length());
 			Object out = writerClass.getConstructor(Writer.class).newInstance(writer);
 			System.out.println("Input:");
-			System.out.println(test.input);
+			print(test.input, truncate);
 			System.out.println("Expected output:");
-			System.out.println(test.output);
+			print(test.output, truncate);
 			System.out.println("Execution result:");
 			long time = System.currentTimeMillis();
 			try {
@@ -66,7 +69,7 @@ public class Tester {
 				time = System.currentTimeMillis() - time;
 				maximalTime = Math.max(time, maximalTime);
 				String result = writer.getBuffer().toString();
-				System.out.println(result);
+				print(result, truncate);
 				System.out.print("Verdict: ");
 				Verdict checkResult = check(checkerClass, readerClass,
 					readerClass.getConstructor(InputStream.class).newInstance(new StringInputStream(test.input)),
@@ -97,6 +100,12 @@ public class Tester {
 		}
 		Thread.currentThread().join(100L);
 		return ok;
+	}
+
+	private static void print(String s, boolean truncate) {
+		if (truncate && s.length() > 2000)
+			s = s.substring(0, 1500) + "..." + s.substring(s.length() - 100);
+		System.out.println(s);
 	}
 
 	private static Verdict check(Class checkerClass, Class readerClass, Object input, Object expectedOutput,

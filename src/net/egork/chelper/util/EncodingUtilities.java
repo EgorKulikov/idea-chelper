@@ -17,7 +17,7 @@ public class EncodingUtilities {
 	public static final String TEST_SEPARATOR = ";;";
 
 	public static String encode(String s) {
-		return s.replace(":", "/:").replace(";", "/;").replace("_", "/_").replace("\n", "/__");
+		return s.replace(":", "/:").replace(";", "/;").replace("_", "/_").replace("\n", "/__").replace("\r", "");
 	}
 
 	public static String decode(String s) {

@@ -75,10 +75,13 @@ public class ParseDialog extends JDialog {
 		ok.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Collection<String> taskIDs;
-				if (parseContest)
+				if (parseContest) {
+					Utilities.setDefaultContestParser((ContestParser) selected);
 					taskIDs = ((ContestParser)selected).parse(id.getText());
-				else
+				} else {
+					Utilities.setDefaultTaskParser((TaskParser) selected);
 					taskIDs = Collections.singleton(id.getText());
+				}
 				TaskParser taskParser;
 				if (parseContest)
 					taskParser = ((ContestParser)selected).getTaskParser();
@@ -145,7 +148,10 @@ public class ParseDialog extends JDialog {
 		okCancelPanel.add(cancel);
 		contentPanel.add(okCancelPanel);
 		setContentPane(contentPanel);
-		parserCombo.setSelectedIndex(0);
+		if (parseContest)
+			parserCombo.setSelectedItem(Utilities.getDefaultContestParser());
+		else
+			parserCombo.setSelectedItem(Utilities.getDefaultTaskParser());
 		pack();
 		Point center = Utilities.getLocation(project, contentPanel.getSize());
 		setLocation(center);

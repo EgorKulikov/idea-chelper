@@ -5,7 +5,6 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
-import com.intellij.psi.impl.PsiClassImplUtil;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import net.egork.chelper.task.*;
 
@@ -306,6 +305,9 @@ public class CodeGenerationUtilities {
 					return null;
 				argumentsAndResult[j] = text.substring(0, lineEnd).trim();
 				argumentsAndResult[j] = argumentsAndResult[j].substring(0, argumentsAndResult[j].length() - 1);
+				Class aClass = j < argumentsAndResult.length - 1 ? methodSignature.arguments[j] : methodSignature.result;
+				argumentsAndResult[j] = MethodSignature.toString(aClass,
+					MethodSignature.resolve(aClass, argumentsAndResult[j]));
 				text = text.substring(lineEnd);
 			}
 			tests.add(new TopCoderTest(Arrays.copyOf(argumentsAndResult, argumentsAndResult.length - 1),

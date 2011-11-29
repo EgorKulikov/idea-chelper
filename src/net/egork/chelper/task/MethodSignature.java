@@ -131,9 +131,14 @@ public class MethodSignature {
 		List<String> list = new ArrayList<String>();
 		int quoteCount = 0;
 		int start = 0;
+		int countSlashes = 0;
 		for (int i = 0; i < s.length(); i++) {
-			if (s.charAt(i) == '"')
+			if (s.charAt(i) == '"' && countSlashes % 2 == 0)
 				quoteCount++;
+			if (s.charAt(i) == '\\')
+				countSlashes++;
+			else
+				countSlashes = 0;
 			if (s.charAt(i) == ',' && quoteCount % 2 == 0) {
 				list.add(s.substring(start, i));
 				start = i + 1;
@@ -147,6 +152,58 @@ public class MethodSignature {
 		argument = argument.trim();
 		if (argument.length() > 0 && argument.charAt(0) == '"' && argument.charAt(argument.length() - 1) == '"')
 			argument = argument.substring(1, argument.length() - 1);
-		return argument;
+		return argument.replace("\\\"", "\"").replace("\\\\", "\\");
+	}
+
+	public static String toString(Class aClass, Object argument) {
+		if (aClass == int[].class) {
+			StringBuilder builder = new StringBuilder();
+			boolean first = true;
+			for (int i : (int[])argument) {
+				if (first)
+					first = false;
+				else
+					builder.append(',');
+				builder.append(i);
+			}
+			return builder.toString();
+		}
+		if (aClass == long[].class) {
+			StringBuilder builder = new StringBuilder();
+			boolean first = true;
+			for (long i : (long[])argument) {
+				if (first)
+					first = false;
+				else
+					builder.append(',');
+				builder.append(i);
+			}
+			return builder.toString();
+		}
+		if (aClass == double[].class) {
+			StringBuilder builder = new StringBuilder();
+			boolean first = true;
+			for (double i : (double[])argument) {
+				if (first)
+					first = false;
+				else
+					builder.append(',');
+				builder.append(i);
+			}
+			return builder.toString();
+		}
+		if (aClass == String[].class) {
+			StringBuilder builder = new StringBuilder();
+			boolean first = true;
+			for (String i : (String[])argument) {
+				if (first)
+					first = false;
+				else
+					builder.append(',');
+				builder.append(i);
+			}
+			return builder.toString();
+		}
+		return argument.toString();
 	}
 }

@@ -4,7 +4,6 @@ import net.egork.chelper.task.MethodSignature;
 import net.egork.chelper.task.TopCoderTest;
 import net.egork.chelper.util.EncodingUtilities;
 
-import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -20,7 +19,6 @@ public class TopCoderTester {
 		throws InterruptedException, InvocationTargetException, ClassNotFoundException, NoSuchMethodException,
 		InstantiationException, IllegalAccessException
 	{
-		JOptionPane.showMessageDialog(null, "HI!!!");
 		test(args);
 	}
 

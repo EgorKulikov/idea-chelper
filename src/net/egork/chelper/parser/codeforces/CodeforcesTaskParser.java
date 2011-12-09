@@ -59,10 +59,10 @@ public class CodeforcesTaskParser extends CodeforcesParser implements TaskParser
 			while (true) {
 				try {
 					parser.advance(false, "<div class=\"input\">");
-					parser.advance(true, "<pre class=\"content\">");
+					parser.advance(true, "<pre>");
 					String testInput = parser.advance(false, "</pre>").replace("<br />", "\n");
 					parser.advance(false, "<div class=\"output\">");
-					parser.advance(true, "<pre class=\"content\">");
+					parser.advance(true, "<pre>");
 					String testOutput = parser.advance(false, "</pre>").replace("<br />", "\n");
 					tests.add(new Test(StringEscapeUtils.unescapeHtml(testInput),
 						StringEscapeUtils.unescapeHtml(testOutput), tests.size()));

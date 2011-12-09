@@ -22,7 +22,6 @@ public class NewTaskAction extends CreateElementActionBase {
 		return create(null, psiDirectory);
 	}
 
-	@Override
 	protected void checkBeforeCreate(String s, PsiDirectory psiDirectory) throws IncorrectOperationException {
 	}
 

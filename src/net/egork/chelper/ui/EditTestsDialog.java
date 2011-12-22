@@ -153,10 +153,12 @@ public class EditTestsDialog extends JDialog {
 		JPanel inputPanel = new JPanel(new BorderLayout());
 		inputPanel.add(new JLabel("Input:"), BorderLayout.NORTH);
 		input = new JTextArea();
+		input.setFont(Font.decode(Font.MONOSPACED));
 		inputPanel.add(new JBScrollPane(input), BorderLayout.CENTER);
 		JPanel outputPanel = new JPanel(new BorderLayout());
 		outputPanel.add(new JLabel("Output:"), BorderLayout.NORTH);
 		output = new JTextArea();
+		output.setFont(Font.decode(Font.MONOSPACED));
 		outputPanel.add(new JBScrollPane(output), BorderLayout.CENTER);
 		testPanel.add(inputPanel);
 		testPanel.add(outputPanel);

@@ -14,6 +14,9 @@
 
   <project-components>
     <!-- Add your project components here -->
+      <component>
+          <implementation-class>net.egork.chelper.AutoSwitcher</implementation-class>
+      </component>
   </project-components>
 
   <actions>

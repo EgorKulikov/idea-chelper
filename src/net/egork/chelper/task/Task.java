@@ -112,4 +112,12 @@ public class Task {
 	public void createSourceFile() {
 		CodeGenerationUtilities.createSourceFile(this);
 	}
+
+	public VirtualFile getFile() {
+		return FileUtilities.getFile(project, location + "/" + name + ".java");
+	}
+
+	public VirtualFile getCheckerFile() {
+		return FileUtilities.getFile(project, location + "/" + name + "Checker.java");
+	}
 }

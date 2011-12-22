@@ -1,6 +1,7 @@
 package net.egork.chelper.task;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import net.egork.chelper.util.FileUtilities;
 import net.egork.chelper.util.Utilities;
 
@@ -35,5 +36,9 @@ public class TopCoderTask {
 
 	public TopCoderTask setTests(TopCoderTest[] tests) {
 		return new TopCoderTask(project, name, signature, tests);
+	}
+
+	public VirtualFile getFile() {
+		return FileUtilities.getFile(project, Utilities.getData(project).defaultDir + "/" + name + "/java");
 	}
 }

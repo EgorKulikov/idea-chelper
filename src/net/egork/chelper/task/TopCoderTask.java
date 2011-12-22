@@ -39,6 +39,6 @@ public class TopCoderTask {
 	}
 
 	public VirtualFile getFile() {
-		return FileUtilities.getFile(project, Utilities.getData(project).defaultDir + "/" + name + "/java");
+		return FileUtilities.getFile(project, Utilities.getData(project).defaultDir + "/" + name + ".java");
 	}
 }

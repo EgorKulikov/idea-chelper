@@ -94,8 +94,10 @@ public class ArchiveAction extends AnAction {
 	public static void setOtherConfiguration(RunManagerImpl manager) {
 		RunConfiguration[] allConfigurations = manager.getAllConfigurations();
 		for (RunConfiguration configuration : allConfigurations) {
-			if (configuration instanceof TaskConfiguration || configuration instanceof TopCoderConfiguration)
+			if (configuration instanceof TaskConfiguration || configuration instanceof TopCoderConfiguration) {
 				manager.setActiveConfiguration(new RunnerAndConfigurationSettingsImpl(manager, configuration, false));
+				return;
+			}
 		}
 	}
 }

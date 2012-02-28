@@ -96,7 +96,7 @@ public class MethodSignature {
 		else if (aClass == String.class) {
 			return getString(value);
 		} else {
-			if (value.charAt(0) == '{')
+			if (value.length() != 0 && value.charAt(0) == '{')
 				value = value.substring(1, value.length() - 1);
 			if (aClass == String[].class) {
 				String[] tokens = mySplit(value);
@@ -105,7 +105,7 @@ public class MethodSignature {
 					result[j] = getString(tokens[j]);
 				return result;
 			} else {
-				String[] tokens = value.trim().split(",");
+				String[] tokens = value.trim().length() == 0 ? new String[0] : value.trim().split(",");
 				if (aClass == int[].class) {
 					int[] result = new int[tokens.length];
 					for (int j = 0; j < tokens.length; j++)
@@ -149,9 +149,9 @@ public class MethodSignature {
 	}
 
 	private static String getString(String argument) {
-		argument = argument.trim();
-		if (argument.length() > 0 && argument.charAt(0) == '"' && argument.charAt(argument.length() - 1) == '"')
-			argument = argument.substring(1, argument.length() - 1);
+		String trimmed = argument.trim();
+		if (trimmed.length() > 0 && trimmed.charAt(0) == '"' && trimmed.charAt(trimmed.length() - 1) == '"')
+			argument = trimmed.substring(1, trimmed.length() - 1);
 		return argument.replace("\\\"", "\"").replace("\\\\", "\\");
 	}
 

@@ -300,11 +300,12 @@ public class CodeGenerationUtilities {
 				if (equalsIndex == -1)
 					return null;
 				text = text.substring(equalsIndex + 1);
-				int lineEnd = text.indexOf('\n');
+				int lineEnd = text.indexOf(";\n");
+				if (lineEnd == -1)
+					lineEnd = text.indexOf(";\r\n");
 				if (lineEnd == -1)
 					return null;
 				argumentsAndResult[j] = text.substring(0, lineEnd).trim();
-				argumentsAndResult[j] = argumentsAndResult[j].substring(0, argumentsAndResult[j].length() - 1);
 				Class aClass = j < argumentsAndResult.length - 1 ? methodSignature.arguments[j] : methodSignature.result;
 				argumentsAndResult[j] = MethodSignature.toString(aClass,
 					MethodSignature.resolve(aClass, argumentsAndResult[j]));

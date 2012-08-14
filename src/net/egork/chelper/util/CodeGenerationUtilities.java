@@ -562,8 +562,8 @@ public class CodeGenerationUtilities {
 				}
 			} else if (element instanceof PsiNewExpression) {
 				processType(((PsiNewExpression) element).getType());
-			} else if (element instanceof PsiReferenceExpression) {
-				PsiElement resolved = ((PsiReferenceExpression) element).resolve();
+			} else if (element instanceof PsiJavaCodeReferenceElement) {
+				PsiElement resolved = ((PsiJavaCodeReferenceElement) element).resolve();
 				if (resolved instanceof PsiClass)
 					addClass((PsiClass) resolved);
 			}

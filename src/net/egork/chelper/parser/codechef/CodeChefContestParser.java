@@ -32,8 +32,7 @@ public class CodeChefContestParser extends CodeChefParser implements ContestPars
 		StringParser parser = new StringParser(mainPage);
 		while (true) {
 			try {
-				parser.advance(false, "<tr class=\"problemrow\">");
-				parser.advance(true, "/problems/");
+				parser.advance(true, id + "/problems/");
 				tasks.add(id + " " + parser.advance(false, "\""));
 			} catch (ParseException e) {
 				break;

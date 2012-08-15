@@ -13,6 +13,9 @@ import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiPackage;
+import net.egork.chelper.task.Task;
+import net.egork.utils.io.InputReader;
+import net.egork.utils.io.OutputWriter;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -176,5 +179,37 @@ public class FileUtilities {
 		while ((nextByte = input.read()) != -1)
 			builder.append((char)nextByte);
 		return builder.toString();
+	}
+
+	public static Task readTask(String fileName, Project project) {
+		return Task.loadTask(new InputReader(getInputStream(getFile(project, fileName))), project);
+	}
+
+	public static void saveConfiguration(final String locationName, final String fileName, final Task configuration, final Project project) {
+		ApplicationManager.getApplication().runWriteAction(new Runnable() {
+			public void run() {
+				if (locationName == null)
+					return;
+				VirtualFile location = FileUtilities.getFile(project, locationName);
+				if (location == null)
+					return;
+				OutputStream stream = null;
+				try {
+					VirtualFile file = location.createChildData(null, fileName);
+					if (file == null)
+						return;
+					stream = file.getOutputStream(null);
+					configuration.saveTask(new OutputWriter(stream));
+				} catch (IOException ignored) {
+				} finally {
+					if (stream != null) {
+						try {
+							stream.close();
+						} catch (IOException ignored) {
+						}
+					}
+				}
+			}
+		});
 	}
 }

@@ -12,11 +12,9 @@ import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.WriteExternalException;
 import com.intellij.psi.PsiDirectory;
-import net.egork.chelper.util.EncodingUtilities;
-import net.egork.chelper.util.FileUtilities;
-import net.egork.chelper.util.Utilities;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.ui.TaskConfigurationEditor;
+import net.egork.chelper.util.FileUtilities;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,6 +29,7 @@ public class TaskConfiguration extends ModuleBasedConfiguration<JavaRunConfigura
 	public TaskConfiguration(String name, Project project, Task configuration, ConfigurationFactory factory) {
 		super(name, new JavaRunConfigurationModule(project, false), factory);
 		this.configuration = configuration;
+		saveConfiguration(configuration);
 	}
 
 	@Override
@@ -59,16 +58,11 @@ public class TaskConfiguration extends ModuleBasedConfiguration<JavaRunConfigura
 				Module module = ProjectRootManager.getInstance(configuration.project).getFileIndex().getModuleForFile(
 					directory.getVirtualFile());
 				parameters.configureByModule(module, JavaParameters.JDK_AND_CLASSES);
-				parameters.setMainClass("net.egork.chelper.tester.Tester");
+				parameters.setWorkingDirectory(configuration.project.getBaseDir().getPath());
+				parameters.setMainClass("net.egork.chelper.tester.NewTester");
 				parameters.getVMParametersList().add("-Xmx" + configuration.heapMemory);
 				parameters.getVMParametersList().add("-Xms" + configuration.stackMemory);
-				parameters.getProgramParametersList().add(Utilities.getData(configuration.project).inputClass);
-				parameters.getProgramParametersList().add(FileUtilities.getFQN(
-					directory, configuration.name));
-				parameters.getProgramParametersList().add(configuration.testType.name());
-				parameters.getProgramParametersList().add(EncodingUtilities.encodeTests(configuration.tests));
-				parameters.getProgramParametersList().add(Utilities.getData(configuration.project).outputClass);
-				parameters.getProgramParametersList().add(Boolean.toString(configuration.truncate));
+				parameters.getProgramParametersList().add(configuration.getTaskFileName());
 				return parameters;
 			}
 		};
@@ -82,12 +76,20 @@ public class TaskConfiguration extends ModuleBasedConfiguration<JavaRunConfigura
 
 	public void setConfiguration(Task configuration) {
 		this.configuration = configuration;
+		saveConfiguration(configuration);
+	}
+
+	private void saveConfiguration(Task configuration) {
+		if (configuration != null && configuration.location != null && configuration.name != null)
+			FileUtilities.saveConfiguration(configuration.location, configuration.name + ".task", configuration, getProject());
 	}
 
 	@Override
 	public void readExternal(Element element) throws InvalidDataException {
 		super.readExternal(element);
-		configuration = EncodingUtilities.readTask(element.getChildText("taskConf"), getProject());
+		String fileName = element.getChildText("taskConf");
+		if (fileName != null && fileName.trim().length() != 0)
+			configuration = FileUtilities.readTask(fileName, getProject());
 	}
 
 	@Override
@@ -95,6 +97,8 @@ public class TaskConfiguration extends ModuleBasedConfiguration<JavaRunConfigura
 		super.writeExternal(element);
 		Element configurationElement = new Element("taskConf");
 		element.addContent(configurationElement);
-		configurationElement.setText(EncodingUtilities.encodeTask(configuration));
+		String configurationFile = configuration.getTaskFileName();
+		if (configurationFile != null)
+			configurationElement.setText(configurationFile);
 	}
 }

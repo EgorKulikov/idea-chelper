@@ -2,13 +2,11 @@ package net.egork.chelper.task;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.JavaDirectoryService;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiDirectory;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiManager;
+import com.intellij.psi.*;
 import net.egork.chelper.util.CodeGenerationUtilities;
 import net.egork.chelper.util.FileUtilities;
+import net.egork.utils.io.InputReader;
+import net.egork.utils.io.OutputWriter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -106,7 +104,7 @@ public class Task {
 	}
 
 	public String getFQN() {
-		return FileUtilities.getFile(project, location).getPath().replace('/', '.') + name;
+		return FileUtilities.getFQN(FileUtilities.getPsiDirectory(project, location), name);
 	}
 
 	public void createSourceFile() {
@@ -117,7 +115,50 @@ public class Task {
 		return FileUtilities.getFile(project, location + "/" + name + ".java");
 	}
 
+	public String getTaskFileName() {
+		if (location != null && name != null)
+			return location + "/" + name + ".task";
+		return null;
+	}
+
 	public VirtualFile getCheckerFile() {
 		return FileUtilities.getFile(project, location + "/" + name + "Checker.java");
+	}
+
+	public void saveTask(OutputWriter out) {
+		out.printString(name);
+		out.printString(location);
+		out.printEnum(testType);
+		out.printEnum(input.type);
+		out.printString(input.fileName);
+		out.printEnum(output.type);
+		out.printString(output.fileName);
+		out.printString(heapMemory);
+		out.printString(stackMemory);
+		out.printBoolean(truncate);
+		out.printLine(tests.length);
+		for (Test test : tests)
+			test.saveTest(out);
+		out.printString(getFQN());
+	}
+
+	public static Task loadTask(InputReader in, Project project) {
+		String name = in.readString();
+		String location = in.readString();
+		TestType testType = in.readEnum(TestType.class);
+		StreamConfiguration.StreamType inputStreamType = in.readEnum(StreamConfiguration.StreamType.class);
+		String inputFileName = in.readString();
+		StreamConfiguration.StreamType outputStreamType = in.readEnum(StreamConfiguration.StreamType.class);
+		String outputFileName = in.readString();
+		String heapMemory = in.readString();
+		String stackMemory = in.readString();
+		boolean truncate = in.readBoolean();
+		int testCount = in.readInt();
+		Test[] tests = new Test[testCount];
+		for (int i = 0; i < testCount; i++)
+			tests[i] = Test.loadTest(in);
+		return new Task(name, location, testType, new StreamConfiguration(inputStreamType, inputFileName),
+			new StreamConfiguration(outputStreamType, outputFileName), heapMemory, stackMemory, project, truncate,
+			tests);
 	}
 }

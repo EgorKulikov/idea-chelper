@@ -17,10 +17,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 /**
  * @author Egor Kulikov (kulikov@devexperts.com)
@@ -88,24 +86,24 @@ public class ParseDialog extends JDialog {
 				else
 					taskParser = (TaskParser) selected;
 				TaskOptions options = selected.getOptions();
-				Task predefined = new Task(null, Utilities.getData(project).defaultDirectory,
-					options.shouldProvideTestType() ? (TestType)testType.getSelectedItem() : null,
-					options.shouldProvideInputType() ? new StreamConfiguration(
-					(StreamConfiguration.StreamType) inputType.getSelectedItem(), inputType.getSelectedItem() ==
-					StreamConfiguration.StreamType.CUSTOM ? inputFileName.getText() : null) : null,
-					options.shouldProvideOutputType() ? new StreamConfiguration(
-					(StreamConfiguration.StreamType) outputType.getSelectedItem(), outputType.getSelectedItem() ==
-					StreamConfiguration.StreamType.CUSTOM ? outputFileName.getText() : null) : null,
-					options.shouldProvideHeapMemory() ? heapMemory.getText() : null,
-					options.shouldProvideStackMemory() ? stackMemory.getText() : null, true);
-				List<Task> tasks = new ArrayList<Task>();
-				for (String id : taskIDs) {
-					Task task = taskParser.parse(id, predefined);
-					if (task != null)
-						tasks.add(task);
-				}
-				result = tasks;
-				setVisible(false);
+//				Task predefined = new Task(null, Utilities.getData(project).defaultDirectory,
+//					options.shouldProvideTestType() ? (TestType)testType.getSelectedItem() : null,
+//					options.shouldProvideInputType() ? new StreamConfiguration(
+//					(StreamConfiguration.StreamType) inputType.getSelectedItem(), inputType.getSelectedItem() ==
+//					StreamConfiguration.StreamType.CUSTOM ? inputFileName.getText() : null) : null,
+//					options.shouldProvideOutputType() ? new StreamConfiguration(
+//					(StreamConfiguration.StreamType) outputType.getSelectedItem(), outputType.getSelectedItem() ==
+//					StreamConfiguration.StreamType.CUSTOM ? outputFileName.getText() : null) : null,
+//					options.shouldProvideHeapMemory() ? heapMemory.getText() : null,
+//					options.shouldProvideStackMemory() ? stackMemory.getText() : null, true);
+//				List<Task> tasks = new ArrayList<Task>();
+//				for (String id : taskIDs) {
+//					Task task = taskParser.parse(id, predefined);
+//					if (task != null)
+//						tasks.add(task);
+//				}
+//				result = tasks;
+//				setVisible(false);
 			}
 		});
 		parserCombo.addActionListener(new ActionListener() {

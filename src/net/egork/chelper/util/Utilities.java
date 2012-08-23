@@ -17,17 +17,20 @@ import com.intellij.psi.PsiFile;
 import net.egork.chelper.ProjectData;
 import net.egork.chelper.actions.ParseContestAction;
 import net.egork.chelper.actions.ParseTaskAction;
+import net.egork.chelper.checkers.TokenChecker;
 import net.egork.chelper.configurations.TaskConfiguration;
 import net.egork.chelper.configurations.TaskConfigurationType;
 import net.egork.chelper.parser.ContestParser;
 import net.egork.chelper.parser.TaskParser;
 import net.egork.chelper.task.StreamConfiguration;
 import net.egork.chelper.task.Task;
+import net.egork.chelper.task.Test;
 import net.egork.chelper.task.TestType;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,8 +39,8 @@ import java.util.Map;
  */
 public class Utilities {
 	private static Map<Project, ProjectData> eligibleProjects = new HashMap<Project, ProjectData>();
-	private static Task defaultConfiguration = new Task(null, null, TestType.SINGLE, StreamConfiguration.STANDARD,
-		StreamConfiguration.STANDARD, "256M", "64M", true);
+	private static Task defaultConfiguration = new Task(null, TestType.SINGLE, StreamConfiguration.STANDARD,
+		StreamConfiguration.STANDARD, new Test[0], null, "-Xmx256m -Xss64m", "Main", null, TokenChecker.class.getCanonicalName(), "", new String[0], null, "", true, null, null);
 	private static ContestParser defaultContestParser = ParseContestAction.PARSERS[0];
 	private static TaskParser defaultTaskParser = ParseTaskAction.PARSERS[0];
 
@@ -66,8 +69,11 @@ public class Utilities {
 	}
 
 	public static void updateDefaultTask(Task task) {
-		if (task != null)
-			defaultConfiguration = task.setDirectory(null).setName("Task");
+		if (task != null) {
+			defaultConfiguration = new Task(null, task.testType, task.input, task.output, new Test[0], null,
+                    task.vmArgs, task.mainClass, null, TokenChecker.class.getCanonicalName(), "", new String[0], null,
+                    "", task.truncate, null, null);
+        }
 	}
 
 	public static Task getDefaultTask() {
@@ -146,5 +152,17 @@ public class Utilities {
             g.dispose();
             return image;
         }
+    }
+
+    public static String getDateString(Date date) {
+        StringBuilder result = new StringBuilder();
+        result.append(date.getYear() + 1900).append('.');
+        if (date.getMonth() < 9)
+            result.append('0');
+        result.append(date.getMonth() + 1).append('.');
+        if (date.getDay() < 10)
+            result.append('0');
+        result.append(date.getDay());
+        return result.toString();
     }
 }

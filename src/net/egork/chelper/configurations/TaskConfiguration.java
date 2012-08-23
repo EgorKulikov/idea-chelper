@@ -61,8 +61,9 @@ public class TaskConfiguration extends ModuleBasedConfiguration<JavaRunConfigura
 				parameters.configureByModule(module, JavaParameters.JDK_AND_CLASSES);
 				parameters.setWorkingDirectory(getProject().getBaseDir().getPath());
 				parameters.setMainClass("net.egork.chelper.tester.NewTester");
-				parameters.getVMParametersList().add("-Xmx" + configuration.heapMemory);
-				parameters.getVMParametersList().add("-Xms" + configuration.stackMemory);
+                String[] vmParameters = configuration.vmArgs.split(" ");
+                for (String parameter : vmParameters)
+                    parameters.getVMParametersList().add(parameter);
 				parameters.getProgramParametersList().add(TaskUtilities.getTaskFileName(configuration.location, configuration.name));
 				return parameters;
 			}

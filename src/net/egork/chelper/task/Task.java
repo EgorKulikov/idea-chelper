@@ -7,83 +7,109 @@ import net.egork.chelper.util.*;
  * @author Egor Kulikov (kulikov@devexperts.com)
  */
 public class Task {
+    //Basic
 	public final String name;
-	public final String location;
-	public final TestType testType;
-	public final StreamConfiguration input;
-	public final StreamConfiguration output;
-	public final Test[] tests;
-	public final String heapMemory;
-	public final String stackMemory;
+    public final TestType testType;
+    public final StreamConfiguration input;
+    public final StreamConfiguration output;
+    public final Test[] tests;
+
+    //Advanced
+    public final String location;
+    public final String vmArgs;
+    public final String mainClass;
+    public final String taskClass;
+    public final String checkerClass;
+    public final String checkerParameters;
+    public final String[] testClasses;
+    public final String date;
+    public final String contestName;
 	public final boolean truncate;
+    public final String inputClass;
+    public final String outputClass;
 
-	public Task(String name, String location, TestType testType, StreamConfiguration input,
-		StreamConfiguration output, String heapMemory, String stackMemory, boolean truncate)
-	{
-		this(name, location, testType, input, output, heapMemory, stackMemory, truncate, new Test[0]);
-	}
-
-	public Task(String name, String location, TestType testType, StreamConfiguration input,
-		StreamConfiguration output, String heapMemory, String stackMemory, boolean truncate,
-		Test[] tests)
-	{
-		this.name = name;
-		this.location = location;
-		this.testType = testType;
-		this.input = input;
-		this.output = output;
-		this.tests = tests;
-		this.heapMemory = heapMemory;
-		this.stackMemory = stackMemory;
-		this.truncate = truncate;
-	}
-
-    public Task setName(String name) {
-		return new Task(name, location, testType, input, output, heapMemory, stackMemory, truncate, tests);
-	}
-
-	public Task setDirectory(String location) {
-		return new Task(name, location, testType, input, output, heapMemory, stackMemory, truncate, tests);
-	}
-
-	public Task setTests(Test[] tests) {
-		return new Task(name, location, testType, input, output, heapMemory, stackMemory, truncate, tests);
-	}
+    public Task(String name, TestType testType, StreamConfiguration input, StreamConfiguration output, Test[] tests, String location, String vmArgs, String mainClass, String taskClass, String checkerClass, String checkerParameters, String[] testClasses, String date, String contestName, boolean truncate, String inputClass, String outputClass) {
+        this.name = name;
+        this.testType = testType;
+        this.input = input;
+        this.output = output;
+        this.tests = tests;
+        this.location = location;
+        this.vmArgs = vmArgs;
+        this.mainClass = mainClass;
+        this.taskClass = taskClass;
+        this.checkerClass = checkerClass;
+        this.checkerParameters = checkerParameters;
+        this.testClasses = testClasses;
+        this.date = date;
+        this.contestName = contestName;
+        this.truncate = truncate;
+        this.inputClass = inputClass;
+        this.outputClass = outputClass;
+    }
 
     public void saveTask(OutputWriter out, Project project) {
 		out.printString(name);
-		out.printString(location);
 		out.printEnum(testType);
 		out.printEnum(input.type);
 		out.printString(input.fileName);
 		out.printEnum(output.type);
 		out.printString(output.fileName);
-		out.printString(heapMemory);
-		out.printString(stackMemory);
-		out.printBoolean(truncate);
-		out.printLine(tests.length);
-		for (Test test : tests)
-			test.saveTest(out);
-		out.printString(TaskUtilities.getFQN(location, name, project));
+        out.printLine(tests.length);
+        for (Test test : tests)
+            test.saveTest(out);
+
+        out.printString(location);
+        out.printString(vmArgs);
+		out.printString(mainClass);
+        out.printString(taskClass);
+        out.printString(checkerClass);
+        out.printString(checkerParameters);
+        out.printLine(testClasses.length);
+        for (String testClass : testClasses)
+            out.printString(testClass);
+        out.printString(date);
+        out.printString(contestName);
+        out.printBoolean(truncate);
+        out.printString(inputClass);
+        out.printString(outputClass);
 	}
 
     public static Task loadTask(InputReader in) {
         String name = in.readString();
-        String location = in.readString();
         TestType testType = in.readEnum(TestType.class);
         StreamConfiguration.StreamType inputStreamType = in.readEnum(StreamConfiguration.StreamType.class);
         String inputFileName = in.readString();
         StreamConfiguration.StreamType outputStreamType = in.readEnum(StreamConfiguration.StreamType.class);
         String outputFileName = in.readString();
-        String heapMemory = in.readString();
-        String stackMemory = in.readString();
-        boolean truncate = in.readBoolean();
         int testCount = in.readInt();
         Test[] tests = new Test[testCount];
         for (int i = 0; i < testCount; i++)
             tests[i] = Test.loadTest(in);
-        return new Task(name, location, testType, new StreamConfiguration(inputStreamType, inputFileName),
-                new StreamConfiguration(outputStreamType, outputFileName), heapMemory, stackMemory, truncate,
-                tests);
+
+        String location = in.readString();
+        String vmArgs = in.readString();
+        String mainClass = in.readString();
+        String taskClass = in.readString();
+        String checkerClass = in.readString();
+        String checkerParameters = in.readString();
+        int testClassesCount = in.readInt();
+        String[] testClasses = new String[testClassesCount];
+        for (int i = 0; i < testClassesCount; i++)
+            testClasses[i] = in.readString();
+        String date = in.readString();
+        String contestName = in.readString();
+        boolean truncate = in.readBoolean();
+        String inputClass = in.readString();
+        String outputClass = in.readString();
+        return new Task(name, testType, new StreamConfiguration(inputStreamType, inputFileName),
+                new StreamConfiguration(outputStreamType, outputFileName), tests, location, vmArgs, mainClass,
+                taskClass, checkerClass, checkerParameters, testClasses, date, contestName, truncate, inputClass,
+                outputClass);
+    }
+
+    public Task setTests(Test[] tests) {
+        return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
+                checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass);
     }
 }

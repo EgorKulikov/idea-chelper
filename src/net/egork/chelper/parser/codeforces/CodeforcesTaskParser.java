@@ -71,8 +71,9 @@ public class CodeforcesTaskParser extends CodeforcesParser implements TaskParser
 				}
 			}
 			String name = "Task" + id;
-			return new Task(name, predefined.location, predefined.testType, inputType, outputType, heapMemory, "64M",
-				true, tests.toArray(new Test[tests.size()]));
+//			return new Task(name, predefined.location, predefined.testType, inputType, outputType, heapMemory, "64M",
+//				true, tests.toArray(new Test[tests.size()]));
+            return null;
 		} catch (ParseException e) {
 			return null;
 		}

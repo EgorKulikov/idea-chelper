@@ -222,4 +222,26 @@ public class FileUtilities {
             childPath += "/";
         return childPath.startsWith(parentPath);
     }
+
+    public static boolean isValidClassName(String name) {
+        return name.matches("[a-zA-Z_$][a-zA-Z\\d_$]*");
+    }
+
+    public static String createTaskClass(Project project, String path, String name) {
+        String mainClass = CodeGenerationUtilities.createStub(path, name, project);
+        VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, path);
+        writeTextFile(directory, name + ".java", mainClass);
+        PsiDirectory psiDirectory = getPsiDirectory(project, path);
+        String aPackage = getPackage(psiDirectory);
+        return aPackage + "." + name;
+    }
+
+    public static String createCheckerClass(Project project, String path, String name) {
+        String mainClass = CodeGenerationUtilities.createCheckerStub(path, name, project);
+        VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, path);
+        writeTextFile(directory, name + ".java", mainClass);
+        PsiDirectory psiDirectory = getPsiDirectory(project, path);
+        String aPackage = getPackage(psiDirectory);
+        return aPackage + "." + name;
+    }
 }

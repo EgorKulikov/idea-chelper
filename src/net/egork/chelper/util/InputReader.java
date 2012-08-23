@@ -102,6 +102,16 @@ public class InputReader {
         return result.toString();
     }
 
+    public String readToken() {
+        int c;
+        while (isSpaceChar(c = read()));
+        StringBuilder result = new StringBuilder();
+        result.appendCodePoint(c);
+        while (!isSpaceChar(c = read()))
+            result.appendCodePoint(c);
+        return result.toString();
+    }
+
     public static boolean isSpaceChar(int c) {
         return c == ' ' || c == '\n' || c == '\r' || c == '\t' || c == -1;
     }

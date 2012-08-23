@@ -2,7 +2,6 @@ package net.egork.chelper.parser.timus;
 
 import net.egork.chelper.parser.StringParser;
 import net.egork.chelper.parser.TaskParser;
-import net.egork.chelper.task.StreamConfiguration;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.Test;
 import net.egork.chelper.util.FileUtilities;
@@ -55,9 +54,10 @@ public class TimusTaskParser extends TimusParser implements TaskParser {
 					break;
 				}
 			}
-			return new Task(taskName, predefined.location, predefined.testType, StreamConfiguration.STANDARD,
-				StreamConfiguration.STANDARD, heapMemory, "64M", true,
-				tests.toArray(new Test[tests.size()]));
+//			return new Task(taskName, predefined.location, predefined.testType, StreamConfiguration.STANDARD,
+//				StreamConfiguration.STANDARD, heapMemory, "64M", true,
+//				tests.toArray(new Test[tests.size()]));
+            return null;
 		} catch (ParseException e) {
 			return null;
 		}

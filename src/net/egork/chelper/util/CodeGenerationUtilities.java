@@ -204,40 +204,30 @@ public class CodeGenerationUtilities {
 		});
 	}
 
-	public static String createCheckerStub(Task task, Project project) {
-		PsiDirectory directory = FileUtilities.getPsiDirectory(project, task.location);
-		String inputClass = Utilities.getData(project).inputClass;
-		String inputClassShort = inputClass.substring(inputClass.lastIndexOf('.') + 1);
+	public static String createCheckerStub(String location, String name, Project project) {
+		PsiDirectory directory = FileUtilities.getPsiDirectory(project, location);
 		StringBuilder builder = new StringBuilder();
 		String packageName = FileUtilities.getPackage(directory);
 		if (packageName != null && packageName.length() != 0)
 			builder.append("package ").append(packageName).append(";\n\n");
-		builder.append("import ").append(inputClass).append(";\n");
-		builder.append("import net.egork.chelper.task.Test;\n");
 		builder.append("import net.egork.chelper.tester.Verdict;\n");
-		builder.append("\n");
+        builder.append("import net.egork.chelper.checkers.Checker;\n");
+        builder.append("\n");
 		builder.append("import java.util.Collection;\n");
 		builder.append("import java.util.Collections;\n");
 		builder.append("\n");
-		builder.append("public class ").append(task.name).append("Checker {\n");
-		builder.append("\tpublic Verdict check(").append(inputClassShort).append(" input, ").append(inputClassShort)
-			.append(" expected, ").append(inputClassShort).append(" actual) {\n");
+		builder.append("public class ").append(name).append(" implements Checker {\n");
+        builder.append("\tpublic ").append(name).append("(String parameters) {\n");
+        builder.append("\t}\n\n");
+		builder.append("\tpublic Verdict check(String input, String expectedOutput, String actualOutput) {\n");
 		builder.append("\t\treturn Verdict.UNDECIDED;\n");
-		builder.append("\t}\n");
-		builder.append("\n");
-		builder.append("\tpublic double getCertainty() {\n");
-		builder.append("\t\treturn 0;\n");
-		builder.append("\t}\n");
-		builder.append("\n");
-		builder.append("\tpublic Collection<? extends Test> generateTests() {\n");
-		builder.append("\t\treturn Collections.emptyList();\n");
 		builder.append("\t}\n");
 		builder.append("}\n");
 		return builder.toString();
 	}
 
-	public static String createStub(Task task, Project project) {
-		PsiDirectory directory = FileUtilities.getPsiDirectory(project, task.location);
+	public static String createStub(String location, String name, Project project) {
+		PsiDirectory directory = FileUtilities.getPsiDirectory(project, location);
 		String inputClass = Utilities.getData(project).inputClass;
 		String inputClassShort = inputClass.substring(inputClass.lastIndexOf('.') + 1);
 		String outputClass = Utilities.getData(project).outputClass;
@@ -249,7 +239,7 @@ public class CodeGenerationUtilities {
 		builder.append("import ").append(inputClass).append(";\n");
 		builder.append("import ").append(outputClass).append(";\n");
 		builder.append("\n");
-		builder.append("public class ").append(task.name).append(" {\n");
+		builder.append("public class ").append(name).append(" {\n");
 		builder.append("\tpublic void solve(int testNumber, ").append(inputClassShort).append(" in, ").
 			append(outputClassShort).append(" out) {\n");
 		builder.append("\t}\n");

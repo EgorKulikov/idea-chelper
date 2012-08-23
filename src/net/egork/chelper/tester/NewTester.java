@@ -1,6 +1,7 @@
 package net.egork.chelper.tester;
 
-import net.egork.chelper.task.StreamConfiguration;
+import net.egork.chelper.checkers.Checker;
+import net.egork.chelper.task.Task;
 import net.egork.chelper.task.Test;
 import net.egork.chelper.task.TestType;
 import net.egork.chelper.util.EncodingUtilities;
@@ -28,7 +29,6 @@ public class NewTester {
 		List<Verdict> verdicts = new ArrayList<Verdict>();
 		long maximalTime = 0;
 		boolean ok = true;
-		int argumentIndex = 0;
 		String taskFileName = args[0];
 		InputReader input;
 		try {
@@ -36,34 +36,22 @@ public class NewTester {
 		} catch (FileNotFoundException e) {
 			throw new RuntimeException(e);
 		}
-		String name = input.readString();
-		String location = input.readString();
-		TestType testType = input.readEnum(TestType.class);
-		StreamConfiguration.StreamType inputStreamType = input.readEnum(StreamConfiguration.StreamType.class);
-		String inputFileName = input.readString();
-		StreamConfiguration.StreamType outputStreamType = input.readEnum(StreamConfiguration.StreamType.class);
-		String outputFileName = input.readString();
-		String heapMemory = input.readString();
-		String stackMemory = input.readString();
-		boolean truncate = input.readBoolean();
-		int testCount = input.readInt();
-		Test[] initialTests = new Test[testCount];
-		for (int i = 0; i < testCount; i++)
-			initialTests[i] = Test.loadTest(input);
-		Properties properties = new Properties();
-		try {
-			properties.load(new FileInputStream("chelper.properties"));
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		String readerFQN = properties.getProperty("inputClass", "java.util.Scanner");
-		String fqn = input.readString();
-		List<Test> tests = Arrays.asList(initialTests);
-		String writerFQN = properties.getProperty("outputClass", "java.io.PrintWriter");
+        Task task = Task.loadTask(input);
+		String readerFQN = task.inputClass;
+		String fqn = task.taskClass;
+		List<Test> tests = Arrays.asList(task.tests);
+        for (String testClass : task.testClasses) {
+            Class test = Class.forName(testClass);
+            TestProvider provider = (TestProvider) test.getConstructor().newInstance();
+            tests.addAll(provider.createTests());
+        }
+		String writerFQN = task.outputClass;
 		Class readerClass = Class.forName(readerFQN);
 		Class writerClass = Class.forName(writerFQN);
 		Class taskClass = Class.forName(fqn);
-		Class checkerClass = Class.forName(fqn + "Checker");
+		Class checkerClass = Class.forName(task.checkerClass);
+        TestType testType = task.testType;
+        boolean truncate = task.truncate;
 		for (Test test : tests) {
 			if (!test.active) {
 				verdicts.add(Verdict.SKIPPED);
@@ -88,10 +76,7 @@ public class NewTester {
 				String result = writer.getBuffer().toString();
 				print(result, truncate);
 				System.out.print("Verdict: ");
-				Verdict checkResult = check(checkerClass, readerClass,
-					readerClass.getConstructor(InputStream.class).newInstance(new StringInputStream(test.input)),
-					test.output == null ? null : readerClass.getConstructor(InputStream.class).newInstance(new StringInputStream(test.output)),
-					readerClass.getConstructor(InputStream.class).newInstance(new StringInputStream(result)));
+				Verdict checkResult = check(checkerClass, test.input, test.output, result, task.checkerParameters);
 				verdicts.add(checkResult);
 				System.out.print(checkResult);
 				System.out.printf(" in %.3f s.\n", time / 1000.);
@@ -127,76 +112,13 @@ public class NewTester {
 		System.out.println(s);
 	}
 
-	private static Verdict check(Class checkerClass, Class readerClass, Object input, Object expectedOutput,
-		Object actualOutput)
+	private static Verdict check(Class checkerClass, String input, String expectedOutput,
+                                 String actualOutput, String checkerParameters)
 		throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException
 	{
-		Method check = checkerClass.getMethod("check", readerClass, readerClass, readerClass);
-		Object checker = checkerClass.getConstructor().newInstance();
-		Object checkResult = check.invoke(checker, input, expectedOutput, actualOutput);
-		Verdict verdict;
-		if (checkResult == null || checkResult instanceof String) {
-			if (checkResult == null)
-				verdict = Verdict.OK;
-			else if (checkResult.equals(""))
-				verdict = Verdict.UNDECIDED;
-			else
-				verdict = new Verdict(Verdict.VerdictType.WA, (String) checkResult);
-		} else
-			verdict = (Verdict) checkResult;
-		if (checkResult == null) {
-			try {
-				readerClass.getMethod("next").invoke(actualOutput);
-				return new Verdict(Verdict.VerdictType.PE, "Excessive output");
-			} catch (Throwable e) {
-				return verdict;
-			}
-		}
-		if (verdict != Verdict.UNDECIDED)
-			return verdict;
-        if (expectedOutput == null)
-            return Verdict.UNDECIDED;
-		Method next = readerClass.getMethod("next");
-		double certainty = (Double) checkerClass.getMethod("getCertainty").invoke(checker);
-		int index = 0;
-		double maxDelta = 0;
-		while (true) {
-			String expectedToken;
-			try {
-				expectedToken = (String) next.invoke(expectedOutput);
-			} catch (Throwable e) {
-				try {
-					next.invoke(actualOutput);
-				} catch (Throwable t) {
-					if (maxDelta != 0)
-						return new Verdict(Verdict.VerdictType.OK, "Maximal absolute difference is " + maxDelta);
-					return Verdict.OK;
-				}
-				return new Verdict(Verdict.VerdictType.PE, "Only " + index + " tokens were expected");
-			}
-			String actualToken;
-			try {
-				actualToken = (String) next.invoke(actualOutput);
-			} catch (Throwable e) {
-				return new Verdict(Verdict.VerdictType.PE, "More than " + index + " tokens were expected");
-			}
-			if (!expectedToken.equals(actualToken)) {
-				if (certainty != 0) {
-					try {
-						double expectedValue = Double.parseDouble(expectedToken);
-						double actualValue = Double.parseDouble(actualToken);
-						double delta = Math.abs(actualValue - expectedValue);
-						maxDelta = Math.max(delta, maxDelta);
-						if (delta / Math.max(Math.abs(expectedValue), 1) > certainty)
-							return new Verdict(Verdict.VerdictType.WA, "Mismatch at index " + index);
-					} catch (NumberFormatException e) {
-						return new Verdict(Verdict.VerdictType.WA, "Mismatch at index " + index);
-					}
-				} else
-					return new Verdict(Verdict.VerdictType.WA, "Mismatch at index " + index);
-			}
-			index++;
-		}
+		Method check = checkerClass.getMethod("check", String.class, String.class, String.class);
+		Checker checker = (Checker)checkerClass.getConstructor(String.class).newInstance(checkerParameters);
+        return checker.check(input, expectedOutput, actualOutput);
 	}
 
 	private static void run(Object in, Object out, Class taskClass, Class readerClass, Class writerClass,

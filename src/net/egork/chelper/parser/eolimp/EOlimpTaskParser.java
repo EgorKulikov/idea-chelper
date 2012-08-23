@@ -72,8 +72,9 @@ public class EOlimpTaskParser extends EOlimpParser implements TaskParser {
 				tests.add(new Test(input, output, 0));
 			}
 			name = "Task" + name;
-			return new Task(name, predefined.location, predefined.testType, predefined.input, predefined.output,
-				heapMemory, "16M", true, tests.toArray(new Test[tests.size()]));
+//			return new Task(name, predefined.location, predefined.testType, predefined.input, predefined.output,
+//				heapMemory, "16M", true, tests.toArray(new Test[tests.size()]));
+            return null;
 		} catch (ParseException e) {
 			return null;
 		}

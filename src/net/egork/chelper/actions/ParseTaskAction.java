@@ -11,6 +11,7 @@ import net.egork.chelper.parser.eolimp.EOlimpTaskParser;
 import net.egork.chelper.parser.timus.TimusTaskParser;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.ui.ParseDialog;
+import net.egork.chelper.util.TaskUtilities;
 import net.egork.chelper.util.Utilities;
 
 /**
@@ -27,8 +28,8 @@ public class ParseTaskAction extends AnAction {
 		Task task = ParseDialog.parseTask(project);
 		if (task == null)
 			return;
-		PsiElement element = task.initialize();
-		Utilities.createConfiguration(task, true);
+		PsiElement element = TaskUtilities.initialize(task, project);
+		Utilities.createConfiguration(task, true, project);
 		Utilities.openElement(project, element);
 	}
 }

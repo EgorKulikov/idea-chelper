@@ -11,6 +11,7 @@ import net.egork.chelper.parser.eolimp.EOlimpContestParser;
 import net.egork.chelper.parser.timus.TimusContestParser;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.ui.ParseDialog;
+import net.egork.chelper.util.TaskUtilities;
 import net.egork.chelper.util.Utilities;
 
 import java.util.Collection;
@@ -30,8 +31,8 @@ public class ParseContestAction extends AnAction {
 		boolean firstConfiguration = true;
 		PsiElement firstElement = null;
 		for (Task task : tasks) {
-			PsiElement element = task.initialize();
-			Utilities.createConfiguration(task, firstConfiguration);
+			PsiElement element = TaskUtilities.initialize(task, project);
+			Utilities.createConfiguration(task, firstConfiguration, project);
 			firstConfiguration = false;
 			if (firstElement == null)
 				firstElement = element;

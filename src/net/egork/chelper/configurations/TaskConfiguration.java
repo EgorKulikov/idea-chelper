@@ -15,6 +15,7 @@ import com.intellij.psi.PsiDirectory;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.ui.TaskConfigurationEditor;
 import net.egork.chelper.util.FileUtilities;
+import net.egork.chelper.util.TaskUtilities;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,7 +35,7 @@ public class TaskConfiguration extends ModuleBasedConfiguration<JavaRunConfigura
 
 	@Override
 	public Collection<Module> getValidModules() {
-		return JavaRunConfigurationModule.getModulesForClass(getProject(), configuration.getFQN());
+		return JavaRunConfigurationModule.getModulesForClass(getProject(), TaskUtilities.getFQN(configuration.location, configuration.name, getProject()));
 	}
 
 	@Override
@@ -49,24 +50,24 @@ public class TaskConfiguration extends ModuleBasedConfiguration<JavaRunConfigura
 	public RunProfileState getState(@NotNull Executor executor, @NotNull ExecutionEnvironment env)
 		throws ExecutionException
 	{
-		configuration.createSourceFile();
+		TaskUtilities.createSourceFile(configuration, getProject());
 		JavaCommandLineState state = new JavaCommandLineState(env) {
 			@Override
 			protected JavaParameters createJavaParameters() throws ExecutionException {
 				JavaParameters parameters = new JavaParameters();
-				PsiDirectory directory = FileUtilities.getPsiDirectory(configuration.project, configuration.location);
-				Module module = ProjectRootManager.getInstance(configuration.project).getFileIndex().getModuleForFile(
+				PsiDirectory directory = FileUtilities.getPsiDirectory(getProject(), configuration.location);
+				Module module = ProjectRootManager.getInstance(getProject()).getFileIndex().getModuleForFile(
 					directory.getVirtualFile());
 				parameters.configureByModule(module, JavaParameters.JDK_AND_CLASSES);
-				parameters.setWorkingDirectory(configuration.project.getBaseDir().getPath());
+				parameters.setWorkingDirectory(getProject().getBaseDir().getPath());
 				parameters.setMainClass("net.egork.chelper.tester.NewTester");
 				parameters.getVMParametersList().add("-Xmx" + configuration.heapMemory);
 				parameters.getVMParametersList().add("-Xms" + configuration.stackMemory);
-				parameters.getProgramParametersList().add(configuration.getTaskFileName());
+				parameters.getProgramParametersList().add(TaskUtilities.getTaskFileName(configuration.location, configuration.name));
 				return parameters;
 			}
 		};
-		state.setConsoleBuilder(new TextConsoleBuilderImpl(configuration.project));
+		state.setConsoleBuilder(new TextConsoleBuilderImpl(getProject()));
 		return state;
 	}
 
@@ -97,7 +98,7 @@ public class TaskConfiguration extends ModuleBasedConfiguration<JavaRunConfigura
 		super.writeExternal(element);
 		Element configurationElement = new Element("taskConf");
 		element.addContent(configurationElement);
-		String configurationFile = configuration.getTaskFileName();
+		String configurationFile = TaskUtilities.getTaskFileName(configuration.location, configuration.name);
 		if (configurationFile != null)
 			configurationElement.setText(configurationFile);
 	}

@@ -58,7 +58,7 @@ public class TopCoderConfiguration extends ModuleBasedConfiguration<JavaRunConfi
 			protected JavaParameters createJavaParameters() throws ExecutionException {
 				JavaParameters parameters = new JavaParameters();
 				PsiDirectory directory = FileUtilities.getPsiDirectory(configuration.project,
-					Utilities.getData(configuration.project).defaultDir);
+					Utilities.getData(configuration.project).defaultDirectory);
 				Module module = ProjectRootManager.getInstance(configuration.project).getFileIndex().getModuleForFile(
 					directory.getVirtualFile());
 				parameters.configureByModule(module, JavaParameters.JDK_AND_CLASSES);

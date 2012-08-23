@@ -8,14 +8,8 @@ import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.JavaDirectoryService;
-import com.intellij.psi.PsiDirectory;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiManager;
-import com.intellij.psi.PsiPackage;
+import com.intellij.psi.*;
 import net.egork.chelper.task.Task;
-import net.egork.utils.io.InputReader;
-import net.egork.utils.io.OutputWriter;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -127,7 +121,13 @@ public class FileUtilities {
 			return null;
 		if (baseDir == null)
 			return file.getPath();
-		return file.getPath().substring(baseDir.getPath().length());
+        if (!isChild(baseDir, file))
+            return null;
+        String basePath = baseDir.getPath();
+        if (!basePath.endsWith("/"))
+            basePath += "/";
+        String filePath = file.getPath();
+        return filePath.substring(Math.min(filePath.length(), basePath.length()));
 	}
 
 	public static String getPackage(PsiDirectory directory) {
@@ -182,7 +182,7 @@ public class FileUtilities {
 	}
 
 	public static Task readTask(String fileName, Project project) {
-		return Task.loadTask(new InputReader(getInputStream(getFile(project, fileName))), project);
+		return Task.loadTask(new InputReader(getInputStream(getFile(project, fileName))));
 	}
 
 	public static void saveConfiguration(final String locationName, final String fileName, final Task configuration, final Project project) {
@@ -199,7 +199,7 @@ public class FileUtilities {
 					if (file == null)
 						return;
 					stream = file.getOutputStream(null);
-					configuration.saveTask(new OutputWriter(stream));
+					configuration.saveTask(new OutputWriter(stream), project);
 				} catch (IOException ignored) {
 				} finally {
 					if (stream != null) {
@@ -212,4 +212,14 @@ public class FileUtilities {
 			}
 		});
 	}
+
+    public static boolean isChild(VirtualFile parent, VirtualFile child) {
+        String parentPath = parent.getPath();
+        if (!parentPath.endsWith("/"))
+            parentPath += "/";
+        String childPath = child.getPath();
+        if (!childPath.endsWith("/"))
+            childPath += "/";
+        return childPath.startsWith(parentPath);
+    }
 }

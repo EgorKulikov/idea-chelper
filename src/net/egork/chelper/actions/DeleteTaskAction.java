@@ -60,11 +60,11 @@ public class DeleteTaskAction extends AnAction {
 			ApplicationManager.getApplication().runWriteAction(new Runnable() {
 				public void run() {
 					try {
-						VirtualFile mainFile = FileUtilities.getFile(project, Utilities.getData(project).defaultDir
+						VirtualFile mainFile = FileUtilities.getFile(project, Utilities.getData(project).defaultDirectory
 							+ "/" + task.name + ".java");
 						if (mainFile != null)
 							mainFile.delete(this);
-						VirtualFile topcoderFile = FileUtilities.getFile(project, Utilities.getData(project).topcoderDir
+						VirtualFile topcoderFile = FileUtilities.getFile(project, Utilities.getData(project).outputDirectory
 							+ "/" + task.name + ".java");
 						if (topcoderFile != null)
 							topcoderFile.delete(this);

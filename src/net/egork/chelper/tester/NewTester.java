@@ -4,7 +4,7 @@ import net.egork.chelper.task.StreamConfiguration;
 import net.egork.chelper.task.Test;
 import net.egork.chelper.task.TestType;
 import net.egork.chelper.util.EncodingUtilities;
-import net.egork.utils.io.InputReader;
+import net.egork.chelper.util.InputReader;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -32,7 +32,7 @@ public class NewTester {
 		String taskFileName = args[0];
 		InputReader input;
 		try {
-			input = new InputReader(new FileInputStream(taskFileName.substring(1)));
+			input = new InputReader(new FileInputStream(taskFileName));
 		} catch (FileNotFoundException e) {
 			throw new RuntimeException(e);
 		}
@@ -73,7 +73,7 @@ public class NewTester {
 			}
 			System.out.println("Test #" + test.index + ":");
 			Object in = readerClass.getConstructor(InputStream.class).newInstance(new StringInputStream(test.input));
-			StringWriter writer = new StringWriter(test.output.length());
+			StringWriter writer = new StringWriter(test.output == null ? 16 : test.output.length());
 			Object out = writerClass.getConstructor(Writer.class).newInstance(writer);
 			System.out.println("Input:");
 			print(test.input, truncate);
@@ -90,12 +90,12 @@ public class NewTester {
 				System.out.print("Verdict: ");
 				Verdict checkResult = check(checkerClass, readerClass,
 					readerClass.getConstructor(InputStream.class).newInstance(new StringInputStream(test.input)),
-					readerClass.getConstructor(InputStream.class).newInstance(new StringInputStream(test.output)),
+					test.output == null ? null : readerClass.getConstructor(InputStream.class).newInstance(new StringInputStream(test.output)),
 					readerClass.getConstructor(InputStream.class).newInstance(new StringInputStream(result)));
 				verdicts.add(checkResult);
 				System.out.print(checkResult);
 				System.out.printf(" in %.3f s.\n", time / 1000.);
-				if (checkResult.type != Verdict.VerdictType.OK)
+				if (checkResult.type != Verdict.VerdictType.OK && checkResult.type != Verdict.VerdictType.UNDECIDED)
 					ok = false;
 			} catch (Throwable e) {
 				if (e instanceof InvocationTargetException)
@@ -120,6 +120,8 @@ public class NewTester {
 	}
 
 	private static void print(String s, boolean truncate) {
+        if (s == null)
+            s = "Not provided";
 		if (truncate && s.length() > 2000)
 			s = s.substring(0, 1500) + "..." + s.substring(s.length() - 100);
 		System.out.println(s);
@@ -152,6 +154,8 @@ public class NewTester {
 		}
 		if (verdict != Verdict.UNDECIDED)
 			return verdict;
+        if (expectedOutput == null)
+            return Verdict.UNDECIDED;
 		Method next = readerClass.getMethod("next");
 		double certainty = (Double) checkerClass.getMethod("getCertainty").invoke(checker);
 		int index = 0;

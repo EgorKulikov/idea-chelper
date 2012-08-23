@@ -9,6 +9,7 @@ import com.intellij.util.IncorrectOperationException;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.ui.CreateTaskDialog;
 import net.egork.chelper.util.FileUtilities;
+import net.egork.chelper.util.TaskUtilities;
 import net.egork.chelper.util.Utilities;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,10 +38,10 @@ public class NewTaskAction extends CreateElementActionBase {
 		Task task = CreateTaskDialog.showDialog(psiDirectory, s);
 		if (task == null)
 			return PsiElement.EMPTY_ARRAY;
-		PsiElement main = task.initialize();
+		PsiElement main = TaskUtilities.initialize(task, psiDirectory.getProject());
 		if (main == null)
 			return PsiElement.EMPTY_ARRAY;
-		Utilities.createConfiguration(task, true);
+		Utilities.createConfiguration(task, true, psiDirectory.getProject());
 		return new PsiElement[]{main};
 	}
 

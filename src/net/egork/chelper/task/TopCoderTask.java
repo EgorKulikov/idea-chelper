@@ -31,7 +31,7 @@ public class TopCoderTask {
 
 	public String getFQN() {
 		return FileUtilities.getFQN(FileUtilities.getPsiDirectory(project,
-			Utilities.getData(project).defaultDir), name);
+			Utilities.getData(project).defaultDirectory), name);
 	}
 
 	public TopCoderTask setTests(TopCoderTest[] tests) {
@@ -39,6 +39,6 @@ public class TopCoderTask {
 	}
 
 	public VirtualFile getFile() {
-		return FileUtilities.getFile(project, Utilities.getData(project).defaultDir + "/" + name + ".java");
+		return FileUtilities.getFile(project, Utilities.getData(project).defaultDirectory + "/" + name + ".java");
 	}
 }

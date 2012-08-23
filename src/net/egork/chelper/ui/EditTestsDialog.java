@@ -2,6 +2,7 @@ package net.egork.chelper.ui;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.VerticalFlowLayout;
+import com.intellij.openapi.util.IconLoader;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBScrollPane;
 import net.egork.chelper.task.Test;
@@ -9,6 +10,8 @@ import net.egork.chelper.util.Utilities;
 import sun.awt.VariableGridLayout;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -31,9 +34,12 @@ public class EditTestsDialog extends JDialog {
 	private JTextArea output;
 	private List<JCheckBox> checkBoxes = new ArrayList<JCheckBox>();
 	private JPanel checkBoxesPanel;
+    private JCheckBox knowAnswer;
+    private JPanel outputPanel;
 
-	public EditTestsDialog(Test[] tests, Project project) {
+    public EditTestsDialog(Test[] tests, Project project) {
 		super(null, "Tests", ModalityType.APPLICATION_MODAL);
+        setIconImage(Utilities.iconToImage(IconLoader.getIcon("/icons/editTests.png")));
 		setAlwaysOnTop(true);
 		setResizable(false);
 		this.tests = new ArrayList<Test>(Arrays.asList(tests));
@@ -152,16 +158,40 @@ public class EditTestsDialog extends JDialog {
 		JPanel testPanel = new JPanel(new GridLayout(2, 1, 5, 5));
 		JPanel inputPanel = new JPanel(new BorderLayout());
 		inputPanel.add(new JLabel("Input:"), BorderLayout.NORTH);
+        DocumentListener listener = new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) {
+                saveCurrentTest();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                saveCurrentTest();
+            }
+
+            public void changedUpdate(DocumentEvent e) {
+                saveCurrentTest();
+            }
+        };
 		input = new JTextArea();
 		input.setFont(Font.decode(Font.MONOSPACED));
+        input.getDocument().addDocumentListener(listener);
 		inputPanel.add(new JBScrollPane(input), BorderLayout.CENTER);
-		JPanel outputPanel = new JPanel(new BorderLayout());
+		outputPanel = new JPanel(new BorderLayout());
 		outputPanel.add(new JLabel("Output:"), BorderLayout.NORTH);
 		output = new JTextArea();
 		output.setFont(Font.decode(Font.MONOSPACED));
+        output.getDocument().addDocumentListener(listener);
 		outputPanel.add(new JBScrollPane(output), BorderLayout.CENTER);
+        knowAnswer = new JCheckBox("Know answer?");
+        knowAnswer.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                saveCurrentTest();
+            }
+        });
+        JPanel outputAndCheckBoxPanel = new JPanel(new BorderLayout());
+        outputAndCheckBoxPanel.add(knowAnswer, BorderLayout.NORTH);
+        outputAndCheckBoxPanel.add(outputPanel, BorderLayout.CENTER);
 		testPanel.add(inputPanel);
-		testPanel.add(outputPanel);
+		testPanel.add(outputAndCheckBoxPanel);
 		mainPanel.add(testPanel);
 		setContentPane(mainPanel);
 		setSelectedTest(Math.min(0, tests.length - 1));
@@ -187,7 +217,7 @@ public class EditTestsDialog extends JDialog {
 	}
 
 	private void setSelectedTest(int index) {
-		currentTest = index;
+		currentTest = -1;
 		if (index == -1) {
 			input.setVisible(false);
 			output.setVisible(false);
@@ -195,8 +225,11 @@ public class EditTestsDialog extends JDialog {
 			input.setVisible(true);
 			output.setVisible(true);
 			input.setText(tests.get(index).input);
-			output.setText(tests.get(index).output);
+            knowAnswer.setSelected(tests.get(index).output != null);
+			output.setText(knowAnswer.isSelected() ? tests.get(index).output : "");
+            outputPanel.setVisible(knowAnswer.isSelected());
 		}
+        currentTest = index;
 		testList.setListData(tests.toArray());
 		testList.setSelectedIndex(currentTest);
 		testList.repaint();
@@ -206,8 +239,11 @@ public class EditTestsDialog extends JDialog {
 	private void saveCurrentTest() {
 		if (currentTest == -1)
 			return;
-		tests.set(currentTest, new Test(input.getText(), output.getText(), currentTest,
-			checkBoxes.get(currentTest).isSelected()));
+		tests.set(currentTest, new Test(input.getText(), knowAnswer.isSelected() ? output.getText() : null, currentTest,
+                checkBoxes.get(currentTest).isSelected()));
+        outputPanel.setVisible(knowAnswer.isSelected());
+//        output.invalidate();
+//        output.repaint();
 	}
 
 	public static Test[] editTests(Test[] tests, Project project) {

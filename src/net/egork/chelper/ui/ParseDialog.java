@@ -88,7 +88,7 @@ public class ParseDialog extends JDialog {
 				else
 					taskParser = (TaskParser) selected;
 				TaskOptions options = selected.getOptions();
-				Task predefined = new Task(null, Utilities.getData(project).defaultDir,
+				Task predefined = new Task(null, Utilities.getData(project).defaultDirectory,
 					options.shouldProvideTestType() ? (TestType)testType.getSelectedItem() : null,
 					options.shouldProvideInputType() ? new StreamConfiguration(
 					(StreamConfiguration.StreamType) inputType.getSelectedItem(), inputType.getSelectedItem() ==
@@ -97,7 +97,7 @@ public class ParseDialog extends JDialog {
 					(StreamConfiguration.StreamType) outputType.getSelectedItem(), outputType.getSelectedItem() ==
 					StreamConfiguration.StreamType.CUSTOM ? outputFileName.getText() : null) : null,
 					options.shouldProvideHeapMemory() ? heapMemory.getText() : null,
-					options.shouldProvideStackMemory() ? stackMemory.getText() : null, project, true);
+					options.shouldProvideStackMemory() ? stackMemory.getText() : null, true);
 				List<Task> tasks = new ArrayList<Task>();
 				for (String id : taskIDs) {
 					Task task = taskParser.parse(id, predefined);

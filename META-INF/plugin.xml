@@ -45,8 +45,10 @@
               icon="/icons/copy.png" description="Copies source to clipboard">
           <keyboard-shortcut keymap="$default" first-keystroke="alt F8"/>
       </action>
-      <action id="parseTask" class="net.egork.chelper.actions.ParseTaskAction" text="Parse Task"  icon="/icons/parseTask.png"
+      <action id="parseTask" class="net.egork.chelper.actions.ParseTaskAction" text="Parse Task" icon="/icons/parseTask.png"
               description="Parses task by id"/>
+      <action id="editProjectProperties" class="net.egork.chelper.actions.EditProjectProperties" icon="/icons/settings.png"
+              text="Edit Project Properties"/>
   </actions>
 
   <extensions defaultExtensionNs="com.intellij">

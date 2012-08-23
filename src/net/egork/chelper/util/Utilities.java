@@ -27,6 +27,7 @@ import net.egork.chelper.task.TestType;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,7 +37,7 @@ import java.util.Map;
 public class Utilities {
 	private static Map<Project, ProjectData> eligibleProjects = new HashMap<Project, ProjectData>();
 	private static Task defaultConfiguration = new Task(null, null, TestType.SINGLE, StreamConfiguration.STANDARD,
-		StreamConfiguration.STANDARD, "256M", "64M", null, true);
+		StreamConfiguration.STANDARD, "256M", "64M", true);
 	private static ContestParser defaultContestParser = ParseContestAction.PARSERS[0];
 	private static TaskParser defaultTaskParser = ParseTaskAction.PARSERS[0];
 
@@ -66,7 +67,7 @@ public class Utilities {
 
 	public static void updateDefaultTask(Task task) {
 		if (task != null)
-			defaultConfiguration = task.setDirectory(null).setProject(null).setName("Task");
+			defaultConfiguration = task.setDirectory(null).setName("Task");
 	}
 
 	public static Task getDefaultTask() {
@@ -85,7 +86,7 @@ public class Utilities {
 			FileEditorManager.getInstance(project).openFile(virtualFile, true);
 		} else if (element instanceof PsiClass) {
 			FileEditorManager.getInstance(project).openFile(FileUtilities.getFile(project,
-				getData(project).defaultDir + "/" + ((PsiClass) element).getName() + ".java"), true);
+				getData(project).defaultDirectory + "/" + ((PsiClass) element).getName() + ".java"), true);
 		}
 	}
 
@@ -99,13 +100,13 @@ public class Utilities {
 		return center;
 	}
 
-	public static RunnerAndConfigurationSettings createConfiguration(Task task, boolean setActive) {
-		RunManagerImpl manager = RunManagerImpl.getInstanceImpl(task.project);
+	public static RunnerAndConfigurationSettings createConfiguration(Task task, boolean setActive, Project project) {
+		RunManagerImpl manager = RunManagerImpl.getInstanceImpl(project);
 		RunnerAndConfigurationSettings old = manager.findConfigurationByName(task.name);
 		if (old != null)
 			manager.removeConfiguration(old);
 		RunnerAndConfigurationSettingsImpl configuration = new RunnerAndConfigurationSettingsImpl(manager,
-			new TaskConfiguration(task.name, task.project, task,
+			new TaskConfiguration(task.name, project, task,
 			TaskConfigurationType.INSTANCE.getConfigurationFactories()[0]), false);
 		manager.addConfiguration(configuration, false);
 		if (setActive)
@@ -128,4 +129,22 @@ public class Utilities {
 	public static void setDefaultTaskParser(TaskParser defaultTaskParser) {
 		Utilities.defaultTaskParser = defaultTaskParser;
 	}
+
+    public static void addProjectData(Project project, ProjectData data) {
+        eligibleProjects.put(project, data);
+    }
+
+    public static Image iconToImage(Icon icon) {
+        if (icon instanceof ImageIcon) {
+            return ((ImageIcon)icon).getImage();
+        } else {
+            int w = icon.getIconWidth();
+            int h = icon.getIconHeight();
+            BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = image.createGraphics();
+            icon.paintIcon(null, g, 0, 0);
+            g.dispose();
+            return image;
+        }
+    }
 }

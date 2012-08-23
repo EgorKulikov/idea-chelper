@@ -35,12 +35,12 @@ public class ArchiveAction extends AnAction {
 			return;
 		RunConfiguration configuration = selectedConfiguration.getConfiguration();
 		if (configuration instanceof TaskConfiguration) {
-			String archiveDir = Utilities.getData(project).archive;
+			String archiveDir = Utilities.getData(project).archiveDirectory;
 			final VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, archiveDir);
 			if (directory == null)
 				return;
 			final Task task = ((TaskConfiguration) configuration).getConfiguration();
-			CodeGenerationUtilities.createUnitTest(task);
+			CodeGenerationUtilities.createUnitTest(task, project);
 			ApplicationManager.getApplication().runWriteAction(new Runnable() {
 				public void run() {
 					try {
@@ -63,7 +63,7 @@ public class ArchiveAction extends AnAction {
 			});
 		}
 		if (configuration instanceof TopCoderConfiguration) {
-			String archiveDir = Utilities.getData(project).archive;
+			String archiveDir = Utilities.getData(project).archiveDirectory;
 			final VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, archiveDir);
 			if (directory == null)
 				return;
@@ -72,13 +72,13 @@ public class ArchiveAction extends AnAction {
 			ApplicationManager.getApplication().runWriteAction(new Runnable() {
 				public void run() {
 					try {
-						VirtualFile mainFile = FileUtilities.getFile(project, Utilities.getData(project).defaultDir
+						VirtualFile mainFile = FileUtilities.getFile(project, Utilities.getData(project).defaultDirectory
 							+ "/" + task.name + ".java");
 						if (mainFile == null)
 							return;
 						VfsUtil.copyFile(this, mainFile, directory);
 						mainFile.delete(this);
-						VirtualFile topcoderFile = FileUtilities.getFile(project, Utilities.getData(project).topcoderDir
+						VirtualFile topcoderFile = FileUtilities.getFile(project, Utilities.getData(project).outputDirectory
 							+ "/" + task.name + ".java");
 						if (topcoderFile != null)
 							topcoderFile.delete(this);

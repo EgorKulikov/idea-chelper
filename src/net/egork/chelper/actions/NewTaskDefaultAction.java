@@ -22,7 +22,7 @@ public class NewTaskDefaultAction extends AnAction {
 			return;
 		Project project = Utilities.getProject(e.getDataContext());
 		ProjectData data = Utilities.getData(project);
-		PsiDirectory directory = FileUtilities.getPsiDirectory(project, data.defaultDir);
+		PsiDirectory directory = FileUtilities.getPsiDirectory(project, data.defaultDirectory);
 		if (directory == null)
 			return;
 		PsiPackage aPackage = JavaDirectoryService.getInstance().getPackage(directory);

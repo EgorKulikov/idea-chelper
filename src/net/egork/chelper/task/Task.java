@@ -1,15 +1,7 @@
 package net.egork.chelper.task;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.*;
-import net.egork.chelper.util.CodeGenerationUtilities;
-import net.egork.chelper.util.FileUtilities;
-import net.egork.utils.io.InputReader;
-import net.egork.utils.io.OutputWriter;
-
-import java.util.HashMap;
-import java.util.Map;
+import net.egork.chelper.util.*;
 
 /**
  * @author Egor Kulikov (kulikov@devexperts.com)
@@ -23,17 +15,16 @@ public class Task {
 	public final Test[] tests;
 	public final String heapMemory;
 	public final String stackMemory;
-	public final Project project;
 	public final boolean truncate;
 
 	public Task(String name, String location, TestType testType, StreamConfiguration input,
-		StreamConfiguration output, String heapMemory, String stackMemory, Project project, boolean truncate)
+		StreamConfiguration output, String heapMemory, String stackMemory, boolean truncate)
 	{
-		this(name, location, testType, input, output, heapMemory, stackMemory, project, truncate, new Test[0]);
+		this(name, location, testType, input, output, heapMemory, stackMemory, truncate, new Test[0]);
 	}
 
 	public Task(String name, String location, TestType testType, StreamConfiguration input,
-		StreamConfiguration output, String heapMemory, String stackMemory, Project project, boolean truncate,
+		StreamConfiguration output, String heapMemory, String stackMemory, boolean truncate,
 		Test[] tests)
 	{
 		this.name = name;
@@ -44,88 +35,22 @@ public class Task {
 		this.tests = tests;
 		this.heapMemory = heapMemory;
 		this.stackMemory = stackMemory;
-		this.project = project;
 		this.truncate = truncate;
 	}
 
-	public Task setName(String name) {
-		return new Task(name, location, testType, input, output, heapMemory, stackMemory, project, truncate, tests);
+    public Task setName(String name) {
+		return new Task(name, location, testType, input, output, heapMemory, stackMemory, truncate, tests);
 	}
 
 	public Task setDirectory(String location) {
-		return new Task(name, location, testType, input, output, heapMemory, stackMemory, project, truncate, tests);
+		return new Task(name, location, testType, input, output, heapMemory, stackMemory, truncate, tests);
 	}
 
 	public Task setTests(Test[] tests) {
-		return new Task(name, location, testType, input, output, heapMemory, stackMemory, project, truncate, tests);
+		return new Task(name, location, testType, input, output, heapMemory, stackMemory, truncate, tests);
 	}
 
-	public Task setProject(Project project) {
-		return new Task(name, location, testType, input, output, heapMemory, stackMemory, project, truncate, tests);
-	}
-
-	public PsiElement initialize() {
-		if (location == null)
-			return null;
-		FileUtilities.createDirectoryIfMissing(project, location);
-		PsiDirectory directory = FileUtilities.getPsiDirectory(project, location);
-		if (directory == null)
-			return null;
-		PsiClass[] psiClasses = JavaDirectoryService.getInstance().getClasses(directory);
-		Map<String, PsiClass> classes = new HashMap<String, PsiClass>();
-		for (PsiClass psiClass : psiClasses)
-			classes.put(psiClass.getName(), psiClass);
-		PsiElement main;
-		if (!classes.containsKey(name))
-			main = createMainClass();
-		else
-			main = classes.get(name);
-		if (!classes.containsKey(name + "Checker"))
-			createCheckerClass();
-		return main;
-	}
-
-	private PsiElement createMainClass() {
-		String mainFileContent = CodeGenerationUtilities.createStub(this);
-		VirtualFile file = FileUtilities
-			.writeTextFile(FileUtilities.getFile(project, location), name + ".java", mainFileContent);
-		if (file == null)
-			return null;
-		return PsiManager.getInstance(project).findFile(file);
-	}
-
-	private PsiElement createCheckerClass() {
-		String checkerFileContent = CodeGenerationUtilities.createCheckerStub(this);
-		VirtualFile file = FileUtilities.writeTextFile(FileUtilities.getFile(project, location), name +
-			"Checker.java", checkerFileContent);
-		if (file == null)
-			return null;
-		return PsiManager.getInstance(project).findFile(file);
-	}
-
-	public String getFQN() {
-		return FileUtilities.getFQN(FileUtilities.getPsiDirectory(project, location), name);
-	}
-
-	public void createSourceFile() {
-		CodeGenerationUtilities.createSourceFile(this);
-	}
-
-	public VirtualFile getFile() {
-		return FileUtilities.getFile(project, location + "/" + name + ".java");
-	}
-
-	public String getTaskFileName() {
-		if (location != null && name != null)
-			return location + "/" + name + ".task";
-		return null;
-	}
-
-	public VirtualFile getCheckerFile() {
-		return FileUtilities.getFile(project, location + "/" + name + "Checker.java");
-	}
-
-	public void saveTask(OutputWriter out) {
+    public void saveTask(OutputWriter out, Project project) {
 		out.printString(name);
 		out.printString(location);
 		out.printEnum(testType);
@@ -139,26 +64,26 @@ public class Task {
 		out.printLine(tests.length);
 		for (Test test : tests)
 			test.saveTest(out);
-		out.printString(getFQN());
+		out.printString(TaskUtilities.getFQN(location, name, project));
 	}
 
-	public static Task loadTask(InputReader in, Project project) {
-		String name = in.readString();
-		String location = in.readString();
-		TestType testType = in.readEnum(TestType.class);
-		StreamConfiguration.StreamType inputStreamType = in.readEnum(StreamConfiguration.StreamType.class);
-		String inputFileName = in.readString();
-		StreamConfiguration.StreamType outputStreamType = in.readEnum(StreamConfiguration.StreamType.class);
-		String outputFileName = in.readString();
-		String heapMemory = in.readString();
-		String stackMemory = in.readString();
-		boolean truncate = in.readBoolean();
-		int testCount = in.readInt();
-		Test[] tests = new Test[testCount];
-		for (int i = 0; i < testCount; i++)
-			tests[i] = Test.loadTest(in);
-		return new Task(name, location, testType, new StreamConfiguration(inputStreamType, inputFileName),
-			new StreamConfiguration(outputStreamType, outputFileName), heapMemory, stackMemory, project, truncate,
-			tests);
-	}
+    public static Task loadTask(InputReader in) {
+        String name = in.readString();
+        String location = in.readString();
+        TestType testType = in.readEnum(TestType.class);
+        StreamConfiguration.StreamType inputStreamType = in.readEnum(StreamConfiguration.StreamType.class);
+        String inputFileName = in.readString();
+        StreamConfiguration.StreamType outputStreamType = in.readEnum(StreamConfiguration.StreamType.class);
+        String outputFileName = in.readString();
+        String heapMemory = in.readString();
+        String stackMemory = in.readString();
+        boolean truncate = in.readBoolean();
+        int testCount = in.readInt();
+        Test[] tests = new Test[testCount];
+        for (int i = 0; i < testCount; i++)
+            tests[i] = Test.loadTest(in);
+        return new Task(name, location, testType, new StreamConfiguration(inputStreamType, inputFileName),
+                new StreamConfiguration(outputStreamType, outputFileName), heapMemory, stackMemory, truncate,
+                tests);
+    }
 }

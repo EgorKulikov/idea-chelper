@@ -130,13 +130,13 @@ public class EncodingUtilities {
 			truncate =  Boolean.parseBoolean(tokens[index++]);
 		if ("empty".equals(tokens[index])) {
 			return new Task(name, location, testType, new StreamConfiguration(inputType, inputFileName),
-				new StreamConfiguration(outputType, outputFileName), heapMemory, stackMemory, project, truncate);
+				new StreamConfiguration(outputType, outputFileName), heapMemory, stackMemory, truncate);
 		}
 		Test[] tests = new Test[tokens.length - index];
 		for (int i = 0; i < tests.length; i++)
 			tests[i] = decodeTest(i, tokens[index + i]);
 		return new Task(name, location, testType, new StreamConfiguration(inputType, inputFileName),
-			new StreamConfiguration(outputType, outputFileName), heapMemory, stackMemory, project, truncate, tests);
+			new StreamConfiguration(outputType, outputFileName), heapMemory, stackMemory, truncate, tests);
 	}
 
 	public static String encodeTask(TopCoderTask task) {

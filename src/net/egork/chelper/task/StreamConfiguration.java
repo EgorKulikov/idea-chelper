@@ -28,6 +28,19 @@ public class StreamConfiguration {
 	}
 
 	public static enum StreamType {
-		STANDARD, TASK_ID, CUSTOM
-	}
+		STANDARD("Standard stream"),
+        TASK_ID("Name.in/.out"),
+        CUSTOM("Custom filename");
+        private final String uiDescription;
+
+        private StreamType(String uiDescription) {
+            this.uiDescription = uiDescription;
+        }
+
+
+        @Override
+        public String toString() {
+            return uiDescription;
+        }
+    }
 }

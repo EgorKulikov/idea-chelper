@@ -114,7 +114,7 @@ public class CodeGenerationUtilities {
 		FileUtilities.synchronizeFile(virtualFile);
 	}
 
-	public static String createMainClass(Task task)
+	public static String createMainClass(Task task, Project project)
 	{
 		StringBuilder builder = new StringBuilder();
 		builder.append("public class Main {\n");
@@ -141,11 +141,11 @@ public class CodeGenerationUtilities {
 			builder.append("\t\t\tthrow new RuntimeException(e);\n");
 			builder.append("\t\t}\n");
 		}
-		String inputClass = Utilities.getData(task.project).inputClass;
+		String inputClass = Utilities.getData(project).inputClass;
 		String inputClassShort = inputClass.substring(inputClass.lastIndexOf('.') + 1);
 		builder.append("\t\t").append(inputClassShort).append(" in = new ").append(inputClassShort).
 			append("(inputStream);\n");
-		String outputClass = Utilities.getData(task.project).outputClass;
+		String outputClass = Utilities.getData(project).outputClass;
 		String outputClassShort = outputClass.substring(outputClass.lastIndexOf('.') + 1);
 		builder.append("\t\t").append(outputClassShort).append(" out = new ").append(outputClassShort).
 			append("(outputStream);\n");
@@ -176,7 +176,7 @@ public class CodeGenerationUtilities {
 		return builder.toString();
 	}
 
-	public static void createSourceFile(final Task task) {
+	public static void createSourceFile(final Task task, final Project project) {
 		ApplicationManager.getApplication().runWriteAction(new Runnable() {
 			public void run() {
 				Set<String> toImport = new HashSet<String>();
@@ -187,26 +187,26 @@ public class CodeGenerationUtilities {
 					toImport.add("import java.io.FileInputStream;");
 				if (task.output.type != StreamConfiguration.StreamType.STANDARD)
 					toImport.add("import java.io.FileOutputStream;");
-				PsiFile originalSource = FileUtilities.getPsiFile(task.project, task.location + "/" + task.name + ".java");
-				final String[] textParts = createInlinedSource(task.project, toImport, originalSource);
+				PsiFile originalSource = FileUtilities.getPsiFile(project, task.location + "/" + task.name + ".java");
+				final String[] textParts = createInlinedSource(project, toImport, originalSource);
 				final StringBuilder text = new StringBuilder();
 				text.append(textParts[0]);
-				text.append(createMainClass(task));
+				text.append(createMainClass(task, project));
 				text.append(textParts[1]);
-				String outputDirectory = Utilities.getData(task.project).outputDirectory;
-				VirtualFile directory = FileUtilities.createDirectoryIfMissing(task.project, outputDirectory);
+				String outputDirectory = Utilities.getData(project).outputDirectory;
+				VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, outputDirectory);
 				if (directory == null)
 					return;
 				final VirtualFile file = FileUtilities.writeTextFile(directory, "Main.java", text.toString());
 				FileUtilities.synchronizeFile(file);
-				removeUnusedCode(task.project, file, "Main", "main");
+				removeUnusedCode(project, file, "Main", "main");
 			}
 		});
 	}
 
-	public static String createCheckerStub(Task task) {
-		PsiDirectory directory = FileUtilities.getPsiDirectory(task.project, task.location);
-		String inputClass = Utilities.getData(task.project).inputClass;
+	public static String createCheckerStub(Task task, Project project) {
+		PsiDirectory directory = FileUtilities.getPsiDirectory(project, task.location);
+		String inputClass = Utilities.getData(project).inputClass;
 		String inputClassShort = inputClass.substring(inputClass.lastIndexOf('.') + 1);
 		StringBuilder builder = new StringBuilder();
 		String packageName = FileUtilities.getPackage(directory);
@@ -236,11 +236,11 @@ public class CodeGenerationUtilities {
 		return builder.toString();
 	}
 
-	public static String createStub(Task task) {
-		PsiDirectory directory = FileUtilities.getPsiDirectory(task.project, task.location);
-		String inputClass = Utilities.getData(task.project).inputClass;
+	public static String createStub(Task task, Project project) {
+		PsiDirectory directory = FileUtilities.getPsiDirectory(project, task.location);
+		String inputClass = Utilities.getData(project).inputClass;
 		String inputClassShort = inputClass.substring(inputClass.lastIndexOf('.') + 1);
-		String outputClass = Utilities.getData(task.project).outputClass;
+		String outputClass = Utilities.getData(project).outputClass;
 		String outputClassShort = outputClass.substring(outputClass.lastIndexOf('.') + 1);
 		StringBuilder builder = new StringBuilder();
 		String packageName = FileUtilities.getPackage(directory);
@@ -322,7 +322,7 @@ public class CodeGenerationUtilities {
 		final String finalOriginalText = originalText;
 		ApplicationManager.getApplication().runWriteAction(new Runnable() {
 			public void run() {
-				String defaultDir = Utilities.getData(project).defaultDir;
+				String defaultDir = Utilities.getData(project).defaultDirectory;
 				FileUtilities.createDirectoryIfMissing(project, defaultDir);
 				String packageName = FileUtilities.getPackage(FileUtilities.getPsiDirectory(project, defaultDir));
 				if (packageName != null && packageName.length() != 0) {
@@ -335,7 +335,7 @@ public class CodeGenerationUtilities {
 			}
 		});
 		FileEditorManager.getInstance(project).openFile(FileUtilities.getFile(project,
-			Utilities.getData(project).defaultDir + "/" + name + ".java"), true);
+			Utilities.getData(project).defaultDirectory + "/" + name + ".java"), true);
 		return new TopCoderTask(project, name, methodSignature, tests.toArray(new TopCoderTest[tests.size()]));
 	}
 
@@ -343,14 +343,14 @@ public class CodeGenerationUtilities {
 		ApplicationManager.getApplication().runWriteAction(new Runnable() {
 			public void run() {
 				PsiFile originalSource = FileUtilities.getPsiFile(task.project,
-					Utilities.getData(task.project).defaultDir + "/" + task.name + ".java");
+					Utilities.getData(task.project).defaultDirectory + "/" + task.name + ".java");
 				String[] textParts = createInlinedSource(task.project, Collections.<String>emptySet(),
 						originalSource);
 				final StringBuilder text = new StringBuilder();
 				text.append(textParts[0]);
 				text.append("public ");
 				text.append(textParts[1]);
-				String outputDirectory = Utilities.getData(task.project).topcoderDir;
+				String outputDirectory = Utilities.getData(task.project).outputDirectory;
 				VirtualFile directory = FileUtilities.createDirectoryIfMissing(task.project, outputDirectory);
 				if (directory == null)
 					return;
@@ -361,8 +361,8 @@ public class CodeGenerationUtilities {
 		});
 	}
 
-	public static void createUnitTest(Task task) {
-		if (!Utilities.getData(task.project).enableUnitTests)
+	public static void createUnitTest(Task task, Project project) {
+		if (!Utilities.getData(project).enableUnitTests)
 			return;
 		Test[] tests = task.tests;
 		for (int i = 0, testsLength = tests.length; i < testsLength; i++)
@@ -371,27 +371,27 @@ public class CodeGenerationUtilities {
 		int year = calendar.get(Calendar.YEAR);
 		int month = calendar.get(Calendar.MONTH);
 		int day = calendar.get(Calendar.DAY_OF_MONTH);
-		String path = Utilities.getData(task.project).testDir + "/on" + year + "_" + month + "_" + day + "/" +
+		String path = Utilities.getData(project).testDirectory + "/on" + year + "_" + month + "_" + day + "/" +
 			task.name.toLowerCase();
 		String originalPath = path;
 		int index = 0;
-		while (FileUtilities.getFile(task.project, path) != null)
+		while (FileUtilities.getFile(project, path) != null)
 			path = originalPath + (index++);
-		VirtualFile directory = FileUtilities.createDirectoryIfMissing(task.project, path);
-		String packageName = FileUtilities.getPackage(FileUtilities.getPsiDirectory(task.project, path));
+		VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, path);
+		String packageName = FileUtilities.getPackage(FileUtilities.getPsiDirectory(project, path));
 		if (packageName == null) {
 			JOptionPane.showMessageDialog(null, "testDirectory should be under project source");
 			return;
 		}
-		String sourceFile = FileUtilities.readTextFile(FileUtilities.getFile(task.project,
+		String sourceFile = FileUtilities.readTextFile(FileUtilities.getFile(project,
 			task.location + "/" + task.name + ".java"));
 		sourceFile = changePackage(sourceFile, packageName);
-		String checkerFile = FileUtilities.readTextFile(FileUtilities.getFile(task.project,
+		String checkerFile = FileUtilities.readTextFile(FileUtilities.getFile(project,
 			task.location + "/" + task.name + "Checker.java"));
 		checkerFile = changePackage(checkerFile, packageName);
 		FileUtilities.writeTextFile(directory, task.name + ".java", sourceFile);
 		FileUtilities.writeTextFile(directory, task.name + "Checker.java", checkerFile);
-		String tester = generateTester(task, path);
+		String tester = generateTester(task, path, project);
 		tester = changePackage(tester, packageName);
 		FileUtilities.writeTextFile(directory, "Main.java", tester);
 	}
@@ -406,7 +406,7 @@ public class CodeGenerationUtilities {
 		int year = calendar.get(Calendar.YEAR);
 		int month = calendar.get(Calendar.MONTH);
 		int day = calendar.get(Calendar.DAY_OF_MONTH);
-		String path = Utilities.getData(task.project).testDir + "/on" + year + "_" + month + "_" + day + "/" +
+		String path = Utilities.getData(task.project).testDirectory + "/on" + year + "_" + month + "_" + day + "/" +
 			task.name.toLowerCase();
 		String originalPath = path;
 		int index = 0;
@@ -419,7 +419,7 @@ public class CodeGenerationUtilities {
 			return;
 		}
 		String sourceFile = FileUtilities.readTextFile(FileUtilities.getFile(task.project,
-			Utilities.getData(task.project).defaultDir + "/" + task.name + ".java"));
+			Utilities.getData(task.project).defaultDirectory + "/" + task.name + ".java"));
 		sourceFile = changePackage(sourceFile, packageName);
 		FileUtilities.writeTextFile(directory, task.name + ".java", sourceFile);
 		String tester = generateTester(task, path);
@@ -427,7 +427,7 @@ public class CodeGenerationUtilities {
 		FileUtilities.writeTextFile(directory, "Main.java", tester);
 	}
 
-	private static String generateTester(Task task, String path) {
+	private static String generateTester(Task task, String path, Project project) {
 		StringBuilder builder = new StringBuilder();
 		builder.append("import net.egork.chelper.tester.Tester;\n");
 		builder.append("import org.junit.Assert;\n");
@@ -435,13 +435,13 @@ public class CodeGenerationUtilities {
 		builder.append("public class Main {\n");
 		builder.append("\t@Test\n");
 		builder.append("\tpublic void test() throws Exception {\n");
-		builder.append("\t\tif (!Tester.test(\"").append(Utilities.getData(task.project).inputClass).append("\",\n");
+		builder.append("\t\tif (!Tester.test(\"").append(Utilities.getData(project).inputClass).append("\",\n");
 		builder.append("\t\t\t\"")
-			.append(FileUtilities.getFQN(FileUtilities.getPsiDirectory(task.project, path), task.name))
+			.append(FileUtilities.getFQN(FileUtilities.getPsiDirectory(project, path), task.name))
 			.append("\",\n");
 		builder.append("\t\t\t\"").append(task.testType.name()).append("\",\n");
 		builder.append("\t\t\t\"").append(escape(EncodingUtilities.encodeTests(task.tests))).append("\",\n");
-		builder.append("\t\t\t\"").append(Utilities.getData(task.project).outputClass).append("\"))\n");
+		builder.append("\t\t\t\"").append(Utilities.getData(project).outputClass).append("\"))\n");
 		builder.append("\t\t{\n");
 		builder.append("\t\t\tAssert.fail();\n");
 		builder.append("\t\t}\n");

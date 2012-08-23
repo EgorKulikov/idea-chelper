@@ -19,10 +19,26 @@ public class Verdict {
 
 	@Override
 	public String toString() {
-		return type.name() + (message == null ? "" : " (" + message + ")");
+		return type + (message == null ? "" : " (" + message + ")");
 	}
 
 	public static enum VerdictType {
-		OK, WA, PE, RTE, UNDECIDED, SKIPPED
-	}
+		OK("OK"),
+        WA("Wrong Answer"),
+        PE("Presentation Error"),
+        RTE("RunTime Error"),
+        UNDECIDED("Unknown"),
+        SKIPPED("Skipped");
+        private final String uiDescription;
+
+        private VerdictType(String uiDescription) {
+            this.uiDescription = uiDescription;
+        }
+
+
+        @Override
+        public String toString() {
+            return uiDescription;
+        }
+    }
 }

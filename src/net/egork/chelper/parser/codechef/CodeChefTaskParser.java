@@ -72,7 +72,7 @@ public class CodeChefTaskParser extends CodeChefParser implements TaskParser {
 			if (tests.isEmpty())
 				return null;
 			return new Task(taskID, predefined.location, predefined.testType, StreamConfiguration.STANDARD,
-				StreamConfiguration.STANDARD, "256M", "64M", predefined.project, true,
+				StreamConfiguration.STANDARD, "256M", "64M", true,
 				tests.toArray(new Test[tests.size()]));
 		} catch (ParseException e) {
 			return null;

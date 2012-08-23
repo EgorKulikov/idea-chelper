@@ -1,8 +1,8 @@
 package net.egork.chelper.task;
 
 
-import net.egork.utils.io.InputReader;
-import net.egork.utils.io.OutputWriter;
+import net.egork.chelper.util.InputReader;
+import net.egork.chelper.util.OutputWriter;
 
 /**
  * @author Egor Kulikov (kulikov@devexperts.com)

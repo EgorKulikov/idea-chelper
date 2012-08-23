@@ -74,7 +74,7 @@ public class TaskConfigurationEditor extends SettingsEditor<TaskConfiguration> {
 			inputType.getSelectedItem() == StreamConfiguration.StreamType.CUSTOM ? inputFileName.getText() : null),
 			new StreamConfiguration((StreamConfiguration.StreamType) outputType.getSelectedItem(),
 			outputType.getSelectedItem() == StreamConfiguration.StreamType.CUSTOM ? outputFileName.getText() : null),
-			heapMemory.getText(), stackMemory.getText(), old.project, truncate.isSelected(), old.tests);
+			heapMemory.getText(), stackMemory.getText(), truncate.isSelected(), old.tests);
 		s.setConfiguration(task);
 		s.setName(task.name);
 	}
@@ -107,7 +107,7 @@ public class TaskConfigurationEditor extends SettingsEditor<TaskConfiguration> {
 		editTests.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Task task = taskConfiguration.getConfiguration();
-				taskConfiguration.setConfiguration(task.setTests(EditTestsDialog.editTests(task.tests, task.project)));
+				taskConfiguration.setConfiguration(task.setTests(EditTestsDialog.editTests(task.tests, taskConfiguration.getProject())));
 			}
 		});
 		JPanel editTestsPanel = new JPanel(new BorderLayout());

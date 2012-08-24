@@ -71,12 +71,16 @@ public class CodeChefParser implements Parser {
     }
 
     public Collection<Description> parseContest(String id, DescriptionReceiver receiver) {
-		String mainPage;
-		try {
-			mainPage = FileUtilities.getWebPageContent("http://www.codechef.com/" + id);
-		} catch (IOException e) {
-			return Collections.emptyList();
-		}
+		String mainPage = null;
+        for (int i = 0; i < 100; i++) {
+            try {
+                mainPage = FileUtilities.getWebPageContent("http://www.codechef.com/" + id);
+                break;
+            } catch (IOException ignored) {
+            }
+        }
+        if (mainPage == null)
+            return Collections.emptyList();
 		List<Description> tasks = new ArrayList<Description>();
 		StringParser parser = new StringParser(mainPage);
         try {

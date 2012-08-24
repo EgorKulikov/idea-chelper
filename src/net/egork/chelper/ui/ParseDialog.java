@@ -64,6 +64,7 @@ public class ParseDialog extends JDialog {
                 }
                 result = list;
                 ParseDialog.this.setVisible(false);
+                Utilities.setDefaultParser(parser);
             }
 
             @Override
@@ -85,6 +86,7 @@ public class ParseDialog extends JDialog {
 				return label;
 			}
 		});
+        parserCombo.setSelectedItem(Utilities.getDefaultParser());
         parserCombo.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 refresh();
@@ -121,8 +123,12 @@ public class ParseDialog extends JDialog {
                     return;
                 }
                 Collection<Description> tasks = parser.parseContest(contest.id, new DescriptionReceiver() {
-                    public void receiveAdditionalDescriptions(Collection<Description> descriptions) {
-                        taskModel.add(descriptions);
+                    public void receiveAdditionalDescriptions(final Collection<Description> descriptions) {
+                        SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
+                                taskModel.add(descriptions);
+                            }
+                        });
                     }
                 });
                 taskModel.removeAll();
@@ -203,9 +209,12 @@ public class ParseDialog extends JDialog {
         contestModel.removeAll();
         contestName.setText("");
         Collection<Description> contests = parser.getContests(new DescriptionReceiver() {
-            public void receiveAdditionalDescriptions(Collection<Description> descriptions) {
-                contestModel.add(descriptions);
-
+            public void receiveAdditionalDescriptions(final Collection<Description> descriptions) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        taskModel.add(descriptions);
+                    }
+                });
             }
         });
         contestModel.add(contests);

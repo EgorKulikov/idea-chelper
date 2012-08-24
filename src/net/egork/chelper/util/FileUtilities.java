@@ -11,9 +11,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import net.egork.chelper.task.Task;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URL;
 import java.util.Properties;
 
@@ -174,10 +172,11 @@ public class FileUtilities {
 	public static String getWebPageContent(String address) throws IOException {
 		URL url = new URL(address);
 		InputStream input = url.openStream();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 		StringBuilder builder = new StringBuilder();
-		int nextByte;
-		while ((nextByte = input.read()) != -1)
-			builder.append((char)nextByte);
+        String s;
+		while ((s = reader.readLine()) != null)
+			builder.append(s).append('\n');
 		return builder.toString();
 	}
 

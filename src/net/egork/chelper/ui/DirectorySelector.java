@@ -19,11 +19,12 @@ import java.util.List;
  */
 public class DirectorySelector extends JPanel {
     private final JTextField textField;
+    private JButton button;
 
     public DirectorySelector(final Project project, String initialValue) {
         super(new BorderLayout());
         textField = new JTextField(initialValue);
-        JButton button = new JButton("...");
+        button = new JButton("...");
         button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 PathChooserDialog dialog = FileChooserFactory.getInstance().createPathChooser(new FileChooserDescriptor(false, true, false, false, false, false) {
@@ -53,6 +54,13 @@ public class DirectorySelector extends JPanel {
         });
         add(textField, BorderLayout.CENTER);
         add(button, BorderLayout.EAST);
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        textField.setEnabled(enabled);
+        button.setEnabled(enabled);
     }
 
     public String getText() {

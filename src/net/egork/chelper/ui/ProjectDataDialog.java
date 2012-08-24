@@ -2,8 +2,6 @@ package net.egork.chelper.ui;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.VerticalFlowLayout;
-import com.intellij.ui.JavaReferenceEditorUtil;
-import com.intellij.ui.ReferenceEditorWithBrowseButton;
 import net.egork.chelper.ProjectData;
 import net.egork.chelper.util.Utilities;
 
@@ -23,8 +21,8 @@ public class ProjectDataDialog extends JDialog {
     private final DirectorySelector outputDirectory;
     private final JCheckBox enableUnitTests;
     private final DirectorySelector testDirectory;
-    private final ReferenceEditorWithBrowseButton inputClass;
-    private final ReferenceEditorWithBrowseButton outputClass;
+    private final ClassSelector inputClass;
+    private final ClassSelector outputClass;
     private final JTextField excludePackages;
     private final JTextField author;
     private final JLabel testDirectoryLabel;
@@ -39,8 +37,8 @@ public class ProjectDataDialog extends JDialog {
         outputDirectory = new DirectorySelector(project, data.outputDirectory);
         enableUnitTests = new JCheckBox("Enable unit tests", data.enableUnitTests);
         testDirectory = new DirectorySelector(project, data.testDirectory);
-        inputClass = JavaReferenceEditorUtil.createReferenceEditorWithBrowseButton(null, data.inputClass, project, true);
-        outputClass = JavaReferenceEditorUtil.createReferenceEditorWithBrowseButton(null, data.outputClass, project, true);
+        inputClass = new ClassSelector(data.inputClass, project);
+        outputClass = new ClassSelector(data.outputClass, project);
         excludePackages = new JTextField(ProjectData.join(data.excludedPackages));
         author = new JTextField(data.author);
         OkCancelPanel main = new OkCancelPanel(new VerticalFlowLayout()) {

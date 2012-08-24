@@ -230,7 +230,8 @@ public class FileUtilities {
     public static String createTaskClass(Project project, String path, String name) {
         String mainClass = CodeGenerationUtilities.createStub(path, name, project);
         VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, path);
-        writeTextFile(directory, name + ".java", mainClass);
+        if (directory.findChild(name + ".java") == null)
+            writeTextFile(directory, name + ".java", mainClass);
         PsiDirectory psiDirectory = getPsiDirectory(project, path);
         String aPackage = getPackage(psiDirectory);
         return aPackage + "." + name;
@@ -238,6 +239,15 @@ public class FileUtilities {
 
     public static String createCheckerClass(Project project, String path, String name) {
         String mainClass = CodeGenerationUtilities.createCheckerStub(path, name, project);
+        VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, path);
+        writeTextFile(directory, name + ".java", mainClass);
+        PsiDirectory psiDirectory = getPsiDirectory(project, path);
+        String aPackage = getPackage(psiDirectory);
+        return aPackage + "." + name;
+    }
+
+    public static String createTestClass(Project project, String path, String name) {
+        String mainClass = CodeGenerationUtilities.createTestStub(path, name, project);
         VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, path);
         writeTextFile(directory, name + ".java", mainClass);
         PsiDirectory psiDirectory = getPsiDirectory(project, path);

@@ -112,4 +112,14 @@ public class Task {
         return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
                 checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass);
     }
+
+    public Task setTestClasses(String[] testClasses) {
+        return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
+                checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass);
+    }
+
+    public Task setTaskClass(String taskClass) {
+        return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
+                checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass);
+    }
 }

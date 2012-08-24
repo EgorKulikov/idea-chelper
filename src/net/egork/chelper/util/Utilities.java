@@ -30,7 +30,7 @@ import net.egork.chelper.task.TestType;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.Date;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -72,7 +72,7 @@ public class Utilities {
 		if (task != null) {
 			defaultConfiguration = new Task(null, task.testType, task.input, task.output, new Test[0], null,
                     task.vmArgs, task.mainClass, null, TokenChecker.class.getCanonicalName(), "", new String[0], null,
-                    "", task.truncate, null, null);
+                    task.contestName, task.truncate, null, null);
         }
 	}
 
@@ -154,15 +154,19 @@ public class Utilities {
         }
     }
 
-    public static String getDateString(Date date) {
+    public static String getDateString() {
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH) + 1;
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
         StringBuilder result = new StringBuilder();
-        result.append(date.getYear() + 1900).append('.');
-        if (date.getMonth() < 9)
+        result.append(year).append('.');
+        if (month < 10)
             result.append('0');
-        result.append(date.getMonth() + 1).append('.');
-        if (date.getDay() < 10)
+        result.append(month).append('.');
+        if (day < 10)
             result.append('0');
-        result.append(date.getDay());
+        result.append(day);
         return result.toString();
     }
 }

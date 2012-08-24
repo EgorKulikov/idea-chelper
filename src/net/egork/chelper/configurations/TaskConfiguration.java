@@ -82,7 +82,7 @@ public class TaskConfiguration extends ModuleBasedConfiguration<JavaRunConfigura
 	}
 
 	private void saveConfiguration(Task configuration) {
-		if (configuration != null && configuration.location != null && configuration.name != null)
+		if (configuration != null && configuration.location != null && configuration.name != null && configuration.name.length() != 0)
 			FileUtilities.saveConfiguration(configuration.location, configuration.name + ".task", configuration, getProject());
 	}
 

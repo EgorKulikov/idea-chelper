@@ -39,11 +39,12 @@ public class NewTester {
         Task task = Task.loadTask(input);
 		String readerFQN = task.inputClass;
 		String fqn = task.taskClass;
-		List<Test> tests = Arrays.asList(task.tests);
+		List<Test> tests = new ArrayList<Test>(Arrays.asList(task.tests));
         for (String testClass : task.testClasses) {
             Class test = Class.forName(testClass);
             TestProvider provider = (TestProvider) test.getConstructor().newInstance();
-            tests.addAll(provider.createTests());
+            for (Test testCase : provider.createTests())
+                tests.add(new Test(testCase.input, testCase.output, tests.size(), testCase.active));
         }
 		String writerFQN = task.outputClass;
 		Class readerClass = Class.forName(readerFQN);

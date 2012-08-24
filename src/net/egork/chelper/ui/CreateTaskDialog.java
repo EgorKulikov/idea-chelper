@@ -13,7 +13,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Date;
 
 /**
  * @author Egor Kulikov (kulikov@devexperts.com)
@@ -78,14 +77,22 @@ public class CreateTaskDialog extends JDialog {
         Task task = new Task(name, defaultTask.testType, defaultTask.input, defaultTask.output, new Test[0], location,
                 defaultTask.vmArgs, defaultTask.mainClass, name,
                 defaultTask.checkerClass, defaultTask.checkerParameters, new String[0],
-                Utilities.getDateString(new Date()), "", defaultTask.truncate, data.inputClass, data.outputClass);
+                Utilities.getDateString(), "", defaultTask.truncate, data.inputClass, data.outputClass);
 		CreateTaskDialog dialog = new CreateTaskDialog(task, defaultName == null, project);
 		dialog.setVisible(true);
 		Utilities.updateDefaultTask(dialog.task);
+        if (dialog.task != null)
+            dialog.task = dialog.task.setTaskClass(createIfNeeded(dialog.task.taskClass, project, dialog.task.location));
 		return dialog.task;
 	}
 
-	@Override
+    private static String createIfNeeded(String taskClass, Project project, String location) {
+        if (taskClass.indexOf('.') == -1)
+            taskClass = FileUtilities.createTaskClass(project, location, taskClass);
+        return taskClass;
+    }
+
+    @Override
 	public void setVisible(boolean b) {
 		if (b) {
             JTextField taskName = panel.getNameField();

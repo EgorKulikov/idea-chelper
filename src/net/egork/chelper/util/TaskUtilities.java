@@ -34,7 +34,7 @@ public class TaskUtilities {
     }
 
     private static PsiElement createMainClass(Task task, Project project) {
-        String mainFileContent = CodeGenerationUtilities.createStub(task, project);
+        String mainFileContent = CodeGenerationUtilities.createStub(task.location, task.name, project);
         VirtualFile file = FileUtilities
             .writeTextFile(FileUtilities.getFile(project, task.location), task.name + ".java", mainFileContent);
         if (file == null)
@@ -43,7 +43,7 @@ public class TaskUtilities {
     }
 
     private static PsiElement createCheckerClass(Task task, Project project) {
-        String checkerFileContent = CodeGenerationUtilities.createCheckerStub(task, project);
+        String checkerFileContent = CodeGenerationUtilities.createCheckerStub(task.location, task.name + "Checker", project);
         VirtualFile file = FileUtilities.writeTextFile(FileUtilities.getFile(project, task.location), task.name +
             "Checker.java", checkerFileContent);
         if (file == null)

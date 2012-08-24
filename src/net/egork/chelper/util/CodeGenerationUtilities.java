@@ -9,6 +9,7 @@ import com.intellij.psi.search.searches.ReferencesSearch;
 import net.egork.chelper.task.*;
 
 import javax.swing.*;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -117,7 +118,7 @@ public class CodeGenerationUtilities {
 	public static String createMainClass(Task task, Project project)
 	{
 		StringBuilder builder = new StringBuilder();
-		builder.append("public class Main {\n");
+		builder.append("public class ").append(task.mainClass).append(" {\n");
 		builder.append("\tpublic static void main(String[] args) {\n");
 		if (task.input.type == StreamConfiguration.StreamType.STANDARD)
 			builder.append("\t\tInputStream inputStream = System.in;\n");
@@ -197,9 +198,18 @@ public class CodeGenerationUtilities {
 				VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, outputDirectory);
 				if (directory == null)
 					return;
-				final VirtualFile file = FileUtilities.writeTextFile(directory, "Main.java", text.toString());
+                for (VirtualFile file : directory.getChildren()) {
+                    if ("java".equals(file.getExtension())) {
+                        try {
+                            file.delete(null);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+				final VirtualFile file = FileUtilities.writeTextFile(directory, task.mainClass + ".java", text.toString());
 				FileUtilities.synchronizeFile(file);
-				removeUnusedCode(project, file, "Main", "main");
+				removeUnusedCode(project, file, task.mainClass, "main");
 			}
 		});
 	}
@@ -213,9 +223,6 @@ public class CodeGenerationUtilities {
 		builder.append("import net.egork.chelper.tester.Verdict;\n");
         builder.append("import net.egork.chelper.checkers.Checker;\n");
         builder.append("\n");
-		builder.append("import java.util.Collection;\n");
-		builder.append("import java.util.Collections;\n");
-		builder.append("\n");
 		builder.append("public class ").append(name).append(" implements Checker {\n");
         builder.append("\tpublic ").append(name).append("(String parameters) {\n");
         builder.append("\t}\n\n");
@@ -488,7 +495,27 @@ public class CodeGenerationUtilities {
 		return sourceFile;
 	}
 
-	public static class InlineVisitor extends PsiElementVisitor {
+    public static String createTestStub(String location, String name, Project project) {
+        PsiDirectory directory = FileUtilities.getPsiDirectory(project, location);
+        StringBuilder builder = new StringBuilder();
+        String packageName = FileUtilities.getPackage(directory);
+        if (packageName != null && packageName.length() != 0)
+            builder.append("package ").append(packageName).append(";\n\n");
+        builder.append("import net.egork.chelper.task.Test;\n");
+        builder.append("import net.egork.chelper.tester.TestProvider;\n");
+        builder.append("\n");
+        builder.append("import java.util.Collection;\n");
+        builder.append("import java.util.Collections;\n");
+        builder.append("\n");
+        builder.append("public class ").append(name).append(" implements TestProvider {\n");
+        builder.append("\tpublic Collection<Test> createTests() {\n");
+        builder.append("\t\treturn Collections.emptyList();\n");
+        builder.append("\t}\n");
+        builder.append("}\n");
+        return builder.toString();
+    }
+
+    public static class InlineVisitor extends PsiElementVisitor {
 		private final String[] excluded;
 		private final HashSet<PsiClass> set;
 		public final List<PsiClass> toInline;

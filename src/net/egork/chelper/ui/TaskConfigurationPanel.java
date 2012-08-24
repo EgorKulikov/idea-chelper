@@ -48,7 +48,14 @@ public class TaskConfigurationPanel extends JPanel {
         super(new BorderLayout(5, 5));
         this.task = task;
         this.project = project;
-        basic = new JPanel(new VerticalFlowLayout());
+        basic = new JPanel(new VerticalFlowLayout()) {
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension size = super.getPreferredSize();
+                size.width = 250;
+                return size;
+            }
+        };
         basic.add(new JLabel("Name:"));
         name = new JTextField(task.name);
         name.setEnabled(firstEdit);
@@ -91,13 +98,21 @@ public class TaskConfigurationPanel extends JPanel {
         tests.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 TaskConfigurationPanel.this.task = TaskConfigurationPanel.this.task.setTests(
-                        EditTestsDialog.editTests(TaskConfigurationPanel.this.task.tests, project));
+                        EditTestsDialog.editTests(TaskConfigurationPanel.this.task.tests, TaskConfigurationPanel.this.project));
+                name.setText(name.getText());
             }
         });
         basic.add(tests);
         if (buttonPanel != null)
             basic.add(buttonPanel);
-        JPanel leftAdvanced = new JPanel(new VerticalFlowLayout());
+        JPanel leftAdvanced = new JPanel(new VerticalFlowLayout()) {
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension size = super.getPreferredSize();
+                size.width = 250;
+                return size;
+            }
+        };
         leftAdvanced.add(new JLabel("Location:"));
         location = new DirectorySelector(project, task.location);
         location.setEnabled(firstEdit);
@@ -135,14 +150,24 @@ public class TaskConfigurationPanel extends JPanel {
         leftAdvanced.add(new JLabel("Checker parameters:"));
         checkerParameters = new JTextField(task.checkerParameters);
         leftAdvanced.add(checkerParameters);
-        JPanel rightAdvanced = new JPanel(new VerticalFlowLayout());
+        JPanel rightAdvanced = new JPanel(new VerticalFlowLayout()) {
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension size = super.getPreferredSize();
+                size.width = 250;
+                return size;
+            }
+        };
         rightAdvanced.add(new JLabel("VM arguments:"));
         vmArgs = new JTextField(task.vmArgs);
         rightAdvanced.add(vmArgs);
         testClasses = new JButton("Test classes");
         testClasses.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                //TODO
+                TaskConfigurationPanel.this.task = TaskConfigurationPanel.this.task.setTestClasses(
+                        TestClassesDialog.showDialog(TaskConfigurationPanel.this.task.testClasses, project,
+                        TaskConfigurationPanel.this.task));
+                name.setText(name.getText());
             }
         });
         rightAdvanced.add(testClasses);
@@ -152,7 +177,7 @@ public class TaskConfigurationPanel extends JPanel {
         rightAdvanced.add(new JLabel("Contest name:"));
         contestName = new JTextField(task.contestName);
         rightAdvanced.add(contestName);
-        truncate = new JCheckBox("Truncate long tests");
+        truncate = new JCheckBox("Truncate long tests", task.truncate);
         rightAdvanced.add(truncate);
         advanced = new JPanel(new GridLayout(1, 2, 5, 5));
         advanced.add(leftAdvanced);
@@ -176,14 +201,8 @@ public class TaskConfigurationPanel extends JPanel {
                 new StreamConfiguration((StreamConfiguration.StreamType) inputType.getSelectedItem(), inputFileName.getText()),
                 new StreamConfiguration((StreamConfiguration.StreamType) outputType.getSelectedItem(), outputFileName.getText()),
                 task.tests, location.getText(), vmArgs.getText(), mainClass.getText(),
-                createIfNeeded(taskClass.getText()), checkerClass.getText(), checkerParameters.getText(), task.testClasses,
+                taskClass.getText(), checkerClass.getText(), checkerParameters.getText(), task.testClasses,
                 date.getText(), contestName.getText(), truncate.isSelected(), task.inputClass, task.outputClass);
-    }
-
-    private String createIfNeeded(String taskClass) {
-        if (taskClass.indexOf('.') == -1)
-            taskClass = FileUtilities.createTaskClass(project, location.getText(), taskClass);
-        return taskClass;
     }
 
     public interface SizeChangeListener {

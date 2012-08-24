@@ -3,8 +3,6 @@ package net.egork.chelper.ui;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.project.Project;
-import com.intellij.ui.JavaReferenceEditorUtil;
-import com.intellij.ui.ReferenceEditorWithBrowseButton;
 import net.egork.chelper.util.FileCreator;
 import net.egork.chelper.util.Provider;
 
@@ -17,13 +15,13 @@ import java.awt.event.ActionListener;
  * @author Egor Kulikov (egorku@yandex-team.ru)
  */
 public class SelectOrCreateClass extends JPanel {
-    private ReferenceEditorWithBrowseButton classSelector;
+    private ClassSelector classSelector;
 
     public SelectOrCreateClass(String initialValue, final Project project, final Provider<String> locationProvider,
         final FileCreator fileCreator)
     {
         super(new BorderLayout());
-        classSelector = JavaReferenceEditorUtil.createReferenceEditorWithBrowseButton(null, initialValue, project, true);
+        classSelector = new ClassSelector(initialValue, project);
         final JButton create = new JButton("Create");
         create.setEnabled(fileCreator.isValid(initialValue));
         classSelector.addDocumentListener(new DocumentListener() {

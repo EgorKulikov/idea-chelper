@@ -40,13 +40,11 @@
           <keyboard-shortcut keymap="$default" first-keystroke="alt F2"/>
       </action>
       <action id="codeforces" class="net.egork.chelper.actions.ParseContestAction" text="Parse Contest" icon="/icons/parseContest.png"
-              description="Parse contest by id"/>
+              description="Parse contest"/>
       <action id="copySource" class="net.egork.chelper.actions.CopyAction" text="Copy Source"
               icon="/icons/copy.png" description="Copies source to clipboard">
           <keyboard-shortcut keymap="$default" first-keystroke="alt F8"/>
       </action>
-      <action id="parseTask" class="net.egork.chelper.actions.ParseTaskAction" text="Parse Task" icon="/icons/parseTask.png"
-              description="Parses task by id"/>
       <action id="editProjectProperties" class="net.egork.chelper.actions.EditProjectProperties" icon="/icons/settings.png"
               text="Edit Project Properties"/>
   </actions>

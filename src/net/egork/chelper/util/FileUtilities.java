@@ -254,4 +254,10 @@ public class FileUtilities {
         String aPackage = getPackage(psiDirectory);
         return aPackage + "." + name;
     }
+
+    public static String createIfNeeded(String taskClass, Project project, String location) {
+        if (taskClass.indexOf('.') == -1)
+            taskClass = createTaskClass(project, location, taskClass);
+        return taskClass;
+    }
 }

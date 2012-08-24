@@ -12,11 +12,11 @@ import sun.awt.VariableGridLayout;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -36,6 +36,7 @@ public class EditTestsDialog extends JDialog {
 	private JPanel checkBoxesPanel;
     private JCheckBox knowAnswer;
     private JPanel outputPanel;
+    private boolean updating = false;
 
     public EditTestsDialog(Test[] tests, Project project) {
 		super(null, "Tests", ModalityType.APPLICATION_MODAL);
@@ -60,16 +61,27 @@ public class EditTestsDialog extends JDialog {
 		testList.setFixedCellHeight(HEIGHT);
 		testList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		testList.setLayoutOrientation(JList.VERTICAL);
-		testList.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				int index = testList.locationToIndex(e.getPoint());
-				if (index >= 0 && index < testList.getItemsCount()) {
-					saveCurrentTest();
-					setSelectedTest(index);
-				}
-			}
-		});
+        testList.addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent e) {
+                if (updating)
+                    return;
+                int index = testList.getSelectedIndex();
+                if (index >= 0 && index < testList.getItemsCount()) {
+                    saveCurrentTest();
+                    setSelectedTest(index);
+                }
+            }
+        });
+//		testList.addMouseListener(new MouseAdapter() {
+//			@Override
+//			public void mouseClicked(MouseEvent e) {
+//				int index = testList.locationToIndex(e.getPoint());
+//				if (index >= 0 && index < testList.getItemsCount()) {
+//					saveCurrentTest();
+//					setSelectedTest(index);
+//				}
+//			}
+//		});
 		checkBoxesAndSelectorPanel.add(testList, BorderLayout.CENTER);
 		selectorAndButtonsPanel.add(new JBScrollPane(checkBoxesAndSelectorPanel,
 			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), BorderLayout.CENTER);
@@ -217,6 +229,7 @@ public class EditTestsDialog extends JDialog {
 	}
 
 	private void setSelectedTest(int index) {
+        updating = true;
 		currentTest = -1;
 		if (index == -1) {
 			input.setVisible(false);
@@ -231,9 +244,11 @@ public class EditTestsDialog extends JDialog {
 		}
         currentTest = index;
 		testList.setListData(tests.toArray());
-		testList.setSelectedIndex(currentTest);
+        if (testList.getSelectedIndex() != currentTest)
+		    testList.setSelectedIndex(currentTest);
 		testList.repaint();
 		checkBoxesPanel.repaint();
+        updating = false;
 	}
 
 	private void saveCurrentTest() {

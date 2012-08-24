@@ -82,15 +82,9 @@ public class CreateTaskDialog extends JDialog {
 		dialog.setVisible(true);
 		Utilities.updateDefaultTask(dialog.task);
         if (dialog.task != null)
-            dialog.task = dialog.task.setTaskClass(createIfNeeded(dialog.task.taskClass, project, dialog.task.location));
+            dialog.task = dialog.task.setTaskClass(FileUtilities.createIfNeeded(dialog.task.taskClass, project, dialog.task.location));
 		return dialog.task;
 	}
-
-    private static String createIfNeeded(String taskClass, Project project, String location) {
-        if (taskClass.indexOf('.') == -1)
-            taskClass = FileUtilities.createTaskClass(project, location, taskClass);
-        return taskClass;
-    }
 
     @Override
 	public void setVisible(boolean b) {

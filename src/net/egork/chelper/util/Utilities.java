@@ -15,13 +15,10 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import net.egork.chelper.ProjectData;
-import net.egork.chelper.actions.ParseContestAction;
-import net.egork.chelper.actions.ParseTaskAction;
 import net.egork.chelper.checkers.TokenChecker;
 import net.egork.chelper.configurations.TaskConfiguration;
 import net.egork.chelper.configurations.TaskConfigurationType;
-import net.egork.chelper.parser.ContestParser;
-import net.egork.chelper.parser.TaskParser;
+import net.egork.chelper.parser.Parser;
 import net.egork.chelper.task.StreamConfiguration;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.Test;
@@ -41,8 +38,7 @@ public class Utilities {
 	private static Map<Project, ProjectData> eligibleProjects = new HashMap<Project, ProjectData>();
 	private static Task defaultConfiguration = new Task(null, TestType.SINGLE, StreamConfiguration.STANDARD,
 		StreamConfiguration.STANDARD, new Test[0], null, "-Xmx256m -Xss64m", "Main", null, TokenChecker.class.getCanonicalName(), "", new String[0], null, "", true, null, null);
-	private static ContestParser defaultContestParser = ParseContestAction.PARSERS[0];
-	private static TaskParser defaultTaskParser = ParseTaskAction.PARSERS[0];
+	private static Parser defaultParser = Parser.PARSERS[0];
 
 	public static void addListeners() {
 		ProjectManager.getInstance().addProjectManagerListener(new ProjectManagerAdapter() {
@@ -120,20 +116,12 @@ public class Utilities {
 		return configuration;
 	}
 
-	public static ContestParser getDefaultContestParser() {
-		return defaultContestParser;
+	public static Parser getDefaultParser() {
+		return defaultParser;
 	}
 
-	public static void setDefaultContestParser(ContestParser defaultContestParser) {
-		Utilities.defaultContestParser = defaultContestParser;
-	}
-
-	public static TaskParser getDefaultTaskParser() {
-		return defaultTaskParser;
-	}
-
-	public static void setDefaultTaskParser(TaskParser defaultTaskParser) {
-		Utilities.defaultTaskParser = defaultTaskParser;
+	public static void setDefaultParser(Parser defaultParser) {
+		Utilities.defaultParser = defaultParser;
 	}
 
     public static void addProjectData(Project project, ProjectData data) {

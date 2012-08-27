@@ -10,6 +10,7 @@ import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import net.egork.chelper.task.Task;
+import net.egork.chelper.task.TopCoderTask;
 
 import java.io.*;
 import java.net.URL;
@@ -184,7 +185,11 @@ public class FileUtilities {
 		return Task.loadTask(new InputReader(getInputStream(getFile(project, fileName))));
 	}
 
-	public static void saveConfiguration(final String locationName, final String fileName, final Task configuration, final Project project) {
+    public static TopCoderTask readTopCoderTask(String fileName, Project project) {
+        return TopCoderTask.load(new InputReader(getInputStream(getFile(project, fileName))));
+    }
+
+    public static void saveConfiguration(final String locationName, final String fileName, final Task configuration, final Project project) {
 		ApplicationManager.getApplication().runWriteAction(new Runnable() {
 			public void run() {
 				if (locationName == null)
@@ -211,6 +216,34 @@ public class FileUtilities {
 			}
 		});
 	}
+
+    public static void saveConfiguration(final String locationName, final String fileName, final TopCoderTask configuration, final Project project) {
+        ApplicationManager.getApplication().runWriteAction(new Runnable() {
+            public void run() {
+                if (locationName == null)
+                    return;
+                VirtualFile location = FileUtilities.getFile(project, locationName);
+                if (location == null)
+                    return;
+                OutputStream stream = null;
+                try {
+                    VirtualFile file = location.createChildData(null, fileName);
+                    if (file == null)
+                        return;
+                    stream = file.getOutputStream(null);
+                    configuration.saveTask(new OutputWriter(stream));
+                } catch (IOException ignored) {
+                } finally {
+                    if (stream != null) {
+                        try {
+                            stream.close();
+                        } catch (IOException ignored) {
+                        }
+                    }
+                }
+            }
+        });
+    }
 
     public static boolean isChild(VirtualFile parent, VirtualFile child) {
         String parentPath = parent.getPath();

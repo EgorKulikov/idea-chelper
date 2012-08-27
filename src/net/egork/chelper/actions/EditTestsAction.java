@@ -35,7 +35,7 @@ public class EditTestsAction extends AnAction {
 		if (configuration instanceof TopCoderConfiguration) {
 			TopCoderConfiguration taskConfiguration = (TopCoderConfiguration) configuration;
 			TopCoderTask task = taskConfiguration.getConfiguration();
-			taskConfiguration.setConfiguration(task.setTests(TopCoderEditTestsDialog.editTests(task)));
+			taskConfiguration.setConfiguration(task.setTests(TopCoderEditTestsDialog.editTests(task, project)));
 		}
 	}
 }

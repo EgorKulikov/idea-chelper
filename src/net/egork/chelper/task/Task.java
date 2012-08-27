@@ -3,6 +3,8 @@ package net.egork.chelper.task;
 import net.egork.chelper.util.InputReader;
 import net.egork.chelper.util.OutputWriter;
 
+import java.util.Calendar;
+
 /**
  * @author Egor Kulikov (kulikov@devexperts.com)
  */
@@ -46,6 +48,22 @@ public class Task {
         this.truncate = truncate;
         this.inputClass = inputClass;
         this.outputClass = outputClass;
+    }
+
+    public static String getDateString() {
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH) + 1;
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        StringBuilder result = new StringBuilder();
+        result.append(year).append('.');
+        if (month < 10)
+            result.append('0');
+        result.append(month).append('.');
+        if (day < 10)
+            result.append('0');
+        result.append(day);
+        return result.toString();
     }
 
     public void saveTask(OutputWriter out) {

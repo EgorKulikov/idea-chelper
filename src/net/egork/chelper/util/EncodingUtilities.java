@@ -1,9 +1,6 @@
 package net.egork.chelper.util;
 
-import com.intellij.openapi.project.Project;
-import net.egork.chelper.task.MethodSignature;
 import net.egork.chelper.task.Test;
-import net.egork.chelper.task.TopCoderTask;
 import net.egork.chelper.task.TopCoderTest;
 
 /**
@@ -76,26 +73,5 @@ public class EncodingUtilities {
 			builder.append(encode(test));
 		}
 		return builder.toString();
-	}
-
-    public static String encodeTask(TopCoderTask task) {
-		StringBuilder builder = new StringBuilder();
-		builder.append(task.name).append(TOKEN_SEPARATOR).append(task.signature == null ? "" : task.signature).append(
-			TOKEN_SEPARATOR);
-		builder.append(encodeTests(task.tests));
-		return builder.toString();
-	}
-
-	public static TopCoderTask decodeTopCoderTask(String taskConf, Project project) {
-		String[] tokens = taskConf.split(TOKEN_SEPARATOR, -1);
-		String name = tokens[0];
-		MethodSignature signature = MethodSignature.parse(tokens[1]);
-		int argumentCount = signature != null ? signature.arguments.length : 0;
-		if ("empty".equals(tokens[2]))
-			return new TopCoderTask(project, name, signature);
-		TopCoderTest[] tests = new TopCoderTest[tokens.length - 2];
-		for (int i = 0; i < tests.length; i++)
-			tests[i] = decodeTopCoderTest(i, tokens[i + 2], argumentCount);
-		return new TopCoderTask(project, name, signature, tests);
 	}
 }

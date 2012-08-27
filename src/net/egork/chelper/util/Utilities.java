@@ -18,16 +18,14 @@ import net.egork.chelper.ProjectData;
 import net.egork.chelper.checkers.TokenChecker;
 import net.egork.chelper.configurations.TaskConfiguration;
 import net.egork.chelper.configurations.TaskConfigurationType;
+import net.egork.chelper.configurations.TopCoderConfiguration;
+import net.egork.chelper.configurations.TopCoderConfigurationType;
 import net.egork.chelper.parser.Parser;
-import net.egork.chelper.task.StreamConfiguration;
-import net.egork.chelper.task.Task;
-import net.egork.chelper.task.Test;
-import net.egork.chelper.task.TestType;
+import net.egork.chelper.task.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -142,19 +140,17 @@ public class Utilities {
         }
     }
 
-    public static String getDateString() {
-        Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH) + 1;
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-        StringBuilder result = new StringBuilder();
-        result.append(year).append('.');
-        if (month < 10)
-            result.append('0');
-        result.append(month).append('.');
-        if (day < 10)
-            result.append('0');
-        result.append(day);
-        return result.toString();
+    public static RunnerAndConfigurationSettings createConfiguration(TopCoderTask task, boolean setActive, Project project) {
+        RunManagerImpl manager = RunManagerImpl.getInstanceImpl(project);
+        RunnerAndConfigurationSettings old = manager.findConfigurationByName(task.name);
+        if (old != null)
+            manager.removeConfiguration(old);
+        RunnerAndConfigurationSettingsImpl configuration = new RunnerAndConfigurationSettingsImpl(manager,
+                new TopCoderConfiguration(task.name, project, task,
+                        TopCoderConfigurationType.INSTANCE.getConfigurationFactories()[0]), false);
+        manager.addConfiguration(configuration, false);
+        if (setActive)
+            manager.setActiveConfiguration(configuration);
+        return configuration;
     }
 }

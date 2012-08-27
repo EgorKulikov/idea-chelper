@@ -69,6 +69,12 @@ public class TaskUtilities {
         return null;
     }
 
+    public static String getTopCoderTaskFileName(String location, String name) {
+        if (location != null && name != null)
+            return location + "/" + name + ".tctask";
+        return null;
+    }
+
     public static VirtualFile getCheckerFile(String location, String name, Project project) {
         return FileUtilities.getFile(project, location + "/" + name + "Checker.java");
     }

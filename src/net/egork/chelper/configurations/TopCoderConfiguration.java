@@ -12,12 +12,12 @@ import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.WriteExternalException;
 import com.intellij.psi.PsiDirectory;
-import net.egork.chelper.util.CodeGenerationUtilities;
-import net.egork.chelper.util.EncodingUtilities;
-import net.egork.chelper.util.FileUtilities;
-import net.egork.chelper.util.Utilities;
 import net.egork.chelper.task.TopCoderTask;
 import net.egork.chelper.ui.TopCoderConfigurationEditor;
+import net.egork.chelper.util.CodeGenerationUtilities;
+import net.egork.chelper.util.FileUtilities;
+import net.egork.chelper.util.TaskUtilities;
+import net.egork.chelper.util.Utilities;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,11 +33,12 @@ public class TopCoderConfiguration extends ModuleBasedConfiguration<JavaRunConfi
 	{
 		super(name, new JavaRunConfigurationModule(project, false), factory);
 		this.configuration = configuration;
+        saveConfiguration(configuration);
 	}
 
 	@Override
 	public Collection<Module> getValidModules() {
-		return JavaRunConfigurationModule.getModulesForClass(getProject(), configuration.getFQN());
+		return JavaRunConfigurationModule.getModulesForClass(getProject(), configuration.fqn);
 	}
 
 	@Override
@@ -52,25 +53,24 @@ public class TopCoderConfiguration extends ModuleBasedConfiguration<JavaRunConfi
 	public RunProfileState getState(@NotNull Executor executor, @NotNull ExecutionEnvironment env)
 		throws ExecutionException
 	{
-		CodeGenerationUtilities.createSourceFile(configuration);
+		CodeGenerationUtilities.createSourceFile(getProject(), configuration);
 		JavaCommandLineState state = new JavaCommandLineState(env) {
 			@Override
 			protected JavaParameters createJavaParameters() throws ExecutionException {
 				JavaParameters parameters = new JavaParameters();
-				PsiDirectory directory = FileUtilities.getPsiDirectory(configuration.project,
-					Utilities.getData(configuration.project).defaultDirectory);
-				Module module = ProjectRootManager.getInstance(configuration.project).getFileIndex().getModuleForFile(
+				PsiDirectory directory = FileUtilities.getPsiDirectory(getProject(),
+					Utilities.getData(getProject()).defaultDirectory);
+				Module module = ProjectRootManager.getInstance(getProject()).getFileIndex().getModuleForFile(
 					directory.getVirtualFile());
 				parameters.configureByModule(module, JavaParameters.JDK_AND_CLASSES);
-				parameters.setMainClass("net.egork.chelper.tester.TopCoderTester");
+				parameters.setMainClass("net.egork.chelper.tester.NewTopCoderTester");
 				parameters.getVMParametersList().add("-Xmx64M");
-				parameters.getProgramParametersList().add(configuration.getSignature());
-				parameters.getProgramParametersList().add(configuration.getFQN());
-				parameters.getProgramParametersList().add(EncodingUtilities.encodeTests(configuration.tests));
+                parameters.setWorkingDirectory(getProject().getBaseDir().getPath());
+                parameters.getProgramParametersList().add(TaskUtilities.getTopCoderTaskFileName(Utilities.getData(getProject()).defaultDirectory, configuration.name));
 				return parameters;
 			}
 		};
-		state.setConsoleBuilder(new TextConsoleBuilderImpl(configuration.project));
+		state.setConsoleBuilder(new TextConsoleBuilderImpl(getProject()));
 		return state;
 	}
 
@@ -80,20 +80,37 @@ public class TopCoderConfiguration extends ModuleBasedConfiguration<JavaRunConfi
 
 	public void setConfiguration(TopCoderTask configuration) {
 		this.configuration = configuration;
-	}
+        saveConfiguration(configuration);
+    }
 
 	@Override
 	public void readExternal(Element element) throws InvalidDataException {
-		super.readExternal(element);
-		configuration = EncodingUtilities.decodeTopCoderTask(element.getChildText("taskConf"), getProject());
-	}
+        super.readExternal(element);
+        String fileName = element.getChildText("taskConf");
+        if (fileName != null && fileName.trim().length() != 0) {
+            try {
+                configuration = FileUtilities.readTopCoderTask(fileName, getProject());
+            } catch (NullPointerException ignored) {}
+        }
+    }
 
 	@Override
 	public void writeExternal(Element element) throws WriteExternalException {
-		super.writeExternal(element);
-		Element configurationElement = new Element("taskConf");
-		element.addContent(configurationElement);
-		configurationElement.setText(EncodingUtilities.encodeTask(configuration));
-	}
+        super.writeExternal(element);
+        Element configurationElement = new Element("taskConf");
+        element.addContent(configurationElement);
+        String configurationFile = TaskUtilities.getTopCoderTaskFileName(Utilities.getData(getProject()).defaultDirectory, configuration.name);
+        if (configurationFile != null && configuration.tests != null)
+            configurationElement.setText(configurationFile);
+    }
+
+    private void saveConfiguration(TopCoderTask configuration) {
+        if (Utilities.getData(getProject()) == null)
+            return;
+        String location = Utilities.getData(getProject()).defaultDirectory;
+        if (configuration != null && location != null && configuration.name != null && configuration.name.length() != 0 && configuration.tests != null)
+            FileUtilities.saveConfiguration(location, configuration.name + ".tctask", configuration, getProject());
+    }
+
 
 }

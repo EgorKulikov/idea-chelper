@@ -1,19 +1,22 @@
 package net.egork.chelper.ui;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.VerticalFlowLayout;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBScrollPane;
+import net.egork.chelper.task.NewTopCoderTest;
 import net.egork.chelper.task.TopCoderTask;
-import net.egork.chelper.task.TopCoderTest;
 import net.egork.chelper.util.Utilities;
 import sun.awt.VariableGridLayout;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,7 +27,7 @@ import java.util.List;
 public class TopCoderEditTestsDialog extends JDialog {
 	private static int HEIGHT = new JLabel("Test").getPreferredSize().height;
 
-	private List<TopCoderTest> tests;
+	private List<NewTopCoderTest> tests;
 	private int currentTest;
 	private JBList testList;
 	private JTextField[] arguments;
@@ -32,12 +35,16 @@ public class TopCoderEditTestsDialog extends JDialog {
 	private JPanel testPanel;
 	private List<JCheckBox> checkBoxes = new ArrayList<JCheckBox>();
 	private JPanel checkBoxesPanel;
+    private TopCoderTask task;
+    private JCheckBox knowAnswer;
+    private boolean updating;
 
-	public TopCoderEditTestsDialog(TopCoderTask task) {
+    public TopCoderEditTestsDialog(TopCoderTask task, Project project) {
 		super(null, "Tests", ModalityType.APPLICATION_MODAL);
-		setAlwaysOnTop(true);
+        this.task = task;
+        setAlwaysOnTop(true);
 		setResizable(false);
-		this.tests = new ArrayList<TopCoderTest>(Arrays.asList(task.tests));
+		this.tests = new ArrayList<NewTopCoderTest>(Arrays.asList(task.tests));
 		VariableGridLayout mainLayout = new VariableGridLayout(1, 2, 5, 5);
 		mainLayout.setColFraction(0, 0.35);
 		mainLayout.setColFraction(1, 0.65);
@@ -46,7 +53,7 @@ public class TopCoderEditTestsDialog extends JDialog {
 		selectorAndButtonsPanel.add(new JLabel("Tests:"), BorderLayout.NORTH);
 		JPanel checkBoxesAndSelectorPanel = new JPanel(new BorderLayout());
 		checkBoxesPanel = new JPanel(new VerticalFlowLayout(VerticalFlowLayout.TOP, 0, 0, false, false));
-		for (TopCoderTest test : tests) {
+		for (NewTopCoderTest test : tests) {
 			JCheckBox checkBox = createCheckBox(test);
 			checkBoxesPanel.add(checkBox);
 		}
@@ -55,16 +62,17 @@ public class TopCoderEditTestsDialog extends JDialog {
 		testList.setFixedCellHeight(HEIGHT);
 		testList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		testList.setLayoutOrientation(JList.VERTICAL);
-		testList.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				int index = testList.locationToIndex(e.getPoint());
-				if (index >= 0 && index < testList.getItemsCount()) {
-					saveCurrentTest();
-					setSelectedTest(index);
-				}
-			}
-		});
+		testList.addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent e) {
+                if (updating)
+                    return;
+                int index = testList.getSelectedIndex();
+                if (index >= 0 && index < testList.getItemsCount()) {
+                    saveCurrentTest();
+                    setSelectedTest(index);
+                }
+            }
+        });
 		checkBoxesAndSelectorPanel.add(testList, BorderLayout.CENTER);
 		selectorAndButtonsPanel.add(new JBScrollPane(checkBoxesAndSelectorPanel,
 			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), BorderLayout.CENTER);
@@ -105,9 +113,9 @@ public class TopCoderEditTestsDialog extends JDialog {
 			public void actionPerformed(ActionEvent e) {
 				saveCurrentTest();
 				int index = TopCoderEditTestsDialog.this.tests.size();
-				String[] arguments = new String[TopCoderEditTestsDialog.this.arguments.length];
+				Object[] arguments = new Object[TopCoderEditTestsDialog.this.arguments.length];
 				Arrays.fill(arguments, "");
-				TopCoderTest test = new TopCoderTest(arguments, "", index);
+				NewTopCoderTest test = new NewTopCoderTest(arguments, null, index);
 				TopCoderEditTestsDialog.this.tests.add(test);
 				checkBoxesPanel.add(createCheckBox(test));
 				setSelectedTest(index);
@@ -126,8 +134,8 @@ public class TopCoderEditTestsDialog extends JDialog {
 				TopCoderEditTestsDialog.this.tests.remove(currentTest);
 				int size = TopCoderEditTestsDialog.this.tests.size();
 				for (int i = currentTest; i < size; i++) {
-					TopCoderTest test = TopCoderEditTestsDialog.this.tests.get(i);
-					test = new TopCoderTest(test.arguments, test.result, i, test.active);
+					NewTopCoderTest test = TopCoderEditTestsDialog.this.tests.get(i);
+					test = new NewTopCoderTest(test.arguments, test.result, i, test.active);
 					TopCoderEditTestsDialog.this.tests.set(i, test);
 					checkBoxesPanel.add(createCheckBox(test));
 				}
@@ -161,16 +169,71 @@ public class TopCoderEditTestsDialog extends JDialog {
 			arguments[i] = new JTextField();
 			testPanel.add(createPanel(task.signature.arguments[i].getSimpleName() + " " +
 				task.signature.argumentNames[i], arguments[i]));
+            final int finalI = i;
+            arguments[i].getDocument().addDocumentListener(new DocumentListener() {
+                public void insertUpdate(DocumentEvent e) {
+                    update();
+                }
+
+                public void removeUpdate(DocumentEvent e) {
+                    update();
+                }
+
+                public void changedUpdate(DocumentEvent e) {
+                    update();
+                }
+
+                private void update() {
+                    if (updating)
+                        return;
+                    saveCurrentTest();
+                    if (NewTopCoderTest.parse(arguments[finalI].getText(), TopCoderEditTestsDialog.this.task.signature.arguments[finalI]) == null)
+                        arguments[finalI].setForeground(Color.RED);
+                    else
+                        arguments[finalI].setForeground(Color.BLACK);
+                }
+            });
 		}
 		testPanel.add(new JLabel("Result:"));
+        knowAnswer = new JCheckBox("Know answer?");
+        knowAnswer.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                saveCurrentTest();
+                result.setEnabled(knowAnswer.isSelected());
+            }
+        });
+        testPanel.add(knowAnswer);
 		result = new JTextField();
+        result.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) {
+                update();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                update();
+            }
+
+            public void changedUpdate(DocumentEvent e) {
+                update();
+            }
+
+            private void update() {
+                if (updating)
+                    return;
+                saveCurrentTest();
+                if (NewTopCoderTest.parse(result.getText(), TopCoderEditTestsDialog.this.task.signature.result) == null)
+                    result.setForeground(Color.RED);
+                else
+                    result.setForeground(Color.BLACK);
+            }
+        });
 		testPanel.add(createPanel(task.signature.result.getSimpleName(), result));
 		mainPanel.add(new JBScrollPane(testPanel));
 		setContentPane(mainPanel);
 		setSelectedTest(Math.min(0, task.tests.length - 1));
 		pack();
 		setSize(600, 400);
-		setLocation(Utilities.getLocation(task.project, this.getSize()));
+		setLocation(Utilities.getLocation(project, this.getSize()));
 	}
 
 	private JPanel createPanel(String label, JTextField editor) {
@@ -183,7 +246,7 @@ public class TopCoderEditTestsDialog extends JDialog {
 		return panel;
 	}
 
-	private JCheckBox createCheckBox(final TopCoderTest test) {
+	private JCheckBox createCheckBox(final NewTopCoderTest test) {
 		final JCheckBox checkBox = new JCheckBox("", test.active);
 		Dimension preferredSize = new Dimension(checkBox.getPreferredSize().width, HEIGHT);
 		checkBox.setPreferredSize(preferredSize);
@@ -200,34 +263,53 @@ public class TopCoderEditTestsDialog extends JDialog {
 	}
 
 	private void setSelectedTest(int index) {
+        updating = true;
 		currentTest = index;
 		if (index == -1)
 			testPanel.setVisible(false);
 		else {
 			testPanel.setVisible(true);
 			for (int i = 0; i < arguments.length; i++)
-				arguments[i].setText(tests.get(index).arguments[i]);
-			result.setText(tests.get(index).result);
+				arguments[i].setText(NewTopCoderTest.toString(tests.get(index).arguments[i], task.signature.arguments[i]));
+            knowAnswer.setSelected(tests.get(index).result != null);
+            result.setEnabled(knowAnswer.isSelected());
+            if (tests.get(index).result != null)
+			    result.setText(NewTopCoderTest.toString(tests.get(index).result, task.signature.result));
+            else
+                result.setText("");
 		}
+        for (int i = 0; i < arguments.length; i++)
+            arguments[i].setForeground(Color.BLACK);
+        result.setForeground(Color.BLACK);
 		testList.setListData(tests.toArray());
 		testList.setSelectedIndex(currentTest);
 		testList.repaint();
 		checkBoxesPanel.repaint();
+        updating = false;
 	}
 
 	private void saveCurrentTest() {
 		if (currentTest == -1)
 			return;
-		String[] arguments = new String[this.arguments.length];
-		for (int i = 0; i < arguments.length; i++)
-			arguments[i] = this.arguments[i].getText();
-		tests.set(currentTest, new TopCoderTest(arguments, result.getText(), currentTest,
+		Object[] arguments = new Object[this.arguments.length];
+		for (int i = 0; i < arguments.length; i++) {
+			if ((arguments[i] = NewTopCoderTest.parse(this.arguments[i].getText(), task.signature.arguments[i])) == null)
+                return;
+        }
+        Object result;
+        if (knowAnswer.isSelected()) {
+            result = NewTopCoderTest.parse(this.result.getText(), task.signature.result);
+            if (result == null)
+                return;
+        } else
+            result = null;
+		tests.set(currentTest, new NewTopCoderTest(arguments, result, currentTest,
 			checkBoxes.get(currentTest).isSelected()));
 	}
 
-	public static TopCoderTest[] editTests(TopCoderTask task) {
-		TopCoderEditTestsDialog dialog = new TopCoderEditTestsDialog(task);
+	public static NewTopCoderTest[] editTests(TopCoderTask task, Project project) {
+		TopCoderEditTestsDialog dialog = new TopCoderEditTestsDialog(task, project);
 		dialog.setVisible(true);
-		return dialog.tests.toArray(new TopCoderTest[dialog.tests.size()]);
+		return dialog.tests.toArray(new NewTopCoderTest[dialog.tests.size()]);
 	}
 }

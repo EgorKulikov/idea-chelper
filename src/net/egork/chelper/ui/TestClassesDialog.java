@@ -3,7 +3,6 @@ package net.egork.chelper.ui;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.VerticalFlowLayout;
 import com.intellij.openapi.util.IconLoader;
-import net.egork.chelper.task.Task;
 import net.egork.chelper.util.FileCreator;
 import net.egork.chelper.util.FileUtilities;
 import net.egork.chelper.util.Provider;
@@ -25,7 +24,7 @@ public class TestClassesDialog extends JDialog {
     private List<TestClassPanel> panels = new ArrayList<TestClassPanel>();
     private JPanel classesPanel;
 
-    public TestClassesDialog(String[] testClasses, final Project project, final Task task) {
+    public TestClassesDialog(String[] testClasses, final Project project, final String location) {
         super(null, "Test classes", ModalityType.APPLICATION_MODAL);
         setIconImage(Utilities.iconToImage(IconLoader.getIcon("/icons/check.png")));
         setAlwaysOnTop(true);
@@ -49,12 +48,12 @@ public class TestClassesDialog extends JDialog {
         buttonPanel.add(main.getCancelButton(), BorderLayout.EAST);
         classesPanel = new JPanel(new VerticalFlowLayout());
         for (String testClass : testClasses)
-            panels.add(new TestClassPanel(testClass, project, task));
+            panels.add(new TestClassPanel(testClass, project, location));
         JButton add = new JButton("Add");
         buttonPanel.add(add, BorderLayout.WEST);
         add.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                panels.add(new TestClassPanel("TestCase" + panels.size(), project, task));
+                panels.add(new TestClassPanel("TestCase" + panels.size(), project, location));
                 rebuild();
             }
         });
@@ -73,8 +72,8 @@ public class TestClassesDialog extends JDialog {
         return testClasses;
     }
 
-    public static String[] showDialog(String[] testClasses, Project project, Task task) {
-        TestClassesDialog dialog = new TestClassesDialog(testClasses, project, task);
+    public static String[] showDialog(String[] testClasses, Project project, String location) {
+        TestClassesDialog dialog = new TestClassesDialog(testClasses, project, location);
         dialog.setVisible(true);
         return dialog.testClasses;
     }
@@ -82,11 +81,11 @@ public class TestClassesDialog extends JDialog {
     private class TestClassPanel extends JPanel {
         private SelectOrCreateClass selector;
 
-        private TestClassPanel(String testClass, Project project, final Task task) {
+        private TestClassPanel(String testClass, Project project, final String location) {
             super(new BorderLayout());
             selector = new SelectOrCreateClass(testClass, project, new Provider<String>() {
                 public String provide() {
-                    return task.location;
+                    return location;
                 }
             }, new FileCreator() {
                 public String createFile(Project project, String path, String name) {

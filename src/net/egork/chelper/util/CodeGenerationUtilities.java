@@ -1,12 +1,14 @@
 package net.egork.chelper.util;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.search.searches.ReferencesSearch;
-import net.egork.chelper.task.*;
+import net.egork.chelper.task.StreamConfiguration;
+import net.egork.chelper.task.Task;
+import net.egork.chelper.task.Test;
+import net.egork.chelper.task.TopCoderTask;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -255,106 +257,24 @@ public class CodeGenerationUtilities {
 		return builder.toString();
 	}
 
-	public static TopCoderTask parseTopCoderStub(VirtualFile file, final Project project) {
-		String text = FileUtilities.readTextFile(file);
-		if (text == null)
-			return null;
-		String originalText = text;
-		final String name = file.getNameWithoutExtension();
-		String classSignature = "public class " + name;
-		int index = text.indexOf(classSignature);
-		if (index == -1)
-			return null;
-		text = text.substring(index + classSignature.length());
-		int openBracketIndex = text.indexOf("{");
-		if (openBracketIndex == -1)
-			return null;
-		text = text.substring(openBracketIndex + 1);
-		int methodSignatureEnd = text.indexOf("{");
-		if (methodSignatureEnd == -1)
-			return null;
-		String signatureText = text.substring(0, methodSignatureEnd).trim();
-		MethodSignature methodSignature = MethodSignature.parse(signatureText);
-		String testStart = "switch";
-		int testStartIndex = text.indexOf(testStart);
-		if (testStartIndex == -1)
-			return null;
-		text = text.substring(testStartIndex + testStart.length());
-		String testEnd = "// custom cases";
-		int testEndIndex = text.indexOf(testEnd);
-		if (testEndIndex == -1)
-			return null;
-		text = text.substring(0, testEndIndex);
-		List<TopCoderTest> tests = new ArrayList<TopCoderTest>();
-		for (int i = 0; ; i++) {
-			String nextTestStart = "case " + i;
-			int nextTestStartIndex = text.indexOf(nextTestStart);
-			if (nextTestStartIndex == -1)
-				break;
-			text = text.substring(nextTestStartIndex);
-			String[] argumentsAndResult = new String[methodSignature.arguments.length + 1];
-			for (int j = 0; j < argumentsAndResult.length; j++) {
-				int equalsIndex = text.indexOf('=');
-				if (equalsIndex == -1)
-					return null;
-				text = text.substring(equalsIndex + 1);
-				int lineEnd = text.indexOf(";\n");
-				if (lineEnd == -1)
-					lineEnd = text.indexOf(";\r\n");
-				if (lineEnd == -1)
-					return null;
-				argumentsAndResult[j] = text.substring(0, lineEnd).trim();
-				Class aClass = j < argumentsAndResult.length - 1 ? methodSignature.arguments[j] : methodSignature.result;
-				argumentsAndResult[j] = MethodSignature.toString(aClass,
-					MethodSignature.resolve(aClass, argumentsAndResult[j]));
-				text = text.substring(lineEnd);
-			}
-			tests.add(new TopCoderTest(Arrays.copyOf(argumentsAndResult, argumentsAndResult.length - 1),
-				argumentsAndResult[argumentsAndResult.length - 1], i));
-		}
-		String tailStart = "// BEGIN CUT HERE";
-		int tailIndex = originalText.indexOf(tailStart);
-		if (tailIndex == -1)
-			return null;
-		originalText = originalText.substring(0, tailIndex) + "}\n\n";
-		final String finalOriginalText = originalText;
+	public static void createSourceFile(final Project project, final TopCoderTask task) {
 		ApplicationManager.getApplication().runWriteAction(new Runnable() {
 			public void run() {
-				String defaultDir = Utilities.getData(project).defaultDirectory;
-				FileUtilities.createDirectoryIfMissing(project, defaultDir);
-				String packageName = FileUtilities.getPackage(FileUtilities.getPsiDirectory(project, defaultDir));
-				if (packageName != null && packageName.length() != 0) {
-					FileUtilities.writeTextFile(FileUtilities.getFile(project, defaultDir),
-						name + ".java", "package " + packageName + ";\n\n" + finalOriginalText);
-				} else {
-					FileUtilities.writeTextFile(FileUtilities.getFile(project, defaultDir),
-						name + ".java", finalOriginalText);
-				}
-			}
-		});
-		FileEditorManager.getInstance(project).openFile(FileUtilities.getFile(project,
-			Utilities.getData(project).defaultDirectory + "/" + name + ".java"), true);
-		return new TopCoderTask(project, name, methodSignature, tests.toArray(new TopCoderTest[tests.size()]));
-	}
-
-	public static void createSourceFile(final TopCoderTask task) {
-		ApplicationManager.getApplication().runWriteAction(new Runnable() {
-			public void run() {
-				PsiFile originalSource = FileUtilities.getPsiFile(task.project,
-					Utilities.getData(task.project).defaultDirectory + "/" + task.name + ".java");
-				String[] textParts = createInlinedSource(task.project, Collections.<String>emptySet(),
+				PsiFile originalSource = FileUtilities.getPsiFile(project,
+					Utilities.getData(project).defaultDirectory + "/" + task.name + ".java");
+				String[] textParts = createInlinedSource(project, Collections.<String>emptySet(),
 						originalSource);
 				final StringBuilder text = new StringBuilder();
 				text.append(textParts[0]);
 				text.append("public ");
 				text.append(textParts[1]);
-				String outputDirectory = Utilities.getData(task.project).outputDirectory;
-				VirtualFile directory = FileUtilities.createDirectoryIfMissing(task.project, outputDirectory);
+				String outputDirectory = Utilities.getData(project).outputDirectory;
+				VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, outputDirectory);
 				if (directory == null)
 					return;
 				final VirtualFile file = FileUtilities.writeTextFile(directory, task.name + ".java", text.toString());
 				FileUtilities.synchronizeFile(file);
-				removeUnusedCode(task.project, file, task.name, task.signature.name);
+				removeUnusedCode(project, file, task.name, task.signature.name);
 			}
 		});
 	}
@@ -437,34 +357,34 @@ public class CodeGenerationUtilities {
     }
 
     public static void createUnitTest(TopCoderTask task) {
-		if (!Utilities.getData(task.project).enableUnitTests)
-			return;
-		TopCoderTest[] tests = task.tests;
-		for (int i = 0, testsLength = tests.length; i < testsLength; i++)
-			tests[i] = tests[i].setActive(true);
-		Calendar calendar = Calendar.getInstance();
-		int year = calendar.get(Calendar.YEAR);
-		int month = calendar.get(Calendar.MONTH);
-		int day = calendar.get(Calendar.DAY_OF_MONTH);
-		String path = Utilities.getData(task.project).testDirectory + "/on" + year + "_" + month + "_" + day + "/" +
-			task.name.toLowerCase();
-		String originalPath = path;
-		int index = 0;
-		while (FileUtilities.getFile(task.project, path) != null)
-			path = originalPath + (index++);
-		VirtualFile directory = FileUtilities.createDirectoryIfMissing(task.project, path);
-		String packageName = FileUtilities.getPackage(FileUtilities.getPsiDirectory(task.project, path));
-		if (packageName == null) {
-			JOptionPane.showMessageDialog(null, "testDirectory should be under project source");
-			return;
-		}
-		String sourceFile = FileUtilities.readTextFile(FileUtilities.getFile(task.project,
-			Utilities.getData(task.project).defaultDirectory + "/" + task.name + ".java"));
-		sourceFile = changePackage(sourceFile, packageName);
-		FileUtilities.writeTextFile(directory, task.name + ".java", sourceFile);
-		String tester = generateTester(task, path);
-		tester = changePackage(tester, packageName);
-		FileUtilities.writeTextFile(directory, "Main.java", tester);
+//		if (!Utilities.getData(task.project).enableUnitTests)
+//			return;
+//		TopCoderTest[] tests = task.tests;
+//		for (int i = 0, testsLength = tests.length; i < testsLength; i++)
+//			tests[i] = tests[i].setActive(true);
+//		Calendar calendar = Calendar.getInstance();
+//		int year = calendar.get(Calendar.YEAR);
+//		int month = calendar.get(Calendar.MONTH);
+//		int day = calendar.get(Calendar.DAY_OF_MONTH);
+//		String path = Utilities.getData(task.project).testDirectory + "/on" + year + "_" + month + "_" + day + "/" +
+//			task.name.toLowerCase();
+//		String originalPath = path;
+//		int index = 0;
+//		while (FileUtilities.getFile(task.project, path) != null)
+//			path = originalPath + (index++);
+//		VirtualFile directory = FileUtilities.createDirectoryIfMissing(task.project, path);
+//		String packageName = FileUtilities.getPackage(FileUtilities.getPsiDirectory(task.project, path));
+//		if (packageName == null) {
+//			JOptionPane.showMessageDialog(null, "testDirectory should be under project source");
+//			return;
+//		}
+//		String sourceFile = FileUtilities.readTextFile(FileUtilities.getFile(task.project,
+//			Utilities.getData(task.project).defaultDirectory + "/" + task.name + ".java"));
+//		sourceFile = changePackage(sourceFile, packageName);
+//		FileUtilities.writeTextFile(directory, task.name + ".java", sourceFile);
+//		String tester = generateTester(task, path);
+//		tester = changePackage(tester, packageName);
+//		FileUtilities.writeTextFile(directory, "Main.java", tester);
 	}
 
 	private static String generateTester(String taskPath) {
@@ -482,26 +402,26 @@ public class CodeGenerationUtilities {
 		return builder.toString();
 	}
 
-	private static String generateTester(TopCoderTask task, String path) {
-		StringBuilder builder = new StringBuilder();
-		builder.append("import net.egork.chelper.tester.TopCoderTester;\n");
-		builder.append("import org.junit.Assert;\n");
-		builder.append("import org.junit.Test;\n\n");
-		builder.append("public class Main {\n");
-		builder.append("\t@Test\n");
-		builder.append("\tpublic void test() throws Exception {\n");
-		builder.append("\t\tif (!TopCoderTester.test(\"").append(task.signature).append("\",\n");
-		builder.append("\t\t\t\"")
-			.append(FileUtilities.getFQN(FileUtilities.getPsiDirectory(task.project, path), task.name))
-			.append("\",\n");
-		builder.append("\t\t\t\"").append(escape(EncodingUtilities.encodeTests(task.tests))).append("\"))\n");
-		builder.append("\t\t{\n");
-		builder.append("\t\t\tAssert.fail();\n");
-		builder.append("\t\t}\n");
-		builder.append("\t}\n");
-		builder.append("}\n");
-		return builder.toString();
-	}
+//	private static String generateTester(TopCoderTask task, String path) {
+//		StringBuilder builder = new StringBuilder();
+//		builder.append("import net.egork.chelper.tester.TopCoderTester;\n");
+//		builder.append("import org.junit.Assert;\n");
+//		builder.append("import org.junit.Test;\n\n");
+//		builder.append("public class Main {\n");
+//		builder.append("\t@Test\n");
+//		builder.append("\tpublic void test() throws Exception {\n");
+//		builder.append("\t\tif (!TopCoderTester.test(\"").append(task.signature).append("\",\n");
+//		builder.append("\t\t\t\"")
+//			.append(FileUtilities.getFQN(FileUtilities.getPsiDirectory(task.project, path), task.name))
+//			.append("\",\n");
+//		builder.append("\t\t\t\"").append(escape(EncodingUtilities.encodeTests(task.tests))).append("\"))\n");
+//		builder.append("\t\t{\n");
+//		builder.append("\t\t\tAssert.fail();\n");
+//		builder.append("\t\t}\n");
+//		builder.append("\t}\n");
+//		builder.append("}\n");
+//		return builder.toString();
+//	}
 
 	private static String escape(String s) {
 		StringBuilder builder = new StringBuilder();
@@ -545,6 +465,21 @@ public class CodeGenerationUtilities {
         builder.append("public class ").append(name).append(" implements TestProvider {\n");
         builder.append("\tpublic Collection<Test> createTests() {\n");
         builder.append("\t\treturn Collections.emptyList();\n");
+        builder.append("\t}\n");
+        builder.append("}\n");
+        return builder.toString();
+    }
+
+    public static String createTopCoderStub(TopCoderTask task) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("public class ").append(task.name).append(" {\n");
+        builder.append("\tpublic ").append(task.signature.result.getSimpleName()).append(" ").append(task.signature.name).append("(");
+        for (int i = 0; i < task.signature.arguments.length; i++) {
+            if (i != 0)
+                builder.append(", ");
+            builder.append(task.signature.arguments[i].getSimpleName()).append(' ').append(task.signature.argumentNames[i]);
+        }
+        builder.append(") {\n");
         builder.append("\t}\n");
         builder.append("}\n");
         return builder.toString();

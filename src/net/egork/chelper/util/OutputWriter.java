@@ -64,4 +64,35 @@ public class OutputWriter {
     public void printEnum(Enum e) {
         printString(e == null ? null : e.name());
     }
+
+    public void printTopCoder(Object o) {
+        if (o == null)
+            printString(null);
+        else if (o instanceof Integer)
+            printLine("int", o);
+        else if (o instanceof Long)
+            printLine("long", o);
+        else if (o instanceof Double)
+            printLine("double", o);
+        else if (o instanceof String) {
+            printLine("String");
+            printString((String) o);
+        } else if (o instanceof int[]) {
+            printLine("int[]", ((int[]) o).length);
+            for (int i : (int[])o)
+                printLine(i);
+        } else if (o instanceof long[]) {
+            printLine("long[]", ((long[]) o).length);
+            for (long i : (long[])o)
+                printLine(i);
+        } else if (o instanceof double[]) {
+            printLine("double[]", ((double[]) o).length);
+            for (double i : (double[])o)
+                printLine(i);
+        } else if (o instanceof String[]) {
+            printLine("String[]", ((String[]) o).length);
+            for (String i : (String[])o)
+                printString(i);
+        }
+    }
 }

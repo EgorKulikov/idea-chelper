@@ -16,6 +16,7 @@ import net.egork.chelper.configurations.TopCoderConfiguration;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.TopCoderTask;
 import net.egork.chelper.util.TaskUtilities;
+import net.egork.chelper.util.Utilities;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -59,7 +60,7 @@ public class AutoSwitcher implements ProjectComponent {
 				busy = true;
 				VirtualFile toOpen = null;
 				if (configuration instanceof TopCoderConfiguration)
-					toOpen = ((TopCoderConfiguration) configuration).getConfiguration().getFile();
+					toOpen = TaskUtilities.getFile(Utilities.getData(project).defaultDirectory, ((TopCoderConfiguration) configuration).getConfiguration().name, project);
 				else if (configuration instanceof TaskConfiguration)
 					toOpen = TaskUtilities.getFile(((TaskConfiguration) configuration).getConfiguration().location, ((TaskConfiguration) configuration).getConfiguration().name, ((TaskConfiguration) configuration).getProject());
 				if (toOpen != null)
@@ -80,7 +81,7 @@ public class AutoSwitcher implements ProjectComponent {
 				for (RunConfiguration configuration : runManager.getAllConfigurations()) {
 					if (configuration instanceof TopCoderConfiguration) {
 						TopCoderTask task = ((TopCoderConfiguration) configuration).getConfiguration();
-						if (file.equals(task.getFile())) {
+						if (file.equals(TaskUtilities.getFile(Utilities.getData(project).defaultDirectory, task.name, project))) {
 							busy = true;
 							runManager.setActiveConfiguration(new RunnerAndConfigurationSettingsImpl(runManager,
 								configuration, false));

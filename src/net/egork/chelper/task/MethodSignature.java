@@ -12,7 +12,7 @@ public class MethodSignature {
 	public final Class[] arguments;
 	public final String[] argumentNames;
 
-	private MethodSignature(String name, Class result, Class[] arguments, String[] argumentNames) {
+	public MethodSignature(String name, Class result, Class[] arguments, String[] argumentNames) {
 		this.name = name;
 		this.result = result;
 		this.arguments = arguments;

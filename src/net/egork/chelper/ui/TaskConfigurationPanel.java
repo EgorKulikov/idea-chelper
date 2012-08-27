@@ -166,7 +166,7 @@ public class TaskConfigurationPanel extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 TaskConfigurationPanel.this.task = TaskConfigurationPanel.this.task.setTestClasses(
                         TestClassesDialog.showDialog(TaskConfigurationPanel.this.task.testClasses, project,
-                        TaskConfigurationPanel.this.task));
+                        TaskConfigurationPanel.this.task.location));
                 name.setText(name.getText());
             }
         });

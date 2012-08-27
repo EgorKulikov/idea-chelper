@@ -216,4 +216,44 @@ public class InputReader {
         }
         throw new EnumConstantNotPresentException(c, name);
     }
+
+    public Object readTopCoder() {
+        String type = readToken();
+        if (type.equals("-1"))
+            return null;
+        if ("int".equals(type))
+            return readInt();
+        else if ("long".equals(type))
+            return readLong();
+        else if ("double".equals(type))
+            return readDouble();
+        else if ("String".equals(type))
+            return readString();
+        else if ("int[]".equals(type)) {
+            int length = readInt();
+            int[] result = new int[length];
+            for (int i = 0; i < length; i++)
+                result[i] = readInt();
+            return result;
+        } else if ("long[]".equals(type)) {
+            int length = readInt();
+            long[] result = new long[length];
+            for (int i = 0; i < length; i++)
+                result[i] = readLong();
+            return result;
+        } else if ("double[]".equals(type)) {
+            int length = readInt();
+            double[] result = new double[length];
+            for (int i = 0; i < length; i++)
+                result[i] = readDouble();
+            return result;
+        } else if ("String[]".equals(type)) {
+            int length = readInt();
+            String[] result = new String[length];
+            for (int i = 0; i < length; i++)
+                result[i] = readString();
+            return result;
+        }
+        throw new InputMismatchException();
+    }
 }

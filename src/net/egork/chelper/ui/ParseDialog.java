@@ -182,7 +182,7 @@ public class ParseDialog extends JDialog {
             }
         };
         dateAndContestName.add(new JLabel("Date:"));
-        date = new JTextField(Utilities.getDateString());
+        date = new JTextField(Task.getDateString());
         dateAndContestName.add(date);
         dateAndContestName.add(new JLabel("Contest name:"));
         contestName = new JTextField();

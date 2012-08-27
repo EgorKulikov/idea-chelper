@@ -53,7 +53,9 @@ public class NewTester {
 		Class checkerClass = Class.forName(task.checkerClass);
         TestType testType = task.testType;
         boolean truncate = task.truncate;
-		for (Test test : tests) {
+        System.out.println(task.contestName + " - " + task.name);
+        System.out.println("------------------------------------------------------------------");
+        for (Test test : tests) {
 			if (!test.active) {
 				verdicts.add(Verdict.SKIPPED);
 				System.out.println("Test #" + test.index + ": SKIPPED");

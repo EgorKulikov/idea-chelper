@@ -6,5 +6,6 @@ import java.util.Collection;
  * @author Egor Kulikov (egorku@yandex-team.ru)
  */
 public interface DescriptionReceiver {
-    public void receiveAdditionalDescriptions(Collection<Description> descriptions);
+    public void receiveDescriptions(Collection<Description> descriptions);
+	public boolean isStopped();
 }

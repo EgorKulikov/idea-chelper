@@ -8,6 +8,7 @@ import net.egork.chelper.ProjectData;
 import net.egork.chelper.parser.Description;
 import net.egork.chelper.parser.DescriptionReceiver;
 import net.egork.chelper.parser.Parser;
+import net.egork.chelper.parser.ParserTask;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.TestType;
 import net.egork.chelper.util.FileUtilities;
@@ -40,6 +41,8 @@ public class ParseDialog extends JDialog {
     private JCheckBox truncate;
     private ParseListModel contestModel;
     private ParseListModel taskModel;
+	private Receiver taskReceiver;
+	private Receiver contestReceiver;
 
     private ParseDialog(final Project project) {
 		super(null, "Parse Contest", ModalityType.APPLICATION_MODAL);
@@ -115,28 +118,38 @@ public class ParseDialog extends JDialog {
         contestList.setLayoutOrientation(JList.VERTICAL);
         contestList.addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent e) {
+				if (taskReceiver != null) {
+					taskReceiver.stop();
+					taskReceiver = null;
+				}
                 Parser parser = (Parser) parserCombo.getSelectedItem();
-                parser.stopAdditionalTaskSending();
                 Description contest = (Description) contestList.getSelectedValue();
                 if (contest == null) {
                     contestName.setText("");
                     return;
                 }
-                Collection<Description> tasks = parser.parseContest(contest.id, new DescriptionReceiver() {
-                    public void receiveAdditionalDescriptions(final Collection<Description> descriptions) {
-                        SwingUtilities.invokeLater(new Runnable() {
-                            public void run() {
-                                taskModel.add(descriptions);
-                            }
-                        });
-                    }
-                });
+				new ParserTask(contest.id, taskReceiver = new Receiver() {
+									@Override
+									protected void processNewDescriptions(final Collection<Description> descriptions) {
+										final Receiver receiver = this;
+										final boolean shouldMark = firstTime;
+										SwingUtilities.invokeLater(new Runnable() {
+											public void run() {
+												if (taskReceiver != receiver)
+													return;
+												int was = taskModel.getSize();
+												taskModel.add(descriptions);
+												if (shouldMark) {
+													int[] toMark = new int[taskModel.getSize() - was];
+													for (int i = 0; i < toMark.length; i++)
+														toMark[i] = was + i;
+													taskList.setSelectedIndices(toMark);
+												}
+											}
+										});
+									}
+								}, parser);
                 taskModel.removeAll();
-                taskModel.add(tasks);
-                int[] indices = new int[tasks.size()];
-                for (int i = 0; i < indices.length; i++)
-                    indices[i] = i;
-                taskList.setSelectedIndices(indices);
                 contestName.setText(contest.description);
             }
         });
@@ -203,35 +216,43 @@ public class ParseDialog extends JDialog {
 	}
 
     private void refresh() {
+		if (contestReceiver != null) {
+			contestReceiver.stop();
+			contestReceiver = null;
+		}
+		if (taskReceiver != null) {
+			taskReceiver.stop();
+			taskReceiver = null;
+		}
         Parser parser = (Parser) parserCombo.getSelectedItem();
-        parser.stopAdditionalContestSending();
-        Description description = (Description) contestList.getSelectedValue();
+        final Description description = (Description) contestList.getSelectedValue();
         contestModel.removeAll();
+		taskModel.removeAll();
         contestName.setText("");
-        Collection<Description> contests = parser.getContests(new DescriptionReceiver() {
-            public void receiveAdditionalDescriptions(final Collection<Description> descriptions) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        contestModel.add(descriptions);
-                    }
-                });
-            }
-        });
-        contestModel.add(contests);
-        if (!contests.isEmpty()) {
-            int toSelect = 0;
-            if (description != null) {
-                int index = 0;
-                for (Description contest : contests) {
-                    if (contest.id.equals(description.id)) {
-                        toSelect = index;
-                        break;
-                    }
-                    index++;
-                }
-            }
-            contestList.setSelectedIndex(toSelect);
-        }
+		new ParserTask(null, contestReceiver = new Receiver() {
+					@Override
+					protected void processNewDescriptions(final Collection<Description> descriptions) {
+						final Receiver receiver = this;
+						SwingUtilities.invokeLater(new Runnable() {
+							public void run() {
+								if (contestReceiver != receiver)
+									return;
+								boolean shouldMark = contestModel.getSize() == 0;
+								contestModel.add(descriptions);
+								if (shouldMark) {
+									for (Description contest : descriptions) {
+										if (description != null && description.id.equals(contest.id)) {
+											contestList.setSelectedValue(contest, true);
+											return;
+										}
+									}
+									if (contestModel.getSize() > 0)
+										contestList.setSelectedIndex(0);
+								}
+							}
+						});
+					}
+				}, parser);
         pack();
     }
 
@@ -267,4 +288,24 @@ public class ParseDialog extends JDialog {
             fireIntervalAdded(this, size, getSize() - 1);
         }
     }
+
+	private abstract class Receiver implements DescriptionReceiver {
+		private boolean stopped;
+		public boolean firstTime = true;
+
+		public void receiveDescriptions(Collection<Description> descriptions) {
+			processNewDescriptions(descriptions);
+			firstTime = false;
+		}
+
+		protected abstract void processNewDescriptions(Collection<Description> descriptions);
+
+		public boolean isStopped() {
+			return stopped;
+		}
+
+		public void stop() {
+			stopped = true;
+		}
+	}
 }

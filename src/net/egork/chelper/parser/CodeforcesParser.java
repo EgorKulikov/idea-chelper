@@ -12,16 +12,12 @@ import javax.swing.*;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 /**
  * @author Egor Kulikov (kulikov@devexperts.com)
  */
 public class CodeforcesParser implements Parser {
-    private AdditionalContestTask task;
-
 	public Icon getIcon() {
 		return IconLoader.getIcon("/icons/codeforces.png");
 	}
@@ -30,12 +26,12 @@ public class CodeforcesParser implements Parser {
 		return "Codeforces";
 	}
 
-    public Collection<Description> getContests(DescriptionReceiver receiver) {
+    public void getContests(DescriptionReceiver receiver) {
         String contestsPage;
         try{
             contestsPage = FileUtilities.getWebPageContent("http://codeforces.com/contests");
         } catch (IOException e) {
-            return Collections.emptyList();
+            return;
         }
         List<Description> contests = new ArrayList<Description>();
         StringParser parser = new StringParser(contestsPage);
@@ -49,16 +45,55 @@ public class CodeforcesParser implements Parser {
                 contests.add(new Description(id, name));
             }
         } catch (ParseException ignored) {}
-        task = new AdditionalContestTask(receiver, contestsPage);
-        return contests;
+		if (!receiver.isStopped())
+			receiver.receiveDescriptions(contests);
+		else
+			return;
+		//noinspection StatementWithEmptyBody
+		while (parser.advanceIfPossible(true, "<span class=\"page-index\" pageIndex=\"") != null);
+		String lastPage = parser.advanceIfPossible(false, "\"");
+		if (lastPage == null)
+			return;
+		int additionalPagesCount;
+		try {
+			additionalPagesCount = Integer.parseInt(lastPage);
+		} catch (NumberFormatException e) {
+			return;
+		}
+		for (int i = 2; i <= additionalPagesCount; i++) {
+			String page;
+			try {
+				page = FileUtilities.getWebPageContent("http://codeforces.com/contests/page/" + i);
+			} catch (IOException e) {
+				continue;
+			}
+			parser = new StringParser(page);
+			List<Description> descriptions = new ArrayList<Description>();
+			try {
+				parser.advance(true, "Contest history");
+				parser.advance(true, "</tr>");
+				while (parser.advanceIfPossible(true, "data-contestId=\"") != null) {
+					String id = parser.advance(false, "\"");
+					parser.advance(true, "<td>");
+					String name = parser.advance(false, "</td>", "<br/>").trim();
+					descriptions.add(new Description(id, name));
+				}
+			} catch (ParseException e) {
+				continue;
+			}
+			if (receiver.isStopped()) {
+				return;
+			}
+			receiver.receiveDescriptions(descriptions);
+		}
     }
 
-    public Collection<Description> parseContest(String id, DescriptionReceiver receiver) {
+    public void parseContest(String id, DescriptionReceiver receiver) {
         String mainPage;
         try {
             mainPage = FileUtilities.getWebPageContent("http://codeforces.com/contest/" + id);
         } catch (IOException e) {
-            return Collections.emptyList();
+            return;
         }
         List<Description> ids = new ArrayList<Description>();
         StringParser parser = new StringParser(mainPage);
@@ -70,10 +105,10 @@ public class CodeforcesParser implements Parser {
                 String name = taskID + " - " + parser.advance(false, "</a>");
                 ids.add(new Description(taskID, name));
             }
-        } catch (ParseException e) {
-            return ids;
+        } catch (ParseException ignored) {
         }
-        return ids;
+        if (!receiver.isStopped())
+			receiver.receiveDescriptions(ids);
     }
 
     public Task parseTask(String id) {
@@ -130,67 +165,6 @@ public class CodeforcesParser implements Parser {
                     null, true, null, null);
         } catch (ParseException e) {
             return null;
-        }
-    }
-
-    public void stopAdditionalContestSending() {
-        if (task != null)
-            task.stop();
-    }
-
-    public void stopAdditionalTaskSending() {
-    }
-
-    private class AdditionalContestTask {
-        private boolean stopped;
-        private DescriptionReceiver receiver;
-
-        private AdditionalContestTask(final DescriptionReceiver receiver, final String contestsPage) {
-            this.receiver = receiver;
-            new Thread(new Runnable() {
-                public void run() {
-                    StringParser parser = new StringParser(contestsPage);
-                    while (parser.advanceIfPossible(true, "<span class=\"page-index\" pageIndex=\"") != null);
-                    String lastPage = parser.advanceIfPossible(false, "\"");
-                    if (lastPage == null)
-                        return;
-                    int additionalPagesCount;
-                    try {
-                        additionalPagesCount = Integer.parseInt(lastPage);
-                    } catch (NumberFormatException e) {
-                        return;
-                    }
-                    for (int i = 2; i <= additionalPagesCount; i++) {
-                        String page;
-                        try{
-                            page = FileUtilities.getWebPageContent("http://codeforces.com/contests/page/" + i);
-                        } catch (IOException e) {
-                            continue;
-                        }
-                        parser = new StringParser(page);
-                        List<Description> descriptions = new ArrayList<Description>();
-                        try {
-                            parser.advance(true, "Contest history");
-                            parser.advance(true, "</tr>");
-                            while (parser.advanceIfPossible(true, "data-contestId=\"") != null) {
-                                String id = parser.advance(false, "\"");
-                                parser.advance(true, "<td>");
-                                String name = parser.advance(false, "</td>", "<br/>").trim();
-                                descriptions.add(new Description(id, name));
-                            }
-                        } catch (ParseException e) {
-                            continue;
-                        }
-                        if (stopped)
-                            return;
-                        receiver.receiveAdditionalDescriptions(descriptions);
-                    }
-                }
-            }).start();
-        }
-
-        public void stop() {
-            stopped = true;
         }
     }
 }

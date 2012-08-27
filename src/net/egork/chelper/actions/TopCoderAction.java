@@ -130,8 +130,12 @@ public class TopCoderAction extends AnAction {
                                                             task.name + ".java", CodeGenerationUtilities.createTopCoderStub(task));
                                                 }
                                                 Utilities.createConfiguration(taskToWrite, true, project);
-                                                PsiElement main = JavaPsiFacade.getInstance(project).findClass(fqn);
-                                                Utilities.openElement(project, main);
+                                                final PsiElement main = JavaPsiFacade.getInstance(project).findClass(fqn);
+												ApplicationManager.getApplication().runReadAction(new Runnable() {
+													public void run() {
+														Utilities.openElement(project, main);
+													}
+												});
                                             }
                                         });
                                     }

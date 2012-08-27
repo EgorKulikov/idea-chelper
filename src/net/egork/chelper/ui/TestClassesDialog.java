@@ -23,9 +23,11 @@ public class TestClassesDialog extends JDialog {
     private boolean isOk = false;
     private List<TestClassPanel> panels = new ArrayList<TestClassPanel>();
     private JPanel classesPanel;
+	private boolean isTopCoder;
 
-    public TestClassesDialog(String[] testClasses, final Project project, final String location) {
+    public TestClassesDialog(String[] testClasses, final Project project, final String location, boolean isTopCoder) {
         super(null, "Test classes", ModalityType.APPLICATION_MODAL);
+		this.isTopCoder = isTopCoder;
         setIconImage(Utilities.iconToImage(IconLoader.getIcon("/icons/check.png")));
         setAlwaysOnTop(true);
         setResizable(false);
@@ -72,8 +74,8 @@ public class TestClassesDialog extends JDialog {
         return testClasses;
     }
 
-    public static String[] showDialog(String[] testClasses, Project project, String location) {
-        TestClassesDialog dialog = new TestClassesDialog(testClasses, project, location);
+    public static String[] showDialog(String[] testClasses, Project project, String location, boolean isTopCoder) {
+        TestClassesDialog dialog = new TestClassesDialog(testClasses, project, location, isTopCoder);
         dialog.setVisible(true);
         return dialog.testClasses;
     }
@@ -89,7 +91,10 @@ public class TestClassesDialog extends JDialog {
                 }
             }, new FileCreator() {
                 public String createFile(Project project, String path, String name) {
-                    return FileUtilities.createTestClass(project, path, name);
+					if (isTopCoder)
+						return FileUtilities.createTopCoderTestClass(project, path, name);
+					else
+                    	return FileUtilities.createTestClass(project, path, name);
                 }
 
                 public boolean isValid(String name) {

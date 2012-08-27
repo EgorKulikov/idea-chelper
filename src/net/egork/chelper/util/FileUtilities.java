@@ -287,6 +287,15 @@ public class FileUtilities {
         return aPackage + "." + name;
     }
 
+	public static String createTopCoderTestClass(Project project, String path, String name) {
+     String mainClass = CodeGenerationUtilities.createTopCoderTestStub(path, name, project);
+     VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, path);
+     writeTextFile(directory, name + ".java", mainClass);
+     PsiDirectory psiDirectory = getPsiDirectory(project, path);
+     String aPackage = getPackage(psiDirectory);
+     return aPackage + "." + name;
+ }
+
     public static String createIfNeeded(String taskClass, Project project, String location) {
         if (taskClass.indexOf('.') == -1)
             taskClass = createTaskClass(project, location, taskClass);

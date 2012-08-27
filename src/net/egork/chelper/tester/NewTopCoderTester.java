@@ -44,7 +44,8 @@ public class NewTopCoderTester {
 		List<NewTopCoderTest> tests = new ArrayList<NewTopCoderTest>(Arrays.asList(task.tests));
         for (String testClass : task.testClasses) {
             TopCoderTestProvider provider = (TopCoderTestProvider)Class.forName(testClass).newInstance();
-            tests.addAll(provider.createTests());
+			for (NewTopCoderTest test : provider.createTests())
+            	tests.add(new NewTopCoderTest(test.arguments, test.result, tests.size(), test.active));
         }
 		Class taskClass = Class.forName(task.fqn);
         System.out.println(task.contestName + " - " + task.name);

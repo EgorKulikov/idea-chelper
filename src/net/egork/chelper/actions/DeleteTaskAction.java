@@ -76,12 +76,17 @@ public class DeleteTaskAction extends AnAction {
 							+ "/" + task.name + ".java");
 						if (mainFile != null)
 							mainFile.delete(this);
-						VirtualFile topcoderFile = FileUtilities.getFile(project, Utilities.getData(project).outputDirectory
-							+ "/" + task.name + ".java");
-						if (topcoderFile != null)
-							topcoderFile.delete(this);
+						for (String testClass : task.testClasses) {
+							PsiElement test = JavaPsiFacade.getInstance(project).findClass(testClass);
+							VirtualFile testFile = test == null ? null : test.getContainingFile() == null ? null : test.getContainingFile().getVirtualFile();
+							if (testFile != null)
+								testFile.delete(this);
+						}
+						VirtualFile taskFile = FileUtilities.getFile(project, Utilities.getData(project).defaultDirectory + "/" + task.name + ".tctask");
+						if (taskFile != null)
+							taskFile.delete(this);
 						manager.removeConfiguration(manager.getSelectedConfiguration());
-//						ArchiveAction.setOtherConfiguration(manager, task);
+						ArchiveAction.setOtherConfiguration(manager, task);
 					} catch (IOException ignored) {
 					}
 				}

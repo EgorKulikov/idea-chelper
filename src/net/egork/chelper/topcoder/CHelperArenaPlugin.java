@@ -68,7 +68,7 @@ public class CHelperArenaPlugin implements ArenaPlugin {
         }
         MethodSignature signature = new MethodSignature(methodName, result, arguments, componentModel.getParamNames());
         String date = Task.getDateString();
-        String contestName = componentModel.getProblem().getRound().getContestName();
+        String contestName = getFullContestName(componentModel.getProblem().getRound().getContestName());
         NewTopCoderTest[] tests = new NewTopCoderTest[componentModel.getTestCases().length];
         for (int i = 0; i < tests.length; i++) {
             TestCase testCase = componentModel.getTestCases()[i];
@@ -98,7 +98,15 @@ public class CHelperArenaPlugin implements ArenaPlugin {
         }
     }
 
-    private Class getClass(DataType type) {
+	private String getFullContestName(String contestName) {
+		if (contestName.startsWith("SRM") && contestName.split(" ").length >= 2)
+			return "TopCoder SRM #" + contestName.split(" ")[1];
+		if (contestName.startsWith("TCO") && contestName.split(" ").length >= 4)
+			return "TopCoder Open Round #" + contestName.split(" ")[3];
+		return contestName.replace("TCO", "TopCoder Open");
+	}
+
+	private Class getClass(DataType type) {
         String description = type.getDescriptor(JavaLanguage.JAVA_LANGUAGE);
         if ("int".equals(description))
             return int.class;

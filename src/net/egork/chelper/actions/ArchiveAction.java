@@ -81,35 +81,56 @@ public class ArchiveAction extends AnAction {
 			});
 		}
 		if (configuration instanceof TopCoderConfiguration) {
+			final TopCoderTask task = ((TopCoderConfiguration) configuration).getConfiguration();
 			String archiveDir = Utilities.getData(project).archiveDirectory;
-			final VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, archiveDir);
+			String dateAndContest = getDateAndContest(task);
+			final VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, archiveDir + "/" + dateAndContest);
 			if (directory == null)
 				return;
-			final TopCoderTask task = ((TopCoderConfiguration) configuration).getConfiguration();
-			CodeGenerationUtilities.createUnitTest(task);
+			CodeGenerationUtilities.createUnitTest(task, project);
 			ApplicationManager.getApplication().runWriteAction(new Runnable() {
 				public void run() {
 					try {
 						VirtualFile mainFile = FileUtilities.getFile(project, Utilities.getData(project).defaultDirectory
 							+ "/" + task.name + ".java");
-						if (mainFile == null)
-							return;
-						VfsUtil.copyFile(this, mainFile, directory);
-						mainFile.delete(this);
-						VirtualFile topcoderFile = FileUtilities.getFile(project, Utilities.getData(project).outputDirectory
-							+ "/" + task.name + ".java");
-						if (topcoderFile != null)
-							topcoderFile.delete(this);
+						if (mainFile != null) {
+							VfsUtil.copyFile(this, mainFile, directory);
+							mainFile.delete(this);
+						}
+						for (String testClass : task.testClasses) {
+							PsiElement test = JavaPsiFacade.getInstance(project).findClass(testClass);
+							VirtualFile testFile = test == null ? null : test.getContainingFile() == null ? null : test.getContainingFile().getVirtualFile();
+							if (testFile != null) {
+								VfsUtil.copyFile(this, testFile, directory);
+								testFile.delete(this);
+							}
+						}
+						VirtualFile taskFile = FileUtilities.getFile(project, Utilities.getData(project).defaultDirectory + "/" + task.name + ".tctask");
+						if (taskFile != null) {
+							VfsUtil.copyFile(this, taskFile, directory);
+							taskFile.delete(this);
+						}
 						manager.removeConfiguration(manager.getSelectedConfiguration());
-//						setOtherConfiguration(manager);
-					} catch (IOException ignored) {
+						setOtherConfiguration(manager, task);
+					} catch (IOException e) {
+						throw new RuntimeException(e);
 					}
 				}
 			});
 		}
 	}
 
-    private String getDateAndContest(Task task) {
+	private String getDateAndContest(TopCoderTask task) {
+		String yearAndMonth = task.date;
+		int position = yearAndMonth.indexOf('.');
+		if (position != -1)
+			position = yearAndMonth.indexOf('.', position + 1);
+		if (position != -1)
+			yearAndMonth = yearAndMonth.substring(0, position);
+		return canonize(yearAndMonth) + "/" + canonize(task.date + " - " + (task.contestName.length() == 0 ? "unsorted" : task.contestName));
+	}
+
+	private String getDateAndContest(Task task) {
         String yearAndMonth = task.date;
         int position = yearAndMonth.indexOf('.');
         if (position != -1)
@@ -135,6 +156,25 @@ public class ArchiveAction extends AnAction {
             }
         }
         for (RunConfiguration configuration : allConfigurations) {
+			if (configuration instanceof TaskConfiguration || configuration instanceof TopCoderConfiguration) {
+				manager.setActiveConfiguration(new RunnerAndConfigurationSettingsImpl(manager, configuration, false));
+				return;
+			}
+		}
+	}
+
+	public static void setOtherConfiguration(RunManagerImpl manager, TopCoderTask task) {
+		RunConfiguration[] allConfigurations = manager.getAllConfigurations();
+		for (RunConfiguration configuration : allConfigurations) {
+			if (configuration instanceof TopCoderConfiguration) {
+				TopCoderTask other = ((TopCoderConfiguration) configuration).getConfiguration();
+				if (!task.contestName.equals(other.contestName))
+					continue;
+				manager.setActiveConfiguration(new RunnerAndConfigurationSettingsImpl(manager, configuration, false));
+				return;
+			}
+		}
+		for (RunConfiguration configuration : allConfigurations) {
 			if (configuration instanceof TaskConfiguration || configuration instanceof TopCoderConfiguration) {
 				manager.setActiveConfiguration(new RunnerAndConfigurationSettingsImpl(manager, configuration, false));
 				return;

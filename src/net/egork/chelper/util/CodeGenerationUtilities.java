@@ -5,10 +5,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.search.searches.ReferencesSearch;
-import net.egork.chelper.task.StreamConfiguration;
-import net.egork.chelper.task.Task;
-import net.egork.chelper.task.Test;
-import net.egork.chelper.task.TopCoderTask;
+import net.egork.chelper.task.*;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -272,6 +269,15 @@ public class CodeGenerationUtilities {
 				VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, outputDirectory);
 				if (directory == null)
 					return;
+				for (VirtualFile file : directory.getChildren()) {
+					if ("java".equals(file.getExtension())) {
+						try {
+							file.delete(null);
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+					}
+				}
 				final VirtualFile file = FileUtilities.writeTextFile(directory, task.name + ".java", text.toString());
 				FileUtilities.synchronizeFile(file);
 				removeUnusedCode(project, file, task.name, task.signature.name);
@@ -356,35 +362,75 @@ public class CodeGenerationUtilities {
         return token.replaceAll("[/\\\\?%*:|\"<>. ]", "_");
     }
 
-    public static void createUnitTest(TopCoderTask task) {
-//		if (!Utilities.getData(task.project).enableUnitTests)
-//			return;
-//		TopCoderTest[] tests = task.tests;
-//		for (int i = 0, testsLength = tests.length; i < testsLength; i++)
-//			tests[i] = tests[i].setActive(true);
-//		Calendar calendar = Calendar.getInstance();
-//		int year = calendar.get(Calendar.YEAR);
-//		int month = calendar.get(Calendar.MONTH);
-//		int day = calendar.get(Calendar.DAY_OF_MONTH);
-//		String path = Utilities.getData(task.project).testDirectory + "/on" + year + "_" + month + "_" + day + "/" +
-//			task.name.toLowerCase();
-//		String originalPath = path;
-//		int index = 0;
-//		while (FileUtilities.getFile(task.project, path) != null)
-//			path = originalPath + (index++);
-//		VirtualFile directory = FileUtilities.createDirectoryIfMissing(task.project, path);
-//		String packageName = FileUtilities.getPackage(FileUtilities.getPsiDirectory(task.project, path));
-//		if (packageName == null) {
-//			JOptionPane.showMessageDialog(null, "testDirectory should be under project source");
-//			return;
-//		}
-//		String sourceFile = FileUtilities.readTextFile(FileUtilities.getFile(task.project,
-//			Utilities.getData(task.project).defaultDirectory + "/" + task.name + ".java"));
-//		sourceFile = changePackage(sourceFile, packageName);
-//		FileUtilities.writeTextFile(directory, task.name + ".java", sourceFile);
-//		String tester = generateTester(task, path);
-//		tester = changePackage(tester, packageName);
-//		FileUtilities.writeTextFile(directory, "Main.java", tester);
+    public static void createUnitTest(TopCoderTask task, final Project project) {
+		if (!Utilities.getData(project).enableUnitTests)
+			return;
+		NewTopCoderTest[] tests = task.tests;
+		for (int i = 0, testsLength = tests.length; i < testsLength; i++)
+			tests[i] = tests[i].setActive(true);
+		String path = Utilities.getData(project).testDirectory + "/on" + canonize(task.date) + "_" + canonize(task.contestName) + "/" +
+			task.name.toLowerCase();
+        task = task.setTests(tests);
+		String originalPath = path;
+		int index = 0;
+		while (FileUtilities.getFile(project, path) != null)
+			path = originalPath + (index++);
+		final VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, path);
+		final String packageName = FileUtilities.getPackage(FileUtilities.getPsiDirectory(project, path));
+		if (packageName == null) {
+			JOptionPane.showMessageDialog(null, "testDirectory should be under project source");
+			return;
+		}
+        VirtualFile mainFile = FileUtilities.getFile(project, Utilities.getData(project).defaultDirectory + "/" + task.name + ".java");
+        String mainContent = FileUtilities.readTextFile(mainFile);
+        mainContent = changePackage(mainContent, packageName);
+        String taskClassSimple = task.name;
+        FileUtilities.writeTextFile(directory, taskClassSimple + ".java", mainContent);
+        task = task.setFQN(packageName + "." + taskClassSimple);
+        String[] testClasses = Arrays.copyOf(task.testClasses, task.testClasses.length);
+        for (int i = 0; i < testClasses.length; i++) {
+            PsiElement test = JavaPsiFacade.getInstance(project).findClass(task.testClasses[i]);
+            VirtualFile testFile = test == null ? null : test.getContainingFile() == null ? null : test.getContainingFile().getVirtualFile();
+            String testContent = FileUtilities.readTextFile(testFile);
+            testContent = changePackage(testContent, packageName);
+            String testClassSimple = getSimpleName(testClasses[i]);
+            FileUtilities.writeTextFile(directory, testClassSimple + ".java", testContent);
+            testClasses[i] = packageName + "." + testClassSimple;
+        }
+        task = task.setTestClasses(testClasses);
+        final TopCoderTask finalTask = task;
+        ApplicationManager.getApplication().runWriteAction(new Runnable() {
+            public void run() {
+                String taskFilePath;
+                try {
+                    VirtualFile taskFile = directory.createChildData(null, finalTask.name + ".tctask");
+                    OutputStream outputStream = taskFile.getOutputStream(null);
+                    finalTask.saveTask(new OutputWriter(outputStream));
+                    outputStream.close();
+                    taskFilePath = FileUtilities.getRelativePath(project.getBaseDir(), taskFile);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                String tester = generateTopCoderTester(taskFilePath);
+                tester = changePackage(tester, packageName);
+                FileUtilities.writeTextFile(directory, "Main.java", tester);
+            }
+        });
+	}
+
+	private static String generateTopCoderTester(String taskPath) {
+		StringBuilder builder = new StringBuilder();
+		builder.append("import net.egork.chelper.tester.NewTopCoderTester;\n\n");
+		builder.append("import org.junit.Assert;\n");
+		builder.append("import org.junit.Test;\n\n");
+		builder.append("public class Main {\n");
+		builder.append("\t@Test\n");
+		builder.append("\tpublic void test() throws Exception {\n");
+		builder.append("\t\tif (!NewTopCoderTester.test(\"").append(taskPath).append("\"))\n");
+		builder.append("\t\t\tAssert.fail();\n");
+		builder.append("\t}\n");
+		builder.append("}\n");
+		return builder.toString();
 	}
 
 	private static String generateTester(String taskPath) {
@@ -485,7 +531,27 @@ public class CodeGenerationUtilities {
         return builder.toString();
     }
 
-    public static class InlineVisitor extends PsiElementVisitor {
+	public static String createTopCoderTestStub(String location, String name, Project project) {
+		PsiDirectory directory = FileUtilities.getPsiDirectory(project, location);
+  StringBuilder builder = new StringBuilder();
+  String packageName = FileUtilities.getPackage(directory);
+  if (packageName != null && packageName.length() != 0)
+      builder.append("package ").append(packageName).append(";\n\n");
+  builder.append("import net.egork.chelper.task.NewTopCoderTest;\n");
+  builder.append("import net.egork.chelper.tester.TopCoderTestProvider;\n");
+  builder.append("\n");
+  builder.append("import java.util.Collection;\n");
+  builder.append("import java.util.Collections;\n");
+  builder.append("\n");
+  builder.append("public class ").append(name).append(" implements TopCoderTestProvider {\n");
+  builder.append("\tpublic Collection<NewTopCoderTest> createTests() {\n");
+  builder.append("\t\treturn Collections.emptyList();\n");
+  builder.append("\t}\n");
+  builder.append("}\n");
+  return builder.toString();
+	}
+
+	public static class InlineVisitor extends PsiElementVisitor {
 		private final String[] excluded;
 		private final HashSet<PsiClass> set;
 		public final List<PsiClass> toInline;

@@ -31,10 +31,13 @@ public class TopCoderConfigurationEditor extends SettingsEditor<TopCoderConfigur
 	protected void resetEditorFrom(TopCoderConfiguration s) {
         date.setText(s.getConfiguration().date);
         contestName.setText(s.getConfiguration().contestName);
+		task = s.getConfiguration();
     }
 
 	@Override
 	protected void applyEditorTo(TopCoderConfiguration s) throws ConfigurationException {
+		if (task == null)
+			return;
         TopCoderTask task = s.getConfiguration();
         task = new TopCoderTask(task.name, task.signature, this.task.tests, date.getText(), contestName.getText(), this.task.testClasses, task.fqn);
         s.setConfiguration(task);
@@ -52,15 +55,18 @@ public class TopCoderConfigurationEditor extends SettingsEditor<TopCoderConfigur
 		editTests.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				task = task.setTests(TopCoderEditTestsDialog.editTests(task, project));
+				date.setText(date.getText());
 			}
 		});
+		editor.add(editTests);
         JButton editTestClasses = new JButton("Edit test classes");
         editTestClasses.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                task = task.setTestClasses(TestClassesDialog.showDialog(task.testClasses, project, Utilities.getData(project).defaultDirectory));
+                task = task.setTestClasses(TestClassesDialog.showDialog(task.testClasses, project, Utilities.getData(project).defaultDirectory, true));
+				date.setText(date.getText());
             }
         });
-        editTests.add(editTests);
+        editor.add(editTestClasses);
 		return editor;
 	}
 

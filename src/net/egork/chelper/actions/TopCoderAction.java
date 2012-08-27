@@ -37,12 +37,9 @@ public class TopCoderAction extends AnAction {
         fixTopCoderSettings();
         startServerIfNeeded(project);
         String arenaFileName = createArenaJar();
-        String javaExecutable = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
+        String javaExecutable = System.getProperty("java.home") + File.separator + "bin" + File.separator + "javaws";
         try {
-            Process process = new ProcessBuilder(javaExecutable, "-cp", arenaFileName,
-                    "-D" + Message.PORT_PROPERTY + "=" + sockets.get(project).getLocalPort(),
-                    "com.topcoder.client.contestApplet.runner.generic", "www.topcoder.com", "5001",
-                    "http://tunnel1.topcoder.com/tunnel?dummy", "TopCoder").start();
+            Process process = new ProcessBuilder(javaExecutable, arenaFileName).start();
             startThreadPrintingFromAStream(process.getInputStream());
             startThreadPrintingFromAStream(process.getErrorStream());
         } catch (IOException ex) {
@@ -69,17 +66,14 @@ public class TopCoderAction extends AnAction {
 
     private String createArenaJar() {
         try {
-            File tempFile = File.createTempFile("ContestApplet", ".jar");
+            File tempFile = File.createTempFile("ContestAppletProd", ".jnlp");
             tempFile.deleteOnExit();
-            InputStream inputStream = new URL("http://www.topcoder.com/contest/classes/ContestApplet.jar").openStream();
+            InputStream inputStream = new URL("http://www.topcoder.com/contest/arena/ContestAppletProd.jnlp").openStream();
             OutputStream outputStream = new FileOutputStream(tempFile);
             byte[] buffer = new byte[1024];
             int bytesRead;
-            long totalBytesRead = 0;
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
+            while ((bytesRead = inputStream.read(buffer)) != -1)
                 outputStream.write(buffer, 0, bytesRead);
-                totalBytesRead += bytesRead;
-            }
             inputStream.close();
             outputStream.close();
             return tempFile.getAbsolutePath();
@@ -92,7 +86,7 @@ public class TopCoderAction extends AnAction {
         try {
             if (sockets.containsKey(project))
                 return;
-            final ServerSocket serverSocket = new ServerSocket(0);
+            final ServerSocket serverSocket = new ServerSocket(CHelperArenaPlugin.PORT);
             sockets.put(project, serverSocket);
             new Thread(new Runnable() {
                 public void run() {
@@ -172,8 +166,7 @@ public class TopCoderAction extends AnAction {
         properties.put("editor.numplugins", Integer.toString(pluginCount));
         properties.put("editor." + index + ".name", "CHelper");
         properties.put("editor." + index + ".entrypoint", CHelperArenaPlugin.class.getName());
-//        properties.put("editor." + index + ".classpath", getJarPathForClass(CHelperArenaPlugin.class));
-        properties.put("editor." + index + ".classpath", "c:\\work\\chelper\\chelper.jar");
+        properties.put("editor." + index + ".classpath", getJarPathForClass(CHelperArenaPlugin.class));
         properties.put("editor." + index + ".eager", "0");
         try {
             OutputStream outputStream = new FileOutputStream(new File(System.getProperty("user.home") + File.separator + "contestapplet.conf"));

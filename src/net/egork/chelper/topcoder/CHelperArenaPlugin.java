@@ -20,7 +20,7 @@ import java.util.Arrays;
  */
 public class CHelperArenaPlugin implements ArenaPlugin {
     private MessagePanel messagePanel;
-    private int port;
+    public static final int PORT = 239;
     private ProblemComponentModel last = null;
 
     public JPanel getEditorPanel() {
@@ -28,10 +28,10 @@ public class CHelperArenaPlugin implements ArenaPlugin {
     }
 
     public String getSource() {
-        if (port == -1 || last == null)
+        if (last == null)
             return "";
         try {
-            Message message = new Message(port);
+            Message message = new Message(PORT);
             message.out.printString(Message.GET_SOURCE);
             message.out.printString(last.getClassName());
             String response = message.in.readString();
@@ -52,8 +52,6 @@ public class CHelperArenaPlugin implements ArenaPlugin {
     public void setProblemComponent(ProblemComponentModel componentModel, Language language, Renderer renderer) {
         System.out.println("Set problem component");
         last = componentModel;
-        if (port == -1)
-            return;
         if (!(language instanceof JavaLanguage)) {
             messagePanel.showErrorMessage("Only Java language is supported");
             return;
@@ -84,7 +82,7 @@ public class CHelperArenaPlugin implements ArenaPlugin {
         }
         TopCoderTask task = new TopCoderTask(name, signature, tests, date, contestName);
         try {
-            Message message = new Message(port);
+            Message message = new Message(PORT);
             message.out.printString(Message.NEW_TASK);
             message.out.flush();
             task.saveTask(message.out);
@@ -125,11 +123,5 @@ public class CHelperArenaPlugin implements ArenaPlugin {
     public void startUsing() {
         System.out.println("Start using");
         messagePanel = new MessagePanel();
-        if (System.getProperty(Message.PORT_PROPERTY) != null)
-            port = Integer.parseInt(System.getProperty(Message.PORT_PROPERTY));
-        else {
-            port = -1;
-            messagePanel.showErrorMessage("Check if you started Competition Arena from inside of IntelliJ IDEA.");
-        }
     }
 }

@@ -1,7 +1,7 @@
 package net.egork.chelper.task;
 
-import com.intellij.openapi.project.Project;
-import net.egork.chelper.util.*;
+import net.egork.chelper.util.InputReader;
+import net.egork.chelper.util.OutputWriter;
 
 /**
  * @author Egor Kulikov (kulikov@devexperts.com)
@@ -48,7 +48,7 @@ public class Task {
         this.outputClass = outputClass;
     }
 
-    public void saveTask(OutputWriter out, Project project) {
+    public void saveTask(OutputWriter out) {
 		out.printString(name);
 		out.printEnum(testType);
 		out.printEnum(input.type);
@@ -119,6 +119,11 @@ public class Task {
     }
 
     public Task setTaskClass(String taskClass) {
+        return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
+                checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass);
+    }
+
+    public Task setCheckerClass(String checkerClass) {
         return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
                 checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass);
     }

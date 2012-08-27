@@ -198,7 +198,7 @@ public class FileUtilities {
 					if (file == null)
 						return;
 					stream = file.getOutputStream(null);
-					configuration.saveTask(new OutputWriter(stream), project);
+					configuration.saveTask(new OutputWriter(stream));
 				} catch (IOException ignored) {
 				} finally {
 					if (stream != null) {

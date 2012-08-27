@@ -73,7 +73,7 @@ public class ArchiveAction extends AnAction {
                             taskFile.delete(this);
                         }
 						manager.removeConfiguration(manager.getSelectedConfiguration());
-						setOtherConfiguration(manager);
+						setOtherConfiguration(manager, task);
 					} catch (IOException e) {
                         throw new RuntimeException(e);
 					}
@@ -101,7 +101,7 @@ public class ArchiveAction extends AnAction {
 						if (topcoderFile != null)
 							topcoderFile.delete(this);
 						manager.removeConfiguration(manager.getSelectedConfiguration());
-						setOtherConfiguration(manager);
+//						setOtherConfiguration(manager);
 					} catch (IOException ignored) {
 					}
 				}
@@ -123,9 +123,18 @@ public class ArchiveAction extends AnAction {
         return filename.replaceAll("[/\\\\?%*:|\"<>]", "-");
     }
 
-    public static void setOtherConfiguration(RunManagerImpl manager) {
+    public static void setOtherConfiguration(RunManagerImpl manager, Task task) {
 		RunConfiguration[] allConfigurations = manager.getAllConfigurations();
-		for (RunConfiguration configuration : allConfigurations) {
+        for (RunConfiguration configuration : allConfigurations) {
+            if (configuration instanceof TaskConfiguration) {
+                Task other = ((TaskConfiguration) configuration).getConfiguration();
+                if (!task.contestName.equals(other.contestName))
+                    continue;
+                manager.setActiveConfiguration(new RunnerAndConfigurationSettingsImpl(manager, configuration, false));
+                return;
+            }
+        }
+        for (RunConfiguration configuration : allConfigurations) {
 			if (configuration instanceof TaskConfiguration || configuration instanceof TopCoderConfiguration) {
 				manager.setActiveConfiguration(new RunnerAndConfigurationSettingsImpl(manager, configuration, false));
 				return;

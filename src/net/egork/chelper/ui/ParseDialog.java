@@ -212,7 +212,7 @@ public class ParseDialog extends JDialog {
             public void receiveAdditionalDescriptions(final Collection<Description> descriptions) {
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
-                        taskModel.add(descriptions);
+                        contestModel.add(descriptions);
                     }
                 });
             }

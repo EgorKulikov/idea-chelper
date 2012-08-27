@@ -61,7 +61,7 @@ public class DeleteTaskAction extends AnAction {
                         if (taskFile != null)
                             taskFile.delete(this);
                         manager.removeConfiguration(manager.getSelectedConfiguration());
-                        ArchiveAction.setOtherConfiguration(manager);
+                        ArchiveAction.setOtherConfiguration(manager, task);
 					} catch (IOException ignored) {
 					}
 				}
@@ -81,7 +81,7 @@ public class DeleteTaskAction extends AnAction {
 						if (topcoderFile != null)
 							topcoderFile.delete(this);
 						manager.removeConfiguration(manager.getSelectedConfiguration());
-						ArchiveAction.setOtherConfiguration(manager);
+//						ArchiveAction.setOtherConfiguration(manager, task);
 					} catch (IOException ignored) {
 					}
 				}

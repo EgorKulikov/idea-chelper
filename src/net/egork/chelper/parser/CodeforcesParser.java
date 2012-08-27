@@ -56,19 +56,22 @@ public class CodeforcesParser implements Parser {
     public Collection<Description> parseContest(String id, DescriptionReceiver receiver) {
         String mainPage;
         try {
-            mainPage = FileUtilities.getWebPageContent("http://codeforces.ru/contest/" + id);
+            mainPage = FileUtilities.getWebPageContent("http://codeforces.com/contest/" + id);
         } catch (IOException e) {
             return Collections.emptyList();
         }
         List<Description> ids = new ArrayList<Description>();
         StringParser parser = new StringParser(mainPage);
-        for (char c = 'A'; c <= 'Z'; c++) {
-            int index = mainPage.indexOf("<a href=\"/contest/" + id + "/problem/" + c + "\">");
-            if (index != -1) {
-                ids.add(new Description(id + " " + Character.toString(c), "Task" + Character.toString(c)));
-                mainPage = mainPage.substring(index);
-            } else
-                break;
+        try {
+            parser.advance(true, "<table class=\"problems\">");
+            while (parser.advanceIfPossible(true, "<a href=\"/contest/" + id + "/problem/") != null) {
+                String taskID = parser.advance(false, "\">");
+                parser.advance(true, "<a href=\"/contest/" + id + "/problem/" + taskID + "\">");
+                String name = taskID + " - " + parser.advance(false, "</a>");
+                ids.add(new Description(taskID, name));
+            }
+        } catch (ParseException e) {
+            return ids;
         }
         return ids;
     }

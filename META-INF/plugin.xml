@@ -47,6 +47,8 @@
       </action>
       <action id="editProjectProperties" class="net.egork.chelper.actions.EditProjectProperties" icon="/icons/settings.png"
               text="Edit Project Properties"/>
+      <action id="unarchiveTask" class="net.egork.chelper.actions.UnarchiveTaskAction" text="Restore task" icon="/icons/unarchive.png"
+              description="Restores previously archived task"/>
   </actions>
 
   <extensions defaultExtensionNs="com.intellij">

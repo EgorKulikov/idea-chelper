@@ -24,6 +24,7 @@ public class CodeChefParser implements Parser {
     private final static String CHALLENGE_ID = "challenge/easy";
     private final static String PEER_ID = "problems/extcontest";
     private final static List<String> SPECIAL = Arrays.asList(EASY_ID, MEDIUM_ID, HARD_ID, CHALLENGE_ID, PEER_ID);
+    private ParseContestTask task;
 
     public Icon getIcon() {
 		return IconLoader.getIcon("/icons/codechef.png");
@@ -71,18 +72,28 @@ public class CodeChefParser implements Parser {
     }
 
     public Collection<Description> parseContest(String id, DescriptionReceiver receiver) {
-		String mainPage = null;
-        for (int i = 0; i < 100; i++) {
+        if (SPECIAL.contains(id)) {
+            new Thread(task = new ParseContestTask(id, receiver)).start();
+            return Collections.emptyList();
+        }
+        return parseContestImpl(id, 25, null);
+	}
+
+    private Collection<Description> parseContestImpl(String id, int retries, ParseContestTask pct) {
+        String mainPage = null;
+        for (int i = 0; i < retries; i++) {
             try {
                 mainPage = FileUtilities.getWebPageContent("http://www.codechef.com/" + id);
                 break;
             } catch (IOException ignored) {
+                if (pct != null && pct.stopped)
+                    return Collections.emptyList();
             }
         }
         if (mainPage == null)
             return Collections.emptyList();
-		List<Description> tasks = new ArrayList<Description>();
-		StringParser parser = new StringParser(mainPage);
+        List<Description> tasks = new ArrayList<Description>();
+        StringParser parser = new StringParser(mainPage);
         try {
             parser.advance(true, "Accuracy</a></th>");
             parser = new StringParser(parser.advance(false, "</tbody>"));
@@ -91,23 +102,23 @@ public class CodeChefParser implements Parser {
         }
         if (SPECIAL.contains(id))
             id = "";
-		while (true) {
-			try {
-				parser.advance(true, id + "/problems/");
-                String taskID;
-                if (id.length() == 0)
-                    taskID = parser.advance(false, "\"");
-                else
-                    taskID = id + " " + parser.advance(false, "\"");
-                parser.advance(true, "<b>");
-                String name = parser.advance(false, "</b>");
-                tasks.add(new Description(taskID, name));
-			} catch (ParseException e) {
-				break;
-			}
-		}
-		return tasks;
-	}
+        while (true) {
+            try {
+                parser.advance(true, id + "/problems/");
+String taskID;
+if (id.length() == 0)
+taskID = parser.advance(false, "\"");
+else
+taskID = id + " " + parser.advance(false, "\"");
+parser.advance(true, "<b>");
+String name = parser.advance(false, "</b>");
+tasks.add(new Description(taskID, name));
+            } catch (ParseException e) {
+                break;
+            }
+        }
+        return tasks;
+    }
 
     public Task parseTask(String id) {
 		String[] tokens = id.split(" ");
@@ -167,6 +178,9 @@ public class CodeChefParser implements Parser {
     }
 
     public void stopAdditionalTaskSending() {
+        if (task != null)
+            task.stopped = true;
+        task = null;
     }
 
     private String dropTags(String s) {
@@ -210,4 +224,20 @@ public class CodeChefParser implements Parser {
 		return id.toString();
 	}
 
+    private class ParseContestTask implements Runnable {
+        private boolean stopped;
+        private String id;
+        private DescriptionReceiver receiver;
+
+        public ParseContestTask(String id, DescriptionReceiver receiver) {
+            this.id = id;
+            this.receiver = receiver;
+        }
+
+        public void run() {
+            Collection<Description> tasks = parseContestImpl(id, Integer.MAX_VALUE, this);
+            if (!stopped)
+                receiver.receiveAdditionalDescriptions(tasks);
+        }
+    }
 }

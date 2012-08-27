@@ -10,6 +10,7 @@ import net.egork.chelper.task.*;
 
 import javax.swing.*;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.*;
 
 /**
@@ -358,42 +359,84 @@ public class CodeGenerationUtilities {
 		});
 	}
 
-	public static void createUnitTest(Task task, Project project) {
+	public static void createUnitTest(Task task, final Project project) {
 		if (!Utilities.getData(project).enableUnitTests)
 			return;
 		Test[] tests = task.tests;
 		for (int i = 0, testsLength = tests.length; i < testsLength; i++)
 			tests[i] = tests[i].setActive(true);
-		Calendar calendar = Calendar.getInstance();
-		int year = calendar.get(Calendar.YEAR);
-		int month = calendar.get(Calendar.MONTH);
-		int day = calendar.get(Calendar.DAY_OF_MONTH);
-		String path = Utilities.getData(project).testDirectory + "/on" + year + "_" + month + "_" + day + "/" +
+		String path = Utilities.getData(project).testDirectory + "/on" + canonize(task.date) + "_" + canonize(task.contestName) + "/" +
 			task.name.toLowerCase();
+        task = task.setTests(tests);
 		String originalPath = path;
 		int index = 0;
 		while (FileUtilities.getFile(project, path) != null)
 			path = originalPath + (index++);
-		VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, path);
-		String packageName = FileUtilities.getPackage(FileUtilities.getPsiDirectory(project, path));
+		final VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, path);
+		final String packageName = FileUtilities.getPackage(FileUtilities.getPsiDirectory(project, path));
 		if (packageName == null) {
 			JOptionPane.showMessageDialog(null, "testDirectory should be under project source");
 			return;
 		}
-		String sourceFile = FileUtilities.readTextFile(FileUtilities.getFile(project,
-			task.location + "/" + task.name + ".java"));
-		sourceFile = changePackage(sourceFile, packageName);
-		String checkerFile = FileUtilities.readTextFile(FileUtilities.getFile(project,
-			task.location + "/" + task.name + "Checker.java"));
-		checkerFile = changePackage(checkerFile, packageName);
-		FileUtilities.writeTextFile(directory, task.name + ".java", sourceFile);
-		FileUtilities.writeTextFile(directory, task.name + "Checker.java", checkerFile);
-		String tester = generateTester(task, path, project);
-		tester = changePackage(tester, packageName);
-		FileUtilities.writeTextFile(directory, "Main.java", tester);
+        PsiElement main = JavaPsiFacade.getInstance(project).findClass(task.taskClass);
+        VirtualFile mainFile = main == null ? null : main.getContainingFile() == null ? null : main.getContainingFile().getVirtualFile();
+        String mainContent = FileUtilities.readTextFile(mainFile);
+        mainContent = changePackage(mainContent, packageName);
+        String taskClassSimple = getSimpleName(task.taskClass);
+        FileUtilities.writeTextFile(directory, taskClassSimple + ".java", mainContent);
+        task = task.setTaskClass(packageName + "." + taskClassSimple);
+        PsiElement checker = JavaPsiFacade.getInstance(project).findClass(task.checkerClass);
+        VirtualFile checkerFile = checker == null ? null : checker.getContainingFile() == null ? null : checker.getContainingFile().getVirtualFile();
+        if (checkerFile != null && mainFile != null && checkerFile.getParent().equals(mainFile.getParent())) {
+            String checkerContent = FileUtilities.readTextFile(mainFile);
+            checkerContent = changePackage(checkerContent, packageName);
+            String checkerClassSimple = getSimpleName(task.checkerClass);
+            FileUtilities.writeTextFile(directory, checkerClassSimple + ".java", checkerContent);
+            task = task.setCheckerClass(packageName + "." + checkerClassSimple);
+        }
+        String[] testClasses = Arrays.copyOf(task.testClasses, task.testClasses.length);
+        for (int i = 0; i < testClasses.length; i++) {
+            PsiElement test = JavaPsiFacade.getInstance(project).findClass(task.testClasses[i]);
+            VirtualFile testFile = test == null ? null : test.getContainingFile() == null ? null : test.getContainingFile().getVirtualFile();
+            String testContent = FileUtilities.readTextFile(testFile);
+            testContent = changePackage(testContent, packageName);
+            String testClassSimple = getSimpleName(testClasses[i]);
+            FileUtilities.writeTextFile(directory, testClassSimple + ".java", testContent);
+            testClasses[i] = packageName + "." + testClassSimple;
+        }
+        task = task.setTestClasses(testClasses);
+        final Task finalTask = task;
+        ApplicationManager.getApplication().runWriteAction(new Runnable() {
+            public void run() {
+                String taskFilePath;
+                try {
+                    VirtualFile taskFile = directory.createChildData(null, finalTask.name + ".task");
+                    OutputStream outputStream = taskFile.getOutputStream(null);
+                    finalTask.saveTask(new OutputWriter(outputStream));
+                    outputStream.close();
+                    taskFilePath = FileUtilities.getRelativePath(project.getBaseDir(), taskFile);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                String tester = generateTester(taskFilePath);
+                tester = changePackage(tester, packageName);
+                FileUtilities.writeTextFile(directory, "Main.java", tester);
+            }
+        });
 	}
 
-	public static void createUnitTest(TopCoderTask task) {
+    private static String getSimpleName(String className) {
+        int position = className.lastIndexOf('.');
+        if (position != -1)
+            className = className.substring(position + 1);
+        return className;
+    }
+
+    private static String canonize(String token) {
+        return token.replaceAll("[/\\\\?%*:|\"<>. ]", "_");
+    }
+
+    public static void createUnitTest(TopCoderTask task) {
 		if (!Utilities.getData(task.project).enableUnitTests)
 			return;
 		TopCoderTest[] tests = task.tests;
@@ -424,24 +467,16 @@ public class CodeGenerationUtilities {
 		FileUtilities.writeTextFile(directory, "Main.java", tester);
 	}
 
-	private static String generateTester(Task task, String path, Project project) {
+	private static String generateTester(String taskPath) {
 		StringBuilder builder = new StringBuilder();
-		builder.append("import net.egork.chelper.tester.Tester;\n");
+		builder.append("import net.egork.chelper.tester.NewTester;\n\n");
 		builder.append("import org.junit.Assert;\n");
 		builder.append("import org.junit.Test;\n\n");
 		builder.append("public class Main {\n");
 		builder.append("\t@Test\n");
 		builder.append("\tpublic void test() throws Exception {\n");
-		builder.append("\t\tif (!Tester.test(\"").append(Utilities.getData(project).inputClass).append("\",\n");
-		builder.append("\t\t\t\"")
-			.append(FileUtilities.getFQN(FileUtilities.getPsiDirectory(project, path), task.name))
-			.append("\",\n");
-		builder.append("\t\t\t\"").append(task.testType.name()).append("\",\n");
-		builder.append("\t\t\t\"").append(escape(EncodingUtilities.encodeTests(task.tests))).append("\",\n");
-		builder.append("\t\t\t\"").append(Utilities.getData(project).outputClass).append("\"))\n");
-		builder.append("\t\t{\n");
+		builder.append("\t\tif (!NewTester.test(\"").append(taskPath).append("\"))\n");
 		builder.append("\t\t\tAssert.fail();\n");
-		builder.append("\t\t}\n");
 		builder.append("\t}\n");
 		builder.append("}\n");
 		return builder.toString();

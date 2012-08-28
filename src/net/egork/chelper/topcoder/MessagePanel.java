@@ -7,27 +7,25 @@ import java.awt.*;
  * @author Egor Kulikov
  */
 public class MessagePanel extends JPanel {
-    public static final Color INFO_COLOR = Color.WHITE;
-    public static final Color ERROR_COLOR = Color.RED;
-
-    private JLabel messageLabel;
+	private JLabel message = new JLabel();
 
     public MessagePanel() {
-        super(new BorderLayout());
-        messageLabel = new JLabel();
-        add(messageLabel, BorderLayout.CENTER);
+		super(new BorderLayout());
+		message = new JLabel();
+		message.setBackground(Color.BLACK);
+		add(message, BorderLayout.NORTH);
     }
 
     public void showErrorMessage(final String message) {
-        setMessage(message, ERROR_COLOR);
+        addMessage(message, Color.RED);
     }
 
     public void showInfoMessage(final String message) {
-        setMessage(message, INFO_COLOR);
+        addMessage(message, Color.WHITE);
     }
 
-    private void setMessage(final String message, final Color color) {
-        messageLabel.setForeground(color);
-        messageLabel.setText(message);
+    private void addMessage(String message, Color color) {
+		this.message.setText(message);
+		this.message.setForeground(color);
     }
 }

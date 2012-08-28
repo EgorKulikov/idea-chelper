@@ -187,15 +187,23 @@ public class FileUtilities {
 	}
 
 	public static String getWebPageContent(String address) throws IOException {
-		URL url = new URL(address);
-		InputStream input = url.openStream();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-		StringBuilder builder = new StringBuilder();
-        String s;
-		while ((s = reader.readLine()) != null) {
-			builder.append(s).append('\n');
+		IOException ex = null;
+		for (int i = 0; i < 10; i++) {
+			try {
+				URL url = new URL(address);
+				InputStream input = url.openStream();
+				BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+				StringBuilder builder = new StringBuilder();
+				String s;
+				while ((s = reader.readLine()) != null) {
+					builder.append(s).append('\n');
+				}
+				return builder.toString();
+			} catch (IOException e) {
+				ex = e;
+			}
 		}
-		return builder.toString();
+		throw ex;
 	}
 
 	public static Task readTask(String fileName, Project project) {

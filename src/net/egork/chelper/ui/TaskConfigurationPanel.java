@@ -43,6 +43,7 @@ public class TaskConfigurationPanel extends JPanel {
     private JTextField date;
     private JTextField contestName;
     private JCheckBox truncate;
+	private int panelWidth = new JTextField(20).getPreferredSize().width;
 
     public TaskConfigurationPanel(final Task task, boolean firstEdit, final Project project, final SizeChangeListener listener, JPanel buttonPanel) {
         super(new BorderLayout(5, 5));
@@ -52,7 +53,7 @@ public class TaskConfigurationPanel extends JPanel {
             @Override
             public Dimension getPreferredSize() {
                 Dimension size = super.getPreferredSize();
-                size.width = 250;
+                size.width = panelWidth;
                 return size;
             }
         };
@@ -103,13 +104,12 @@ public class TaskConfigurationPanel extends JPanel {
             }
         });
         basic.add(tests);
-        if (buttonPanel != null)
-            basic.add(buttonPanel);
+        basic.add(buttonPanel);
         JPanel leftAdvanced = new JPanel(new VerticalFlowLayout()) {
             @Override
             public Dimension getPreferredSize() {
                 Dimension size = super.getPreferredSize();
-                size.width = 250;
+                size.width = panelWidth;
                 return size;
             }
         };
@@ -154,7 +154,7 @@ public class TaskConfigurationPanel extends JPanel {
             @Override
             public Dimension getPreferredSize() {
                 Dimension size = super.getPreferredSize();
-                size.width = 250;
+                size.width = panelWidth;
                 return size;
             }
         };

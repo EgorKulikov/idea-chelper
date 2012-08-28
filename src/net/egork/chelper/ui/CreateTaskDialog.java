@@ -29,7 +29,7 @@ public class CreateTaskDialog extends JDialog {
 		setAlwaysOnTop(true);
 		setResizable(false);
 		this.task = task;
-        JPanel buttonPanel = new JPanel(new BorderLayout());
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 3));
         basicAdvanced = new JButton("Advanced");
         OkCancelPanel main = new OkCancelPanel(new BorderLayout()) {
             @Override
@@ -45,9 +45,9 @@ public class CreateTaskDialog extends JDialog {
                 CreateTaskDialog.this.setVisible(false);
             }
         };
-        buttonPanel.add(basicAdvanced, BorderLayout.WEST);
-        buttonPanel.add(main.getOkButton(), BorderLayout.CENTER);
-        buttonPanel.add(main.getCancelButton(), BorderLayout.EAST);
+        buttonPanel.add(basicAdvanced);
+        buttonPanel.add(main.getOkButton());
+        buttonPanel.add(main.getCancelButton());
         basicAdvanced.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 panel.setAdvancedVisibility(!panel.isAdvancedVisible());

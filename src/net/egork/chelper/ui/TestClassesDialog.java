@@ -24,15 +24,16 @@ public class TestClassesDialog extends JDialog {
     private List<TestClassPanel> panels = new ArrayList<TestClassPanel>();
     private JPanel classesPanel;
 	private boolean isTopCoder;
+	private final int width = new JTextField(20).getPreferredSize().width;
 
-    public TestClassesDialog(String[] testClasses, final Project project, final String location, boolean isTopCoder) {
+	public TestClassesDialog(String[] testClasses, final Project project, final String location, boolean isTopCoder) {
         super(null, "Test classes", ModalityType.APPLICATION_MODAL);
 		this.isTopCoder = isTopCoder;
         setIconImage(Utilities.iconToImage(IconLoader.getIcon("/icons/check.png")));
         setAlwaysOnTop(true);
         setResizable(false);
         this.testClasses = testClasses;
-        JPanel buttonPanel = new JPanel(new BorderLayout());
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 2));
         OkCancelPanel main = new OkCancelPanel(new BorderLayout()) {
             @Override
             public void onOk() {
@@ -45,9 +46,16 @@ public class TestClassesDialog extends JDialog {
             public void onCancel() {
                 TestClassesDialog.this.setVisible(false);
             }
-        };
-        buttonPanel.add(main.getOkButton(), BorderLayout.CENTER);
-        buttonPanel.add(main.getCancelButton(), BorderLayout.EAST);
+
+			@Override
+			public Dimension getPreferredSize() {
+				Dimension dimension = super.getPreferredSize();
+				dimension.width = width;
+				return dimension;
+			}
+		};
+        buttonPanel.add(main.getOkButton());
+        buttonPanel.add(main.getCancelButton());
         classesPanel = new JPanel(new VerticalFlowLayout());
         for (String testClass : testClasses)
             panels.add(new TestClassPanel(testClass, project, location));

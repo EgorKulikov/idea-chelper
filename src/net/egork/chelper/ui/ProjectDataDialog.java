@@ -26,6 +26,7 @@ public class ProjectDataDialog extends JDialog {
     private final JTextField excludePackages;
     private final JTextField author;
     private final JLabel testDirectoryLabel;
+	private final int width = new JTextField(20).getPreferredSize().width;
 
     public ProjectDataDialog(Project project, ProjectData data) {
         super(null, "Project properties", Dialog.ModalityType.APPLICATION_MODAL);
@@ -54,10 +55,17 @@ public class ProjectDataDialog extends JDialog {
                 ProjectDataDialog.this.data = null;
                 ProjectDataDialog.this.setVisible(false);
             }
-        };
-        JPanel okCancelPanel = new JPanel(new BorderLayout());
-        okCancelPanel.add(main.getOkButton(), BorderLayout.CENTER);
-        okCancelPanel.add(main.getCancelButton(), BorderLayout.EAST);
+
+			@Override
+			public Dimension getPreferredSize() {
+				Dimension dimension = super.getPreferredSize();
+				dimension.width = width;
+				return dimension;
+			}
+		};
+        JPanel okCancelPanel = new JPanel(new GridLayout(1, 2));
+        okCancelPanel.add(main.getOkButton());
+        okCancelPanel.add(main.getCancelButton());
         main.add(new JLabel("Default directory:"));
         main.add(defaultDirectory);
         main.add(new JLabel("Archive directory:"));

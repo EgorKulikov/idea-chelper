@@ -24,7 +24,15 @@ public class DirectorySelector extends JPanel {
     public DirectorySelector(final Project project, String initialValue) {
         super(new BorderLayout());
         textField = new JTextField(initialValue);
-        button = new JButton("...");
+        button = new JButton("...") {
+			@Override
+			public Dimension getPreferredSize() {
+				Dimension dimension = super.getPreferredSize();
+				//noinspection SuspiciousNameCombination
+				dimension.width = dimension.height;
+				return dimension;
+			}
+		};
         button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 PathChooserDialog dialog = FileChooserFactory.getInstance().createPathChooser(new FileChooserDescriptor(false, true, false, false, false, false) {

@@ -16,6 +16,7 @@ import net.egork.chelper.util.FileUtilities;
 import net.egork.chelper.util.Utilities;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -109,35 +110,35 @@ public class TopCoderAction extends AnAction {
                                 if (task == null)
                                     message.out.printString(Message.OTHER_ERROR);
                                 else {
-                                    final VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, Utilities.getData(project).defaultDirectory);
+                                    final VirtualFile directory = FileUtilities.getFile(project, Utilities.getData(project).defaultDirectory);
                                     VirtualFile taskFile = directory.findChild(task.name + ".tctask");
                                     if (taskFile != null)
                                         message.out.printString(Message.ALREADY_DEFINED);
                                     else {
                                         message.out.printString(Message.OK);
-                                        ApplicationManager.getApplication().runWriteAction(new Runnable() {
-                                            public void run() {
-                                                String defaultDir = Utilities.getData(project).defaultDirectory;
-                                                FileUtilities.createDirectoryIfMissing(project, defaultDir);
-                                                String packageName = FileUtilities.getPackage(FileUtilities.getPsiDirectory(project, defaultDir));
-                                                String fqn = (packageName.length() == 0 ? "" : packageName + ".") + task.name;
-                                                TopCoderTask taskToWrite = task.setFQN(fqn);
-                                                if (packageName.length() != 0) {
-                                                    FileUtilities.writeTextFile(FileUtilities.getFile(project, defaultDir),
-                                                            task.name + ".java", "package " + packageName + ";\n\n" + CodeGenerationUtilities.createTopCoderStub(task));
-                                                } else {
-                                                    FileUtilities.writeTextFile(FileUtilities.getFile(project, defaultDir),
-                                                            task.name + ".java", CodeGenerationUtilities.createTopCoderStub(task));
-                                                }
-                                                Utilities.createConfiguration(taskToWrite, true, project);
-                                                final PsiElement main = JavaPsiFacade.getInstance(project).findClass(fqn);
-												ApplicationManager.getApplication().runReadAction(new Runnable() {
+										SwingUtilities.invokeLater(new Runnable() {
+											public void run() {
+												ApplicationManager.getApplication().runWriteAction(new Runnable() {
 													public void run() {
+														String defaultDir = Utilities.getData(project).defaultDirectory;
+														FileUtilities.createDirectoryIfMissing(project, defaultDir);
+														String packageName = FileUtilities.getPackage(FileUtilities.getPsiDirectory(project, defaultDir));
+														String fqn = (packageName.length() == 0 ? "" : packageName + ".") + task.name;
+														TopCoderTask taskToWrite = task.setFQN(fqn);
+														if (packageName.length() != 0) {
+															FileUtilities.writeTextFile(FileUtilities.getFile(project, defaultDir),
+																task.name + ".java", "package " + packageName + ";\n\n" + CodeGenerationUtilities.createTopCoderStub(task));
+														} else {
+															FileUtilities.writeTextFile(FileUtilities.getFile(project, defaultDir),
+																task.name + ".java", CodeGenerationUtilities.createTopCoderStub(task));
+														}
+														Utilities.createConfiguration(taskToWrite, true, project);
+														final PsiElement main = JavaPsiFacade.getInstance(project).findClass(fqn);
 														Utilities.openElement(project, main);
 													}
 												});
-                                            }
-                                        });
+											}
+										});
                                     }
                                 }
                             }
@@ -180,7 +181,7 @@ public class TopCoderAction extends AnAction {
         }
     }
 
-    private static String getJarPathForClass(@NotNull Class aClass) {
+    public static String getJarPathForClass(@NotNull Class aClass) {
         final String resourceRoot = PathManager.getResourceRoot(aClass, "/" + aClass.getName().replace('.', '/') + ".class");
         return resourceRoot != null ? new File(resourceRoot).getAbsolutePath() : null;
     }

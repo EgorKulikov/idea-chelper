@@ -22,8 +22,9 @@ import java.util.Properties;
 public class FileUtilities {
 	public static Properties loadProperties(VirtualFile file) {
 		InputStream is = getInputStream(file);
-		if (is == null)
+		if (is == null) {
 			return null;
+		}
 		Properties properties = new Properties();
 		try {
 			properties.load(is);
@@ -48,11 +49,13 @@ public class FileUtilities {
 
 	public static PsiDirectory getDirectory(DataContext dataContext) {
 		IdeView view = getView(dataContext);
-		if (view == null)
+		if (view == null) {
 			return null;
+		}
 		PsiDirectory[] directories = view.getDirectories();
-		if (directories.length != 1)
+		if (directories.length != 1) {
 			return null;
+		}
 		return directories[0];
 	}
 
@@ -68,13 +71,15 @@ public class FileUtilities {
 	{
 		ApplicationManager.getApplication().runWriteAction(new Runnable() {
 			public void run() {
-				if (location == null)
+				if (location == null) {
 					return;
+				}
 				OutputStream stream = null;
 				try {
 					VirtualFile file = location.createChildData(null, fileName);
-					if (file == null)
+					if (file == null) {
 						return;
+					}
 					stream = file.getOutputStream(null);
 					stream.write(fileContent.getBytes());
 				} catch (IOException ignored) {
@@ -88,8 +93,9 @@ public class FileUtilities {
 				}
 			}
 		});
-		if (location == null)
+		if (location == null) {
 			return null;
+		}
 		return location.findChild(fileName);
 	}
 
@@ -103,28 +109,34 @@ public class FileUtilities {
 
 	public static PsiDirectory getPsiDirectory(Project project, String location) {
 		VirtualFile file = getFile(project, location);
-		if (file == null)
+		if (file == null) {
 			return null;
+		}
 		return PsiManager.getInstance(project).findDirectory(file);
 	}
 
 	public static VirtualFile getFile(Project project, String location) {
 		VirtualFile baseDir = project.getBaseDir();
-		if (baseDir == null)
+		if (baseDir == null) {
 			return null;
+		}
 		return baseDir.findFileByRelativePath(location);
 	}
 
 	public static String getRelativePath(VirtualFile baseDir, VirtualFile file) {
-		if (file == null)
+		if (file == null) {
 			return null;
-		if (baseDir == null)
+		}
+		if (baseDir == null) {
 			return file.getPath();
-        if (!isChild(baseDir, file))
-            return null;
+		}
+		if (!isChild(baseDir, file)) {
+			return null;
+		}
         String basePath = baseDir.getPath();
-        if (!basePath.endsWith("/"))
-            basePath += "/";
+		if (!basePath.endsWith("/")) {
+			basePath += "/";
+		}
         String filePath = file.getPath();
         return filePath.substring(Math.min(filePath.length(), basePath.length()));
 	}
@@ -132,22 +144,25 @@ public class FileUtilities {
 	public static String getPackage(PsiDirectory directory) {
 		PsiPackage aPackage = JavaDirectoryService.getInstance().getPackage(directory);
 		String packageName = null;
-		if (aPackage != null)
+		if (aPackage != null) {
 			packageName = aPackage.getQualifiedName();
+		}
 		return packageName;
 	}
 
 	public static String getFQN(PsiDirectory directory, String name) {
 		String packageName = getPackage(directory);
-		if (packageName == null || packageName.length() == 0)
+		if (packageName == null || packageName.length() == 0) {
 			return name;
+		}
 		return packageName + "." + name;
 	}
 
 	public static PsiFile getPsiFile(Project project, String location) {
 		VirtualFile file = getFile(project, location);
-		if (file == null)
+		if (file == null) {
 			return null;
+		}
 		return PsiManager.getInstance(project).findFile(file);
 	}
 
@@ -155,8 +170,9 @@ public class FileUtilities {
 		ApplicationManager.getApplication().runWriteAction(new Runnable() {
 			public void run() {
 				VirtualFile baseDir = project.getBaseDir();
-				if (baseDir == null)
+				if (baseDir == null) {
 					return;
+				}
 				try {
 					VfsUtil.createDirectoryIfMissing(baseDir, location);
 				} catch (IOException ignored) {
@@ -176,8 +192,9 @@ public class FileUtilities {
         BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 		StringBuilder builder = new StringBuilder();
         String s;
-		while ((s = reader.readLine()) != null)
+		while ((s = reader.readLine()) != null) {
 			builder.append(s).append('\n');
+		}
 		return builder.toString();
 	}
 
@@ -192,16 +209,19 @@ public class FileUtilities {
     public static void saveConfiguration(final String locationName, final String fileName, final Task configuration, final Project project) {
 		ApplicationManager.getApplication().runWriteAction(new Runnable() {
 			public void run() {
-				if (locationName == null)
+				if (locationName == null) {
 					return;
+				}
 				VirtualFile location = FileUtilities.getFile(project, locationName);
-				if (location == null)
+				if (location == null) {
 					return;
+				}
 				OutputStream stream = null;
 				try {
 					VirtualFile file = location.createChildData(null, fileName);
-					if (file == null)
+					if (file == null) {
 						return;
+					}
 					stream = file.getOutputStream(null);
 					configuration.saveTask(new OutputWriter(stream));
 				} catch (IOException ignored) {
@@ -220,16 +240,19 @@ public class FileUtilities {
     public static void saveConfiguration(final String locationName, final String fileName, final TopCoderTask configuration, final Project project) {
         ApplicationManager.getApplication().runWriteAction(new Runnable() {
             public void run() {
-                if (locationName == null)
-                    return;
+				if (locationName == null) {
+					return;
+				}
                 VirtualFile location = FileUtilities.getFile(project, locationName);
-                if (location == null)
-                    return;
+				if (location == null) {
+					return;
+				}
                 OutputStream stream = null;
                 try {
                     VirtualFile file = location.createChildData(null, fileName);
-                    if (file == null)
-                        return;
+					if (file == null) {
+						return;
+					}
                     stream = file.getOutputStream(null);
                     configuration.saveTask(new OutputWriter(stream));
                 } catch (IOException ignored) {
@@ -247,11 +270,13 @@ public class FileUtilities {
 
     public static boolean isChild(VirtualFile parent, VirtualFile child) {
         String parentPath = parent.getPath();
-        if (!parentPath.endsWith("/"))
-            parentPath += "/";
+		if (!parentPath.endsWith("/")) {
+			parentPath += "/";
+		}
         String childPath = child.getPath();
-        if (!childPath.endsWith("/"))
-            childPath += "/";
+		if (!childPath.endsWith("/")) {
+			childPath += "/";
+		}
         return childPath.startsWith(parentPath);
     }
 
@@ -262,8 +287,9 @@ public class FileUtilities {
     public static String createTaskClass(Project project, String path, String name) {
         String mainClass = CodeGenerationUtilities.createStub(path, name, project);
         VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, path);
-        if (directory.findChild(name + ".java") == null)
-            writeTextFile(directory, name + ".java", mainClass);
+		if (directory.findChild(name + ".java") == null) {
+			writeTextFile(directory, name + ".java", mainClass);
+		}
         PsiDirectory psiDirectory = getPsiDirectory(project, path);
         String aPackage = getPackage(psiDirectory);
         return aPackage + "." + name;
@@ -297,8 +323,9 @@ public class FileUtilities {
  }
 
     public static String createIfNeeded(String taskClass, Project project, String location) {
-        if (taskClass.indexOf('.') == -1)
-            taskClass = createTaskClass(project, location, taskClass);
+		if (taskClass.indexOf('.') == -1) {
+			taskClass = createTaskClass(project, location, taskClass);
+		}
         return taskClass;
     }
 }

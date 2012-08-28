@@ -19,6 +19,8 @@ import net.egork.chelper.util.TaskUtilities;
 import net.egork.chelper.util.Utilities;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
+
 /**
  * @author Egor Kulikov (egor@egork.net)
  */
@@ -63,8 +65,14 @@ public class AutoSwitcher implements ProjectComponent {
 					toOpen = TaskUtilities.getFile(Utilities.getData(project).defaultDirectory, ((TopCoderConfiguration) configuration).getConfiguration().name, project);
 				else if (configuration instanceof TaskConfiguration)
 					toOpen = TaskUtilities.getFile(((TaskConfiguration) configuration).getConfiguration().location, ((TaskConfiguration) configuration).getConfiguration().name, ((TaskConfiguration) configuration).getProject());
-				if (toOpen != null)
-					FileEditorManager.getInstance(project).openFile(toOpen, true);
+				if (toOpen != null) {
+					final VirtualFile finalToOpen = toOpen;
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							FileEditorManager.getInstance(project).openFile(finalToOpen, true);
+						}
+					});
+				}
 				busy = false;
 			}
 		});

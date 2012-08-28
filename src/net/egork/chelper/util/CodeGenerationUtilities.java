@@ -115,8 +115,7 @@ public class CodeGenerationUtilities {
 		FileUtilities.synchronizeFile(virtualFile);
 	}
 
-	public static String createMainClass(Task task, Project project)
-	{
+	public static String createMainClass(Task task, Project project) {
 		StringBuilder builder = new StringBuilder();
 		builder.append("public class ").append(task.mainClass).append(" {\n");
 		builder.append("\tpublic static void main(String[] args) {\n");
@@ -150,7 +149,8 @@ public class CodeGenerationUtilities {
 		String outputClassShort = outputClass.substring(outputClass.lastIndexOf('.') + 1);
 		builder.append("\t\t").append(outputClassShort).append(" out = new ").append(outputClassShort).
 			append("(outputStream);\n");
-		builder.append("\t\t").append(task.name).append(" solver = new ").append(task.name).append("();\n");
+		String className = Utilities.getSimpleName(task.taskClass);
+		builder.append("\t\t").append(className).append(" solver = new ").append(className).append("();\n");
 		switch (task.testType) {
 		case SINGLE:
 			builder.append("\t\tsolver.solve(1, in, out);\n");
@@ -188,7 +188,8 @@ public class CodeGenerationUtilities {
 					toImport.add("import java.io.FileInputStream;");
 				if (task.output.type != StreamConfiguration.StreamType.STANDARD)
 					toImport.add("import java.io.FileOutputStream;");
-				PsiFile originalSource = FileUtilities.getPsiFile(project, task.location + "/" + task.name + ".java");
+				VirtualFile originalFile = FileUtilities.getFileByFQN(task.taskClass, project);
+				PsiFile originalSource = PsiManager.getInstance(project).findFile(originalFile);
 				final String[] textParts = createInlinedSource(project, toImport, originalSource);
 				final StringBuilder text = new StringBuilder();
 				text.append(textParts[0]);

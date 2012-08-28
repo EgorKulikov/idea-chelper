@@ -153,4 +153,11 @@ public class Utilities {
             manager.setActiveConfiguration(configuration);
         return configuration;
     }
+
+	public static String getSimpleName(String className) {
+		int position = className.lastIndexOf('.');
+		if (position != -1)
+			className = className.substring(position + 1);
+		return className;
+	}
 }

@@ -47,8 +47,7 @@ public class ArchiveAction extends AnAction {
 			ApplicationManager.getApplication().runWriteAction(new Runnable() {
 				public void run() {
 					try {
-                        PsiElement main = JavaPsiFacade.getInstance(project).findClass(task.taskClass);
-                        VirtualFile mainFile = main == null ? null : main.getContainingFile() == null ? null : main.getContainingFile().getVirtualFile();
+						VirtualFile mainFile = FileUtilities.getFileByFQN(task.taskClass, project);
 						if (mainFile != null) {
     						VfsUtil.copyFile(this, mainFile, directory);
 	    					mainFile.delete(this);
@@ -60,8 +59,7 @@ public class ArchiveAction extends AnAction {
                             checkerFile.delete(this);
                         }
                         for (String testClass : task.testClasses) {
-                            PsiElement test = JavaPsiFacade.getInstance(project).findClass(testClass);
-                            VirtualFile testFile = test == null ? null : test.getContainingFile() == null ? null : test.getContainingFile().getVirtualFile();
+							VirtualFile testFile = FileUtilities.getFileByFQN(testClass, project);
                             if (testFile != null) {
                                 VfsUtil.copyFile(this, testFile, directory);
                                 testFile.delete(this);
@@ -98,8 +96,7 @@ public class ArchiveAction extends AnAction {
 							mainFile.delete(this);
 						}
 						for (String testClass : task.testClasses) {
-							PsiElement test = JavaPsiFacade.getInstance(project).findClass(testClass);
-							VirtualFile testFile = test == null ? null : test.getContainingFile() == null ? null : test.getContainingFile().getVirtualFile();
+							VirtualFile testFile = FileUtilities.getFileByFQN(testClass, project);
 							if (testFile != null) {
 								VfsUtil.copyFile(this, testFile, directory);
 								testFile.delete(this);

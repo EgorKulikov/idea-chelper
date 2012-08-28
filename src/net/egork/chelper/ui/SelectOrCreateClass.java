@@ -44,4 +44,8 @@ public class SelectOrCreateClass extends JPanel {
     public String getText() {
         return classSelector.getText();
     }
+
+	public void setText(String text) {
+		classSelector.setText(text);
+	}
 }

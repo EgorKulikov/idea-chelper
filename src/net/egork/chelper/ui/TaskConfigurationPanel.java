@@ -10,6 +10,8 @@ import net.egork.chelper.util.FileUtilities;
 import net.egork.chelper.util.Provider;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -60,6 +62,24 @@ public class TaskConfigurationPanel extends JPanel {
         basic.add(new JLabel("Name:"));
         name = new JTextField(task.name);
         name.setEnabled(firstEdit);
+		name.getDocument().addDocumentListener(new DocumentListener() {
+			public void insertUpdate(DocumentEvent e) {
+				update();
+			}
+
+			public void removeUpdate(DocumentEvent e) {
+				update();
+			}
+
+			public void changedUpdate(DocumentEvent e) {
+				update();
+			}
+
+			private void update() {
+				if (taskClass.getText().indexOf('.') == -1)
+					taskClass.setText(name.getText());
+			}
+		});
         basic.add(name);
         basic.add(new JLabel("Test type:"));
         testType = new JComboBox(TestType.values());
@@ -104,7 +124,8 @@ public class TaskConfigurationPanel extends JPanel {
             }
         });
         basic.add(tests);
-        basic.add(buttonPanel);
+		if (buttonPanel != null)
+        	basic.add(buttonPanel);
         JPanel leftAdvanced = new JPanel(new VerticalFlowLayout()) {
             @Override
             public Dimension getPreferredSize() {

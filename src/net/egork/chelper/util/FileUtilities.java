@@ -328,4 +328,9 @@ public class FileUtilities {
 		}
         return taskClass;
     }
+
+	public static VirtualFile getFileByFQN(String fqn, Project project) {
+		PsiElement main = JavaPsiFacade.getInstance(project).findClass(fqn);
+		return main == null ? null : main.getContainingFile() == null ? null : main.getContainingFile().getVirtualFile();
+	}
 }

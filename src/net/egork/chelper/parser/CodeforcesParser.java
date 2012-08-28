@@ -103,7 +103,7 @@ public class CodeforcesParser implements Parser {
                 String taskID = parser.advance(false, "\">");
                 parser.advance(true, "<a href=\"/contest/" + id + "/problem/" + taskID + "\">");
                 String name = taskID + " - " + parser.advance(false, "</a>");
-                ids.add(new Description(taskID, name));
+                ids.add(new Description(id + " " + taskID, name));
             }
         } catch (ParseException ignored) {
         }

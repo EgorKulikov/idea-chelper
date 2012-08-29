@@ -360,7 +360,14 @@ public class CodeGenerationUtilities {
     }
 
     private static String canonize(String token) {
-        return token.replaceAll("[/\\\\?%*:|\"<>. ]", "_");
+		StringBuilder result = new StringBuilder();
+		for (int i = 0; i < token.length(); i++) {
+			if (Character.isLetterOrDigit(token.charAt(i)) && (i != 0 || Character.isLetter(token.charAt(i))))
+				result.append(token.charAt(i));
+			else
+				result.append('_');
+		}
+        return result.toString();
     }
 
     public static void createUnitTest(TopCoderTask task, final Project project) {

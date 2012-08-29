@@ -362,7 +362,7 @@ public class CodeGenerationUtilities {
     private static String canonize(String token) {
 		StringBuilder result = new StringBuilder();
 		for (int i = 0; i < token.length(); i++) {
-			if (Character.isLetterOrDigit(token.charAt(i)) && (i != 0 || Character.isLetter(token.charAt(i))))
+			if (Character.isLetterOrDigit(token.charAt(i)))
 				result.append(token.charAt(i));
 			else
 				result.append('_');

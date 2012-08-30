@@ -123,6 +123,10 @@ public class TopCoderAction extends AnAction {
 														String defaultDir = Utilities.getData(project).defaultDirectory;
 														FileUtilities.createDirectoryIfMissing(project, defaultDir);
 														String packageName = FileUtilities.getPackage(FileUtilities.getPsiDirectory(project, defaultDir));
+														if (packageName == null) {
+															JOptionPane.showMessageDialog(null, "defaultDirectory should be under source and in non-default package");
+															return;
+														}
 														String fqn = (packageName.length() == 0 ? "" : packageName + ".") + task.name;
 														TopCoderTask taskToWrite = task.setFQN(fqn);
 														if (packageName.length() != 0) {

@@ -128,17 +128,19 @@ public class ArchiveAction extends AnAction {
 	}
 
 	private String getDateAndContest(Task task) {
-        String yearAndMonth = task.date;
+        String yearAndMonth = task.date.trim();
         int position = yearAndMonth.indexOf('.');
         if (position != -1)
             position = yearAndMonth.indexOf('.', position + 1);
         if (position != -1)
             yearAndMonth = yearAndMonth.substring(0, position);
+		if (yearAndMonth.length() == 0)
+			return canonize(task.contestName.length() == 0 ? "unsorted" : task.contestName);
         return canonize(yearAndMonth) + "/" + canonize(task.date + " - " + (task.contestName.length() == 0 ? "unsorted" : task.contestName));
     }
 
     private String canonize(String filename) {
-        return filename.replaceAll("[/\\\\?%*:|\"<>]", "-");
+        return filename.replaceAll("[\\\\?%*:|\"<>]", "-");
     }
 
     public static void setOtherConfiguration(RunManagerImpl manager, Task task) {

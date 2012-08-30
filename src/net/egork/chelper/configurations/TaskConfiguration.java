@@ -90,8 +90,11 @@ public class TaskConfiguration extends ModuleBasedConfiguration<JavaRunConfigura
 	public void readExternal(Element element) throws InvalidDataException {
 		super.readExternal(element);
 		String fileName = element.getChildText("taskConf");
-		if (fileName != null && fileName.trim().length() != 0)
-			configuration = FileUtilities.readTask(fileName, getProject());
+		if (fileName != null && fileName.trim().length() != 0) {
+			try {
+				configuration = FileUtilities.readTask(fileName, getProject());
+			} catch (NullPointerException ignored) {}
+		}
 	}
 
 	@Override

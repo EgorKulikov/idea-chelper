@@ -54,7 +54,7 @@ public class OutputWriter {
         if (s == null)
             printLine(-1);
         else
-            printLine(s.length(), s);
+            printLine(s.getBytes().length, s);
     }
 
     public void printBoolean(boolean b) {

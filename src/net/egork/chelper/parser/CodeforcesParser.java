@@ -9,7 +9,6 @@ import net.egork.chelper.util.FileUtilities;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import javax.swing.*;
-import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,12 +26,9 @@ public class CodeforcesParser implements Parser {
 	}
 
     public void getContests(DescriptionReceiver receiver) {
-        String contestsPage;
-        try{
-            contestsPage = FileUtilities.getWebPageContent("http://codeforces.com/contests");
-        } catch (IOException e) {
-            return;
-        }
+        String contestsPage = FileUtilities.getWebPageContent("http://codeforces.com/contests");
+		if (contestsPage == null)
+			return;
         List<Description> contests = new ArrayList<Description>();
         StringParser parser = new StringParser(contestsPage);
         try {
@@ -61,12 +57,9 @@ public class CodeforcesParser implements Parser {
 			return;
 		}
 		for (int i = 2; i <= additionalPagesCount; i++) {
-			String page;
-			try {
-				page = FileUtilities.getWebPageContent("http://codeforces.com/contests/page/" + i);
-			} catch (IOException e) {
+			String page = FileUtilities.getWebPageContent("http://codeforces.com/contests/page/" + i);
+			if (page == null)
 				continue;
-			}
 			parser = new StringParser(page);
 			List<Description> descriptions = new ArrayList<Description>();
 			try {
@@ -89,12 +82,9 @@ public class CodeforcesParser implements Parser {
     }
 
     public void parseContest(String id, DescriptionReceiver receiver) {
-        String mainPage;
-        try {
-            mainPage = FileUtilities.getWebPageContent("http://codeforces.com/contest/" + id);
-        } catch (IOException e) {
-            return;
-        }
+        String mainPage = FileUtilities.getWebPageContent("http://codeforces.com/contest/" + id);
+		if (mainPage == null)
+			return;
         List<Description> ids = new ArrayList<Description>();
         StringParser parser = new StringParser(mainPage);
         try {
@@ -111,18 +101,16 @@ public class CodeforcesParser implements Parser {
 			receiver.receiveDescriptions(ids);
     }
 
-    public Task parseTask(String id) {
+    public Task parseTask(Description description) {
+		String id = description.id;
         String[] tokens = id.split(" ");
         if (tokens.length != 2)
             return null;
         String contestId = tokens[0];
         id = tokens[1];
-        String text;
-        try {
-            text = FileUtilities.getWebPageContent("http://codeforces.ru/contest/" + contestId + "/problem/" + id);
-        } catch (IOException e) {
-            return null;
-        }
+        String text = FileUtilities.getWebPageContent("http://codeforces.ru/contest/" + contestId + "/problem/" + id);
+		if (text == null)
+			return null;
         StringParser parser = new StringParser(text);
         try {
             parser.advance(false, "<div class=\"memory-limit\">");
@@ -159,9 +147,10 @@ public class CodeforcesParser implements Parser {
                     break;
                 }
             }
-            String name = "Task" + id;
+            String taskClass = "Task" + id;
+			String name = description.description;
             return new Task(name, null, inputType, outputType, tests.toArray(new Test[tests.size()]), null,
-                    "-Xmx" + heapMemory, null, name, TokenChecker.class.getCanonicalName(), "", new String[0], null,
+                    "-Xmx" + heapMemory, null, taskClass, TokenChecker.class.getCanonicalName(), "", new String[0], null,
                     null, true, null, null);
         } catch (ParseException e) {
             return null;

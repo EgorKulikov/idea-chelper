@@ -58,7 +58,7 @@ public class ParseDialog extends JDialog {
                 ProjectData data = Utilities.getData(project);
                 for (Object taskDescription : tasks) {
                     Description description = (Description) taskDescription;
-                    Task raw = parser.parseTask(description.id);
+                    Task raw = parser.parseTask(description);
 					if (raw == null)
 						continue;
                     Task task = new Task(raw.name, (TestType)testType.getSelectedItem(), raw.input, raw.output,

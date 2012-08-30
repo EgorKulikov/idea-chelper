@@ -96,10 +96,10 @@ public class InputReader {
         int length = readInt();
         if (length < 0)
             return null;
-        StringBuilder result = new StringBuilder(length);
-        for (int i = 0; i < length; i++)
-            result.appendCodePoint(read());
-        return result.toString();
+		byte[] bytes = new byte[length];
+		for (int i = 0; i < length; i++)
+			bytes[i] = (byte) read();
+        return new String(bytes);
     }
 
     public String readToken() {

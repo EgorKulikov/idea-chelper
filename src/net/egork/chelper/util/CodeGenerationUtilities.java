@@ -292,8 +292,8 @@ public class CodeGenerationUtilities {
 		Test[] tests = task.tests;
 		for (int i = 0, testsLength = tests.length; i < testsLength; i++)
 			tests[i] = tests[i].setActive(true);
-		String path = Utilities.getData(project).testDirectory + "/on" + canonize(task.date) + "_" + canonize(task.contestName) + "/" +
-			task.name.toLowerCase();
+		String path = Utilities.getData(project).testDirectory + "/on" + canonize(firstPart(task.date), false)  + "/on" + canonize(task.date, false) + "_" + canonize(task.contestName, false) + "/" +
+			canonize(task.name, true);
         task = task.setTests(tests);
 		String originalPath = path;
 		int index = 0;
@@ -359,10 +359,12 @@ public class CodeGenerationUtilities {
         return className;
     }
 
-    private static String canonize(String token) {
+    private static String canonize(String token, boolean firstIsLetter) {
 		StringBuilder result = new StringBuilder();
 		for (int i = 0; i < token.length(); i++) {
-			if (Character.isLetterOrDigit(token.charAt(i)))
+			if (firstIsLetter && i == 0 && Character.isDigit(token.charAt(0)))
+				result.append('_');
+			if (Character.isLetterOrDigit(token.charAt(i)) && token.charAt(i) < 128)
 				result.append(token.charAt(i));
 			else
 				result.append('_');
@@ -376,8 +378,8 @@ public class CodeGenerationUtilities {
 		NewTopCoderTest[] tests = task.tests;
 		for (int i = 0, testsLength = tests.length; i < testsLength; i++)
 			tests[i] = tests[i].setActive(true);
-		String path = Utilities.getData(project).testDirectory + "/on" + canonize(task.date) + "_" + canonize(task.contestName) + "/" +
-			task.name.toLowerCase();
+		String path = Utilities.getData(project).testDirectory + "/on" + canonize(firstPart(task.date), false) + "/on" + canonize(task.date, false) + "_" + canonize(task.contestName, false) + "/" +
+			canonize(task.name, true);
         task = task.setTests(tests);
 		String originalPath = path;
 		int index = 0;
@@ -424,6 +426,15 @@ public class CodeGenerationUtilities {
                 FileUtilities.writeTextFile(directory, "Main.java", tester);
             }
         });
+	}
+
+	private static String firstPart(String date) {
+		int position = date.indexOf('.');
+		if (position != -1)
+			position = date.indexOf('.', position + 1);
+		if (position != -1)
+			return date.substring(0, position);
+		return date;
 	}
 
 	private static String generateTopCoderTester(String taskPath) {

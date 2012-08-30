@@ -14,6 +14,7 @@ import net.egork.chelper.task.TopCoderTask;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Properties;
 
 /**
@@ -81,7 +82,7 @@ public class FileUtilities {
 						return;
 					}
 					stream = file.getOutputStream(null);
-					stream.write(fileContent.getBytes());
+					stream.write(fileContent.getBytes(Charset.forName("UTF-8")));
 				} catch (IOException ignored) {
 				} finally {
 					if (stream != null) {
@@ -142,6 +143,8 @@ public class FileUtilities {
 	}
 
 	public static String getPackage(PsiDirectory directory) {
+		if (directory == null)
+			return null;
 		PsiPackage aPackage = JavaDirectoryService.getInstance().getPackage(directory);
 		String packageName = null;
 		if (aPackage != null) {
@@ -186,24 +189,22 @@ public class FileUtilities {
 		FileDocumentManager.getInstance().saveDocument(FileDocumentManager.getInstance().getDocument(file));
 	}
 
-	public static String getWebPageContent(String address) throws IOException {
-		IOException ex = null;
+	public static String getWebPageContent(String address) {
 		for (int i = 0; i < 10; i++) {
 			try {
 				URL url = new URL(address);
 				InputStream input = url.openStream();
-				BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+				BufferedReader reader = new BufferedReader(new InputStreamReader(input, Charset.forName("UTF-8")));
 				StringBuilder builder = new StringBuilder();
 				String s;
 				while ((s = reader.readLine()) != null) {
 					builder.append(s).append('\n');
 				}
 				return builder.toString();
-			} catch (IOException e) {
-				ex = e;
+			} catch (IOException ignored) {
 			}
 		}
-		throw ex;
+		return null;
 	}
 
 	public static Task readTask(String fileName, Project project) {

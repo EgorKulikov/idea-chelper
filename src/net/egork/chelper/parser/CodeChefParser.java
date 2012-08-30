@@ -9,9 +9,11 @@ import net.egork.chelper.util.FileUtilities;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import javax.swing.*;
-import java.io.IOException;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -36,13 +38,11 @@ public class CodeChefParser implements Parser {
     public void getContests(DescriptionReceiver receiver) {
         String mainPage;
 		while (true) {
-			try {
-				mainPage = FileUtilities.getWebPageContent("http://www.codechef.com/contests");
+			mainPage = FileUtilities.getWebPageContent("http://www.codechef.com/contests");
+			if (mainPage != null)
 				break;
-			} catch (IOException e) {
-				if (receiver.isStopped())
-					return;
-			}
+			if (receiver.isStopped())
+				return;
 		}
         StringParser parser = new StringParser(mainPage);
         List<Description> contests = new ArrayList<Description>();
@@ -90,15 +90,13 @@ public class CodeChefParser implements Parser {
     }
 
 	public void parseContest(String id, DescriptionReceiver receiver) {
-		String mainPage = null;
+		String mainPage;
 		while (true) {
-			try {
-				mainPage = FileUtilities.getWebPageContent("http://www.codechef.com/" + id);
+			mainPage = FileUtilities.getWebPageContent("http://www.codechef.com/" + id);
+			if (mainPage != null)
 				break;
-			} catch (IOException ignored) {
-				if (receiver.isStopped())
-					return;
-			}
+			if (receiver.isStopped())
+				return;
 		}
 		List<Description> tasks = new ArrayList<Description>();
 		StringParser parser = new StringParser(mainPage);
@@ -131,7 +129,8 @@ public class CodeChefParser implements Parser {
 			receiver.receiveDescriptions(tasks);
 	}
 
-	public Task parseTask(String id) {
+	public Task parseTask(Description description) {
+		String id = description.id;
 		String[] tokens = id.split(" ");
 		if (tokens.length > 2 || tokens.length == 0)
 			return null;
@@ -140,12 +139,9 @@ public class CodeChefParser implements Parser {
 			url = "http://www.codechef.com/" + tokens[0] + "/problems/" + tokens[1];
 		else
 			url = "http://www.codechef.com/problems/" + tokens[0];
-		String text;
-		try {
-			text = FileUtilities.getWebPageContent(url);
-		} catch (IOException e) {
+		String text = FileUtilities.getWebPageContent(url);
+		if (text == null)
 			return null;
-		}
 		StringParser parser = new StringParser(text);
 		Pattern pattern = Pattern.compile(".*<p>.*</p>.*", Pattern.DOTALL);
 		try {
@@ -177,7 +173,7 @@ public class CodeChefParser implements Parser {
 					break;
 				}
 			}
-            return new Task(taskID, null, StreamConfiguration.STANDARD, StreamConfiguration.STANDARD,
+            return new Task(description.description, null, StreamConfiguration.STANDARD, StreamConfiguration.STANDARD,
                     tests.toArray(new Test[tests.size()]), null, "-Xmx64M", null, taskID,
                     TokenChecker.class.getCanonicalName(), "", new String[0], null, null, true, null, null);
 		} catch (ParseException e) {

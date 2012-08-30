@@ -9,7 +9,6 @@ import net.egork.chelper.util.FileUtilities;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import javax.swing.*;
-import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,11 +27,7 @@ public class TimusParser implements Parser {
 	}
 
 	public void getContests(DescriptionReceiver receiver) {
-		String currentContestPage = null;
-		try {
-			currentContestPage = FileUtilities.getWebPageContent("http://acm.timus.ru/contest.aspx?locale=en");
-		} catch (IOException ignored) {
-		}
+		String currentContestPage = FileUtilities.getWebPageContent("http://acm.timus.ru/contest.aspx?locale=en");
 		if (currentContestPage != null) {
 			StringParser parser = new StringParser(currentContestPage);
 			try {
@@ -46,11 +41,7 @@ public class TimusParser implements Parser {
 				}
 			} catch (ParseException ignored) {}
 		}
-		String problemsetPage = null;
-		try {
-			problemsetPage = FileUtilities.getWebPageContent("http://acm.timus.ru/problemset.aspx?locale=en");
-		} catch (IOException ignored) {
-		}
+		String problemsetPage = FileUtilities.getWebPageContent("http://acm.timus.ru/problemset.aspx?locale=en");
 		if (problemsetPage != null) {
 			StringParser parser = new StringParser(problemsetPage);
 			int index = 1;
@@ -64,11 +55,7 @@ public class TimusParser implements Parser {
 			else
 				return;
 		}
-		String archivePage = null;
-		try {
-			archivePage = FileUtilities.getWebPageContent("http://acm.timus.ru/archive.aspx?locale=en");
-		} catch (IOException ignored) {
-		}
+		String archivePage = FileUtilities.getWebPageContent("http://acm.timus.ru/archive.aspx?locale=en");
 		if (archivePage != null) {
 			StringParser parser = new StringParser(archivePage);
 			List<Description> contests = new ArrayList<Description>();
@@ -88,23 +75,20 @@ public class TimusParser implements Parser {
 	}
 
 	public void parseContest(String id, DescriptionReceiver receiver) {
-		String mainPage;
 		int index = 1;
-		try {
-			String url = "http://acm.timus.ru/problemset.aspx?space=" + id + "&locale=en";
-			if (Integer.parseInt(id) < 0) {
-				url = "http://acm.timus.ru/problemset.aspx?space=1&page=" + id.substring(1) + "&locale=en";
-				index = 1000 + 100 * (-Integer.parseInt(id) - 1);
-				id = "1";
-				if (!receiver.isStopped())
-					receiver.receiveDescriptions(Collections.<Description>emptyList());
-				else
-					return;
-			}
-			mainPage = FileUtilities.getWebPageContent(url);
-		} catch (IOException e) {
-			return;
+		String url = "http://acm.timus.ru/problemset.aspx?space=" + id + "&locale=en";
+		if (Integer.parseInt(id) < 0) {
+			url = "http://acm.timus.ru/problemset.aspx?space=1&page=" + id.substring(1) + "&locale=en";
+			index = 1000 + 100 * (-Integer.parseInt(id) - 1);
+			id = "1";
+			if (!receiver.isStopped())
+				receiver.receiveDescriptions(Collections.<Description>emptyList());
+			else
+				return;
 		}
+		String mainPage = FileUtilities.getWebPageContent(url);
+		if (mainPage == null)
+			return;
 		List<Description> tasks = new ArrayList<Description>();
 		StringParser parser = new StringParser(mainPage);
 		while (true) {
@@ -112,6 +96,10 @@ public class TimusParser implements Parser {
 				parser.advance(true, "<A HREF=\"problem.aspx?space=" + id + "&amp;num=" + index);
 				parser.advance(true, "\">");
 				String description = StringEscapeUtils.unescapeHtml(parser.advance(false, "</A>"));
+				if (index < 1000)
+					description = ((char)(index - 1 + 'A')) + " - " + description;
+				else
+					description = index + " - " + description;
 				tasks.add(new Description(id + " " + index++, description));
 			} catch (ParseException e) {
 				break;
@@ -121,24 +109,22 @@ public class TimusParser implements Parser {
 			receiver.receiveDescriptions(tasks);
 	}
 
-	public Task parseTask(String id) {
+	public Task parseTask(Description description) {
+		String id = description.id;
 		String[] tokens = id.split(" ");
 		String url;
-		String taskName;
 		if (tokens.length != 2)
 			return null;
+		String index;
 		if (!tokens[0].equals("1")) {
-			taskName = "Task" + (char)('A' - 1 + Integer.parseInt(tokens[1]));
+			index = Character.toString((char)('A' - 1 + Integer.parseInt(tokens[1])));
 		} else {
-			taskName = "Task" + tokens[1];
+			index = tokens[1];
 		}
 		url = "http://acm.timus.ru/problem.aspx?space=" + tokens[0] + "&num=" + tokens[1] + "&locale=en";
-		String text;
-		try {
-			text = FileUtilities.getWebPageContent(url);
-		} catch (IOException e) {
+		String text = FileUtilities.getWebPageContent(url);
+		if (text == null)
 			return null;
-		}
 		StringParser parser = new StringParser(text);
 		try {
 			parser.advance(true, "Memory Limit: ");
@@ -157,9 +143,9 @@ public class TimusParser implements Parser {
 					break;
 				}
 			}
-			return new Task(taskName, null, StreamConfiguration.STANDARD, StreamConfiguration.STANDARD,
-				tests.toArray(new Test[tests.size()]), null,
-				"-Xmx" + heapMemory + "M -Xss" + Math.min(heapMemory, 64) + "M", null, taskName,
+			return new Task(description.description, null, StreamConfiguration.STANDARD,
+				StreamConfiguration.STANDARD, tests.toArray(new Test[tests.size()]), null,
+				"-Xmx" + heapMemory + "M -Xss" + Math.min(heapMemory, 64) + "M", null, "Task" + index,
 				TokenChecker.class.getCanonicalName(), "", new String[0], null, null, true, null, null);
 		} catch (ParseException e) {
 			return null;

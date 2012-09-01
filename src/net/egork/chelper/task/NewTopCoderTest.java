@@ -123,6 +123,8 @@ public class NewTopCoderTest {
     public String toString() {
 		StringBuilder builder = new StringBuilder();
 		for (Object argument : arguments) {
+			if (builder.length() != 0)
+				builder.append(" ");
 			if (argument instanceof String)
 				builder.append(toString(argument, String.class));
 			else if (argument instanceof Integer)

@@ -19,7 +19,6 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.io.*;
-import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
@@ -136,7 +135,7 @@ public class TopCoderAction extends AnAction {
                     }
                 }
             }).start();
-		} catch (BindException e) {
+		} catch (IOException e) {
 			JOptionPane.showMessageDialog(null, "Socket cannot be opened. Files will be used which are less reliable",
 				"Socket error", JOptionPane.INFORMATION_MESSAGE);
 			VirtualFileManager.getInstance().addVirtualFileListener(new VirtualFileAdapter() {
@@ -170,8 +169,6 @@ public class TopCoderAction extends AnAction {
 			VirtualFile file = FileUtilities.writeTextFile(LocalFileSystem.getInstance().findFileByPath(System.getProperty("user.home")), ".chelper", project.getBasePath() + "\n");
 			new File(file.getCanonicalPath()).deleteOnExit();
 			alternative = true;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 

@@ -113,12 +113,12 @@ public class TopCoderEditTestsDialog extends JDialog {
 			public void actionPerformed(ActionEvent e) {
 				saveCurrentTest();
 				int index = TopCoderEditTestsDialog.this.tests.size();
-				Object[] arguments = new Object[TopCoderEditTestsDialog.this.arguments.length];
-				Arrays.fill(arguments, "");
-				NewTopCoderTest test = new NewTopCoderTest(arguments, null, index);
+				NewTopCoderTest test = new NewTopCoderTest(new Object[TopCoderEditTestsDialog.this.arguments.length], null, index);
 				TopCoderEditTestsDialog.this.tests.add(test);
 				checkBoxesPanel.add(createCheckBox(test));
 				setSelectedTest(index);
+				knowAnswer.setSelected(true);
+				result.setEnabled(true);
 			}
 		});
 		middleButtonsPanel.add(newTest);
@@ -269,8 +269,12 @@ public class TopCoderEditTestsDialog extends JDialog {
 			testPanel.setVisible(false);
 		else {
 			testPanel.setVisible(true);
-			for (int i = 0; i < arguments.length; i++)
-				arguments[i].setText(NewTopCoderTest.toString(tests.get(index).arguments[i], task.signature.arguments[i]));
+			for (int i = 0; i < arguments.length; i++) {
+				if (tests.get(index).arguments[i] == null)
+					arguments[i].setText("");
+				else
+					arguments[i].setText(NewTopCoderTest.toString(tests.get(index).arguments[i], task.signature.arguments[i]));
+			}
             knowAnswer.setSelected(tests.get(index).result != null);
             result.setEnabled(knowAnswer.isSelected());
             if (tests.get(index).result != null)

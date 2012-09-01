@@ -65,7 +65,7 @@ public class NewTopCoderTester {
                 System.out.println(NewTopCoderTest.toString(argument, task.signature.arguments[i]));
             }
 			System.out.println("Expected output:");
-			System.out.println(test.result);
+			System.out.println(NewTopCoderTest.toString(test.result, task.signature.result));
 			System.out.println("Execution result:");
 			long time = System.currentTimeMillis();
 			try {

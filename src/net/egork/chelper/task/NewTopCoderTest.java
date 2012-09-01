@@ -4,7 +4,6 @@ import net.egork.chelper.util.InputReader;
 import net.egork.chelper.util.OutputWriter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -122,7 +121,26 @@ public class NewTopCoderTest {
     }
 
     public String toString() {
-        String representation = Arrays.toString(arguments);
+		StringBuilder builder = new StringBuilder();
+		for (Object argument : arguments) {
+			if (argument instanceof String)
+				builder.append(toString(argument, String.class));
+			else if (argument instanceof Integer)
+				builder.append(toString(argument, int.class));
+			else if (argument instanceof Long)
+				builder.append(toString(argument, long.class));
+			else if (argument instanceof Double)
+				builder.append(toString(argument, double.class));
+			else if (argument instanceof String[])
+				builder.append(toString(argument, String[].class));
+			else if (argument instanceof int[])
+				builder.append(toString(argument, int[].class));
+			else if (argument instanceof long[])
+				builder.append(toString(argument, long[].class));
+			else
+				builder.append(toString(argument, double[].class));
+		}
+        String representation = builder.toString();
         if (representation.length() > 15)
             representation = representation.substring(0, 12) + "...";
         return "Test #" + index + ": " + representation;
@@ -157,6 +175,8 @@ public class NewTopCoderTest {
     }
 
     public static String toString(Object value, Class aClass) {
+		if (value == null)
+			return "null";
         if (String.class.equals(aClass))
             return '"' + value.toString() + '"';
         if (!aClass.isArray())

@@ -46,6 +46,7 @@ public class TaskConfigurationPanel extends JPanel {
     private JTextField contestName;
     private JCheckBox truncate;
 	private int panelWidth = new JTextField(20).getPreferredSize().width;
+	private JCheckBox includeLocale;
 
     public TaskConfigurationPanel(final Task task, boolean firstEdit, final Project project, final SizeChangeListener listener, JPanel buttonPanel) {
         super(new BorderLayout(5, 5));
@@ -200,6 +201,8 @@ public class TaskConfigurationPanel extends JPanel {
         rightAdvanced.add(contestName);
         truncate = new JCheckBox("Truncate long tests", task.truncate);
         rightAdvanced.add(truncate);
+		includeLocale = new JCheckBox("Force locale", task.includeLocale);
+		rightAdvanced.add(includeLocale);
         advanced = new JPanel(new GridLayout(1, 2, 5, 5));
         advanced.add(leftAdvanced);
         advanced.add(rightAdvanced);
@@ -219,11 +222,12 @@ public class TaskConfigurationPanel extends JPanel {
 
     public Task getTask() {
         return task = new Task(name.getText(), (TestType)testType.getSelectedItem(),
-                new StreamConfiguration((StreamConfiguration.StreamType) inputType.getSelectedItem(), inputFileName.getText()),
-                new StreamConfiguration((StreamConfiguration.StreamType) outputType.getSelectedItem(), outputFileName.getText()),
-                task.tests, location.getText(), vmArgs.getText(), mainClass.getText(),
-                taskClass.getText(), checkerClass.getText(), checkerParameters.getText(), task.testClasses,
-                date.getText(), contestName.getText(), truncate.isSelected(), task.inputClass, task.outputClass);
+            new StreamConfiguration((StreamConfiguration.StreamType) inputType.getSelectedItem(), inputFileName.getText()),
+            new StreamConfiguration((StreamConfiguration.StreamType) outputType.getSelectedItem(), outputFileName.getText()),
+            task.tests, location.getText(), vmArgs.getText(), mainClass.getText(),
+            taskClass.getText(), checkerClass.getText(), checkerParameters.getText(), task.testClasses,
+            date.getText(), contestName.getText(), truncate.isSelected(), task.inputClass, task.outputClass,
+			includeLocale.isSelected());
     }
 
     public interface SizeChangeListener {

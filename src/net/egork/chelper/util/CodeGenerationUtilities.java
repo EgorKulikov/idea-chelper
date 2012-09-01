@@ -2,12 +2,15 @@ package net.egork.chelper.util;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.search.searches.ReferencesSearch;
+import net.egork.chelper.actions.TopCoderAction;
 import net.egork.chelper.task.*;
 
 import javax.swing.*;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
@@ -119,6 +122,8 @@ public class CodeGenerationUtilities {
 		StringBuilder builder = new StringBuilder();
 		builder.append("public class ").append(task.mainClass).append(" {\n");
 		builder.append("\tpublic static void main(String[] args) {\n");
+		if (task.includeLocale)
+			builder.append("\t\tLocale.setDefault(Locale.US);\n");
 		if (task.input.type == StreamConfiguration.StreamType.STANDARD)
 			builder.append("\t\tInputStream inputStream = System.in;\n");
 		else {
@@ -188,6 +193,8 @@ public class CodeGenerationUtilities {
 					toImport.add("import java.io.FileInputStream;");
 				if (task.output.type != StreamConfiguration.StreamType.STANDARD)
 					toImport.add("import java.io.FileOutputStream;");
+				if (task.includeLocale)
+					toImport.add("import java.util.Locale;");
 				VirtualFile originalFile = FileUtilities.getFileByFQN(task.taskClass, project);
 				PsiFile originalSource = PsiManager.getInstance(project).findFile(originalFile);
 				final String[] textParts = createInlinedSource(project, toImport, originalSource);
@@ -282,6 +289,11 @@ public class CodeGenerationUtilities {
 				final VirtualFile file = FileUtilities.writeTextFile(directory, task.name + ".java", text.toString());
 				FileUtilities.synchronizeFile(file);
 				removeUnusedCode(project, file, task.name, task.signature.name);
+				if (TopCoderAction.alternative) {
+					String source = FileUtilities.readTextFile(file);
+					VirtualFile virtualFile = FileUtilities.writeTextFile(LocalFileSystem.getInstance().findFileByPath(System.getProperty("user.home")), ".java", source);
+					new File(virtualFile.getCanonicalPath()).deleteOnExit();
+				}
 			}
 		});
 	}

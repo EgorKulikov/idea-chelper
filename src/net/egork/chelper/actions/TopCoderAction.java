@@ -5,7 +5,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.*;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiElement;
 import net.egork.chelper.task.TopCoderTask;
@@ -13,23 +13,24 @@ import net.egork.chelper.topcoder.CHelperArenaPlugin;
 import net.egork.chelper.topcoder.Message;
 import net.egork.chelper.util.CodeGenerationUtilities;
 import net.egork.chelper.util.FileUtilities;
+import net.egork.chelper.util.InputReader;
 import net.egork.chelper.util.Utilities;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.io.*;
+import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
 /**
  * @author Egor Kulikov (egorku@yandex-team.ru)
  */
 public class TopCoderAction extends AnAction {
-    private Map<Project, ServerSocket> sockets = new HashMap<Project, ServerSocket>();
+    private ServerSocket serverSocket = null;
+	public static boolean alternative = false;
 
     public void actionPerformed(AnActionEvent e) {
         if (!Utilities.isEligible(e.getDataContext()))
@@ -38,6 +39,8 @@ public class TopCoderAction extends AnAction {
         fixTopCoderSettings();
         startServerIfNeeded(project);
         String arenaFileName = createArenaJar();
+		if (arenaFileName == null)
+			return;
         String javaExecutable = System.getProperty("java.home") + File.separator + "bin" + File.separator + "javaws";
         try {
             Process process = new ProcessBuilder(javaExecutable, arenaFileName).start();
@@ -79,16 +82,16 @@ public class TopCoderAction extends AnAction {
             outputStream.close();
             return tempFile.getAbsolutePath();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            JOptionPane.showMessageDialog(null, "Arena is not accessible, check Internet connection", "Connection error", JOptionPane.ERROR_MESSAGE);
+			return null;
         }
     }
 
     private void startServerIfNeeded(final Project project) {
         try {
-            if (sockets.containsKey(project))
+            if (serverSocket != null || alternative)
                 return;
-            final ServerSocket serverSocket = new ServerSocket(CHelperArenaPlugin.PORT);
-            sockets.put(project, serverSocket);
+            serverSocket = new ServerSocket(CHelperArenaPlugin.PORT);
             new Thread(new Runnable() {
                 public void run() {
                     while (true) {
@@ -120,25 +123,7 @@ public class TopCoderAction extends AnAction {
 											public void run() {
 												ApplicationManager.getApplication().runWriteAction(new Runnable() {
 													public void run() {
-														String defaultDir = Utilities.getData(project).defaultDirectory;
-														FileUtilities.createDirectoryIfMissing(project, defaultDir);
-														String packageName = FileUtilities.getPackage(FileUtilities.getPsiDirectory(project, defaultDir));
-														if (packageName == null) {
-															JOptionPane.showMessageDialog(null, "defaultDirectory should be under source and in non-default package");
-															return;
-														}
-														String fqn = (packageName.length() == 0 ? "" : packageName + ".") + task.name;
-														TopCoderTask taskToWrite = task.setFQN(fqn);
-														if (packageName.length() != 0) {
-															FileUtilities.writeTextFile(FileUtilities.getFile(project, defaultDir),
-																task.name + ".java", "package " + packageName + ";\n\n" + CodeGenerationUtilities.createTopCoderStub(task));
-														} else {
-															FileUtilities.writeTextFile(FileUtilities.getFile(project, defaultDir),
-																task.name + ".java", CodeGenerationUtilities.createTopCoderStub(task));
-														}
-														Utilities.createConfiguration(taskToWrite, true, project);
-														final PsiElement main = JavaPsiFacade.getInstance(project).findClass(fqn);
-														Utilities.openElement(project, main);
+														createConfiguration(project, task);
 													}
 												});
 											}
@@ -151,12 +136,68 @@ public class TopCoderAction extends AnAction {
                     }
                 }
             }).start();
+		} catch (BindException e) {
+			JOptionPane.showMessageDialog(null, "Socket cannot be opened. Files will be used which are less reliable",
+				"Socket error", JOptionPane.INFORMATION_MESSAGE);
+			VirtualFileManager.getInstance().addVirtualFileListener(new VirtualFileAdapter() {
+				@Override
+				public void fileCreated(VirtualFileEvent event) {
+					process(event);
+				}
+
+				@Override
+				public void contentsChanged(VirtualFileEvent event) {
+					process(event);
+				}
+
+				private void process(VirtualFileEvent event) {
+					final VirtualFile file = event.getFile();
+					if (".tctask".equals(file.getName())) {
+						try {
+							TopCoderTask task = TopCoderTask.load(new InputReader(file.getInputStream()));
+							createConfiguration(project, task);
+							ApplicationManager.getApplication().runWriteAction(new Runnable() {
+								public void run() {
+									try {
+										file.delete(null);
+									} catch (IOException ignored) {}
+								}
+							});
+						} catch (IOException ignored) {}
+					}
+				}
+			});
+			VirtualFile file = FileUtilities.writeTextFile(LocalFileSystem.getInstance().findFileByPath(System.getProperty("user.home")), ".chelper", project.getBasePath() + "\n");
+			new File(file.getCanonicalPath()).deleteOnExit();
+			alternative = true;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void fixTopCoderSettings() {
+	private void createConfiguration(Project project, TopCoderTask task) {
+		String defaultDir = Utilities.getData(project).defaultDirectory;
+		FileUtilities.createDirectoryIfMissing(project, defaultDir);
+		String packageName = FileUtilities.getPackage(FileUtilities.getPsiDirectory(project, defaultDir));
+		if (packageName == null) {
+			JOptionPane.showMessageDialog(null, "defaultDirectory should be under source and in non-default package");
+			return;
+		}
+		String fqn = (packageName.length() == 0 ? "" : packageName + ".") + task.name;
+		TopCoderTask taskToWrite = task.setFQN(fqn);
+		if (packageName.length() != 0) {
+			FileUtilities.writeTextFile(FileUtilities.getFile(project, defaultDir),
+				task.name + ".java", "package " + packageName + ";\n\n" + CodeGenerationUtilities.createTopCoderStub(task));
+		} else {
+			FileUtilities.writeTextFile(FileUtilities.getFile(project, defaultDir),
+				task.name + ".java", CodeGenerationUtilities.createTopCoderStub(task));
+		}
+		Utilities.createConfiguration(taskToWrite, true, project);
+		final PsiElement main = JavaPsiFacade.getInstance(project).findClass(fqn);
+		Utilities.openElement(project, main);
+	}
+
+	private void fixTopCoderSettings() {
         Properties properties = new Properties();
         try {
             properties.load(new FileInputStream(new File(System.getProperty("user.home") + File.separator + "contestapplet.conf")));

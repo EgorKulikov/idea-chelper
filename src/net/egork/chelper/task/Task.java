@@ -4,6 +4,7 @@ import net.egork.chelper.util.InputReader;
 import net.egork.chelper.util.OutputWriter;
 
 import java.util.Calendar;
+import java.util.InputMismatchException;
 
 /**
  * @author Egor Kulikov (kulikov@devexperts.com)
@@ -29,8 +30,13 @@ public class Task {
 	public final boolean truncate;
     public final String inputClass;
     public final String outputClass;
+	public final boolean includeLocale;
 
-    public Task(String name, TestType testType, StreamConfiguration input, StreamConfiguration output, Test[] tests, String location, String vmArgs, String mainClass, String taskClass, String checkerClass, String checkerParameters, String[] testClasses, String date, String contestName, boolean truncate, String inputClass, String outputClass) {
+	public Task(String name, TestType testType, StreamConfiguration input, StreamConfiguration output, Test[] tests, String location, String vmArgs, String mainClass, String taskClass, String checkerClass, String checkerParameters, String[] testClasses, String date, String contestName, boolean truncate, String inputClass, String outputClass) {
+		this(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass, checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, false);
+	}
+
+    public Task(String name, TestType testType, StreamConfiguration input, StreamConfiguration output, Test[] tests, String location, String vmArgs, String mainClass, String taskClass, String checkerClass, String checkerParameters, String[] testClasses, String date, String contestName, boolean truncate, String inputClass, String outputClass, boolean  includeLocale) {
         this.name = name;
         this.testType = testType;
         this.input = input;
@@ -48,6 +54,7 @@ public class Task {
         this.truncate = truncate;
         this.inputClass = inputClass;
         this.outputClass = outputClass;
+		this.includeLocale = includeLocale;
     }
 
     public static String getDateString() {
@@ -91,6 +98,7 @@ public class Task {
         out.printBoolean(truncate);
         out.printString(inputClass);
         out.printString(outputClass);
+		out.printBoolean(includeLocale);
 	}
 
     public static Task loadTask(InputReader in) {
@@ -120,10 +128,14 @@ public class Task {
         boolean truncate = in.readBoolean();
         String inputClass = in.readString();
         String outputClass = in.readString();
+		boolean includeLocale = false;
+		try {
+			includeLocale = in.readBoolean();
+		} catch (InputMismatchException ignored) {}
         return new Task(name, testType, new StreamConfiguration(inputStreamType, inputFileName),
                 new StreamConfiguration(outputStreamType, outputFileName), tests, location, vmArgs, mainClass,
                 taskClass, checkerClass, checkerParameters, testClasses, date, contestName, truncate, inputClass,
-                outputClass);
+                outputClass, includeLocale);
     }
 
     public Task setTests(Test[] tests) {

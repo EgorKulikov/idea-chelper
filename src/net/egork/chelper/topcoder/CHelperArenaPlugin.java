@@ -10,9 +10,10 @@ import net.egork.chelper.task.MethodSignature;
 import net.egork.chelper.task.NewTopCoderTest;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.TopCoderTask;
+import net.egork.chelper.util.OutputWriter;
 
 import javax.swing.*;
-import java.io.IOException;
+import java.io.*;
 import java.util.Arrays;
 
 /**
@@ -41,8 +42,20 @@ public class CHelperArenaPlugin implements ArenaPlugin {
             }
             return message.in.readString();
         } catch (IOException e) {
-            messagePanel.showErrorMessage("Error communicating with server (had you restarted idea?)");
-            return "";
+            messagePanel.showInfoMessage("Probably socket was not opened, trying file method");
+			StringBuilder source = new StringBuilder();
+			try {
+				File file = new File(System.getProperty("user.home") + File.separator + ".java");
+				Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+				int next;
+				while ((next = reader.read()) != -1)
+					source.append((char)next);
+				reader.close();
+				return source.toString();
+			} catch (IOException e1) {
+				messagePanel.showErrorMessage("Both socket and file methods failed to retrieve source");
+				return "";
+			}
         }
     }
 
@@ -94,8 +107,18 @@ public class CHelperArenaPlugin implements ArenaPlugin {
                 messagePanel.showErrorMessage("Something went wrong :(");
             }
         } catch (IOException e) {
-            messagePanel.showErrorMessage("Error communicating with server (had you restarted idea?)");
-        }
+            messagePanel.showInfoMessage("Probably socket was not opened, trying file method");
+			try {
+				String path = new BufferedReader(new InputStreamReader(new FileInputStream(System.getProperty("user.home") + File.separator + ".chelper"))).readLine();
+				File file = new File(path + File.separator + ".tctask");
+				file.deleteOnExit();
+				FileOutputStream outputStream = new FileOutputStream(file);
+				task.saveTask(new OutputWriter(outputStream));
+				outputStream.close();
+			} catch (IOException e1) {
+				messagePanel.showErrorMessage("File method also failed");
+			}
+		}
     }
 
 	private String getFullContestName(String contestName) {

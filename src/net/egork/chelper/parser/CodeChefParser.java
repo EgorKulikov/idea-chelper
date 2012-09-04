@@ -10,10 +10,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 
 import javax.swing.*;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -90,13 +87,14 @@ public class CodeChefParser implements Parser {
     }
 
 	public void parseContest(String id, DescriptionReceiver receiver) {
-		String mainPage;
-		while (true) {
-			mainPage = FileUtilities.getWebPageContent("http://www.codechef.com/" + id);
-			if (mainPage != null)
-				break;
+		String mainPage = FileUtilities.getWebPageContent("http://www.codechef.com/" + id);
+		if (mainPage == null)
+			return;
+		if (SPECIAL.contains(id)) {
+			id = "";
 			if (receiver.isStopped())
 				return;
+			receiver.receiveDescriptions(Collections.<Description>emptyList());
 		}
 		List<Description> tasks = new ArrayList<Description>();
 		StringParser parser = new StringParser(mainPage);
@@ -105,9 +103,6 @@ public class CodeChefParser implements Parser {
 			parser = new StringParser(parser.advance(false, "</tbody>"));
 		} catch (ParseException e) {
 			return;
-		}
-		if (SPECIAL.contains(id)) {
-			id = "";
 		}
 		while (true) {
 			try {

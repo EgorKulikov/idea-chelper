@@ -91,6 +91,8 @@ public class CodeGenerationUtilities {
 					}
 					if (element instanceof PsiClass && mainClass.equals(((PsiClass) element).getQualifiedName()))
 						return true;
+					if (element instanceof PsiTypeParameter)
+						return false;
 					for (PsiReference reference : ReferencesSearch.search(element)) {
 						PsiElement referenceElement = reference.getElement();
 						while (referenceElement != null && referenceElement != element)

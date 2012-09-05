@@ -8,7 +8,8 @@ import javax.swing.*;
  * @author Egor Kulikov (kulikov@devexperts.com)
  */
 public interface Parser {
-    public static final Parser[] PARSERS = {new CodeforcesParser(), new CodeChefParser(), new TimusParser(), new EOlimpParser()};
+    public static final Parser[] PARSERS = {new CodeforcesParser(), new CodeChefParser(), new TimusParser(),
+		new EOlimpParser(), new RCCParser()};
 
 	public Icon getIcon();
 	public String getName();

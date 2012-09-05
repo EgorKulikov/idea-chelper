@@ -44,7 +44,6 @@ public class CodeChefParser implements Parser {
         StringParser parser = new StringParser(mainPage);
         List<Description> contests = new ArrayList<Description>();
         try {
-            parser.advance(true, "<h3>Future Contests</h3>");
             StringParser nonPastContestParser = new StringParser(parser.advance(false, "<h3>Past Contests</h3>"));
             while (nonPastContestParser.advanceIfPossible(true, "<tr ><td >") != null) {
                 String id = nonPastContestParser.advance(false, "</td>");

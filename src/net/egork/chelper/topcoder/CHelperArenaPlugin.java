@@ -21,7 +21,7 @@ import java.util.Arrays;
  */
 public class CHelperArenaPlugin implements ArenaPlugin {
     private MessagePanel messagePanel;
-    public static final int PORT = 239;
+    public static final int PORT = 4242;
     private ProblemComponentModel last = null;
 
     public JPanel getEditorPanel() {

@@ -2,6 +2,7 @@ package net.egork.chelper.util;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 
 /**
  * @author Egor Kulikov (egor@egork.net)
@@ -18,7 +19,7 @@ public class OutputWriter {
             for (int i = 0; i < objects.length; i++) {
                 if (i != 0)
                     out.write(' ');
-                out.write(objects[i].toString().getBytes());
+                out.write(objects[i].toString().getBytes("UTF-8"));
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -54,8 +55,12 @@ public class OutputWriter {
         if (s == null)
             printLine(-1);
         else
-            printLine(s.getBytes().length, s);
-    }
+			try {
+				printLine(s.getBytes("UTF-8").length, s);
+			} catch (UnsupportedEncodingException e) {
+				throw new RuntimeException(e);
+			}
+	}
 
     public void printBoolean(boolean b) {
         printLine(b ? 1 : 0);

@@ -27,20 +27,41 @@ public class EOlimpParser implements Parser {
 	}
 
 	public void getContests(DescriptionReceiver receiver) {
+		int lastContestPage = 0;
 		String contestPage = FileUtilities.getWebPageContent("http://www.e-olimp.com/en/competitions");
 		if (contestPage != null) {
 			StringParser parser = new StringParser(contestPage);
-			List<Description> descriptions = new ArrayList<Description>();
+			String lastPage = null;
 			try {
-				while (parser.advanceIfPossible(true, "href='competitions/") != null) {
-					String id = parser.advance(true, "'>");
-					String name = parser.advance(false, "</a>");
-					descriptions.add(new Description(id, name));
+				while (parser.advanceIfPossible(true, "page:") != null) {
+					String page = parser.advance(false, "' class='page'");
+					if (!"1".equals(page) || lastPage == null)
+						lastPage = page;
 				}
-			} catch (ParseException ignored) {}
-			if (receiver.isStopped())
-				return;
-			receiver.receiveDescriptions(descriptions);
+			} catch (ParseException ignored) {
+			}
+			try {
+				lastContestPage = Integer.parseInt(lastPage);
+			} catch (NumberFormatException ignored) {}
+		}
+		if (receiver.isStopped())
+			return;
+		for (int i = 0; i <= lastContestPage; i++) {
+			contestPage = FileUtilities.getWebPageContent("http://www.e-olimp.com/en/competitions/page:" + i);
+			if (contestPage != null) {
+				StringParser parser = new StringParser(contestPage);
+				List<Description> descriptions = new ArrayList<Description>();
+				try {
+					while (parser.advanceIfPossible(true, "href='competitions/") != null) {
+						String id = parser.advance(true, "'>");
+						String name = parser.advance(false, "</a>");
+						descriptions.add(new Description(id, name));
+					}
+				} catch (ParseException ignored) {}
+				if (receiver.isStopped())
+					return;
+				receiver.receiveDescriptions(descriptions);
+			}
 		}
 		String archivePage = FileUtilities.getWebPageContent("http://www.e-olimp.com/en/problems");
 		if (archivePage != null) {

@@ -2,6 +2,7 @@ package net.egork.chelper.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.InputMismatchException;
 
@@ -99,8 +100,12 @@ public class InputReader {
 		byte[] bytes = new byte[length];
 		for (int i = 0; i < length; i++)
 			bytes[i] = (byte) read();
-        return new String(bytes);
-    }
+		try {
+			return new String(bytes, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			return new String(bytes);
+		}
+	}
 
     public String readToken() {
         int c;

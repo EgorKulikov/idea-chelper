@@ -99,7 +99,7 @@ public class AutoSwitcher implements ProjectComponent {
 						}
 					} else if (configuration instanceof TaskConfiguration) {
 						Task task = ((TaskConfiguration) configuration).getConfiguration();
-						if (file.equals(TaskUtilities.getFile(task.location, task.name, configuration.getProject())) || file.equals(TaskUtilities.getCheckerFile(task.location, task.name, configuration.getProject()))) {
+						if (file.equals(FileUtilities.getFileByFQN(task.taskClass, configuration.getProject()))) {
 							busy = true;
 							runManager.setActiveConfiguration(new RunnerAndConfigurationSettingsImpl(runManager,
 								configuration, false));

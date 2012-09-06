@@ -52,6 +52,10 @@ public class EOlimpParser implements Parser {
 				StringParser parser = new StringParser(contestPage);
 				List<Description> descriptions = new ArrayList<Description>();
 				try {
+					if (i == 0)
+						parser.advance(true, "<h1>CurrentCompetitions</h1>");
+					else
+						parser.advance(true, "<h1>Competitions</h1>");
 					while (parser.advanceIfPossible(true, "href='competitions/") != null) {
 						String id = parser.advance(true, "'>");
 						String name = parser.advance(false, "</a>");
@@ -181,7 +185,7 @@ public class EOlimpParser implements Parser {
 				List<String> outputs = new ArrayList<String>();
 				for (int i = 1; ; i++) {
 					try {
-						parser.advance(true, "Sample " + i + "\r\n");
+						parser.advance(true, "Sample " + i + "\r\n", "Sample " + i + "\n");
 						inputs.add(parser.advance(false, "\nSample " + (i + 1), "</pre>"));
 					} catch (ParseException e) {
 						break;
@@ -191,7 +195,7 @@ public class EOlimpParser implements Parser {
 				parser.advance(true, "<pre>");
 				for (int i = 1; ; i++) {
 					try {
-						parser.advance(true, "Sample " + i + "\r\n");
+						parser.advance(true, "Sample " + i + "\r\n", "Sample " + i + "\n");
 						outputs.add(parser.advance(false, "\nSample " + (i + 1), "</pre>"));
 					} catch (ParseException e) {
 						break;

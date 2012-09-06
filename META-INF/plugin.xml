@@ -1,7 +1,7 @@
 <idea-plugin version="2">
   <name>CHelper</name>
   <description>Inlines library code and provides testing framework</description>
-  <version>3.0beta8</version>
+  <version>3.0beta9</version>
   <vendor>Egor Kulikov</vendor>
   <idea-version since-build="8000"/>
 
@@ -46,8 +46,8 @@
           <keyboard-shortcut keymap="$default" first-keystroke="alt F8"/>
       </action>
       <action id="editProjectProperties" class="net.egork.chelper.actions.EditProjectProperties" icon="/icons/settings.png"
-              text="Edit Project Properties"/>
-      <action id="unarchiveTask" class="net.egork.chelper.actions.UnarchiveTaskAction" text="Restore task" icon="/icons/unarchive.png"
+              text="Edit Project Settings"/>
+      <action id="unarchiveTask" class="net.egork.chelper.actions.UnarchiveTaskAction" text="Restore Task" icon="/icons/unarchive.png"
               description="Restores previously archived task"/>
       <action id="launchArena" class="net.egork.chelper.actions.TopCoderAction" text="Launch TopCoder Arena" icon="/icons/topcoder.png"
               description="Launches TopCoder Arena with integrated plugin to interact with idea"/>

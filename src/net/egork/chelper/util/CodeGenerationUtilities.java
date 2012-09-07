@@ -516,7 +516,7 @@ public class CodeGenerationUtilities {
 		return builder.toString();
 	}
 
-	private static String changePackage(String sourceFile, String packageName) {
+	public static String changePackage(String sourceFile, String packageName) {
 		if (sourceFile.startsWith("package ")) {
 			int index = sourceFile.indexOf(';');
 			if (index == -1)

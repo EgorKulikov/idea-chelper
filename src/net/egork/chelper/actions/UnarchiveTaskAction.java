@@ -7,14 +7,13 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserDialog;
 import com.intellij.openapi.fileChooser.FileChooserFactory;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.vfs.VirtualFile;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.TopCoderTask;
-import net.egork.chelper.util.FileUtilities;
-import net.egork.chelper.util.InputReader;
-import net.egork.chelper.util.OutputWriter;
-import net.egork.chelper.util.Utilities;
+import net.egork.chelper.util.*;
 
+import javax.swing.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,9 +37,7 @@ public class UnarchiveTaskAction extends AnAction {
                     @Override
                     public boolean isFileVisible(VirtualFile file, boolean showHiddenFiles) {
                         return super.isFileVisible(file, showHiddenFiles) &&
-                                (file.isDirectory() || "task".equals(file.getExtension()) || "tctask".equals(file.getExtension())) &&
-                                (FileUtilities.isChild(project.getBaseDir(), file) ||
-                                        FileUtilities.isChild(file, project.getBaseDir()));
+                                (file.isDirectory() || "task".equals(file.getExtension()) || "tctask".equals(file.getExtension()));
                     }
                 }, project);
         final VirtualFile[] files = dialog.choose(FileUtilities.getFile(project, Utilities.getData(project).archiveDirectory), project);
@@ -57,13 +54,45 @@ public class UnarchiveTaskAction extends AnAction {
 							toCopy.add(task.taskClass);
 							toCopy.add(task.checkerClass);
 							Collections.addAll(toCopy, task.testClasses);
+							String aPackage = FileUtilities.getPackage(FileUtilities.getPsiDirectory(project, task.location));
+							if (aPackage == null || aPackage.isEmpty()) {
+								int result = JOptionPane.showOptionDialog(null, "Task location is not under source or in default" +
+									"package, do you want to put it in default directory instead?", "Restore task",
+									JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE,
+									IconLoader.getIcon("/icons/restore.png"), null, null);
+								if (result == JOptionPane.YES_OPTION) {
+									String defaultDirectory = Utilities.getData(project).defaultDirectory;
+									baseDirectory = FileUtilities.getFile(project, defaultDirectory);
+									aPackage = FileUtilities.getPackage(FileUtilities.getPsiDirectory(project, defaultDirectory));
+									task = task.setLocation(defaultDirectory);
+								}
+							}
 							for (String className : toCopy) {
+								String fullClassName = className;
 								int position = className.lastIndexOf('.');
 								if (position != -1)
 									className = className.substring(position + 1);
 								VirtualFile file = taskFile.getParent().findChild(className + ".java");
-								if (file != null)
-									FileUtilities.writeTextFile(baseDirectory, className + ".java", FileUtilities.readTextFile(file));
+								if (file != null) {
+									String fileContent = FileUtilities.readTextFile(file);
+									if (aPackage != null && !aPackage.isEmpty()) {
+										fileContent = CodeGenerationUtilities.changePackage(fileContent, aPackage);
+										String fqn = aPackage + "." + className;
+										if (task.taskClass.equals(fullClassName))
+											task = task.setTaskClass(fqn);
+										else if (task.checkerClass.equals(fullClassName))
+											task = task.setCheckerClass(fqn);
+										else {
+											for (int i = 0; i < task.testClasses.length; i++) {
+												if (task.testClasses[i].equals(fqn)) {
+													task.testClasses[i] = fqn;
+													break;
+												}
+											}
+										}
+									}
+									FileUtilities.writeTextFile(baseDirectory, className + ".java", fileContent);
+								}
 							}
 							Utilities.createConfiguration(task, true, project);
 						} else if ("tctask".equals(taskFile.getExtension())) {

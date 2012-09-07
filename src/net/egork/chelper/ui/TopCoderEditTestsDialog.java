@@ -240,7 +240,14 @@ public class TopCoderEditTestsDialog extends JDialog {
 		VariableGridLayout layout = new VariableGridLayout(1, 2);
 		layout.setColFraction(0, 0.3);
 		layout.setColFraction(1, 0.7);
-		JPanel panel = new JPanel(layout);
+		JPanel panel = new JPanel(layout) {
+			@Override
+			public Dimension getPreferredSize() {
+				Dimension preferredSize = super.getPreferredSize();
+				preferredSize.width = (int) Math.min(preferredSize.width, 600 * .65 - 10);
+				return preferredSize;
+			}
+		};
 		panel.add(new JLabel(label));
 		panel.add(editor);
 		return panel;

@@ -48,7 +48,7 @@ public class UnarchiveTaskAction extends AnAction {
 						if ("task".equals(taskFile.getExtension())) {
 							Task task = Task.loadTask(new InputReader(taskFile.getInputStream()));
 							VirtualFile baseDirectory = FileUtilities.getFile(project, task.location);
-							task.saveTask(new OutputWriter(baseDirectory.createChildData(null, task.name + ".task").
+							task.saveTask(new OutputWriter(baseDirectory.createChildData(null, ArchiveAction.canonize(task.name) + ".task").
 									getOutputStream(null)));
 							List<String> toCopy = new ArrayList<String>();
 							toCopy.add(task.taskClass);

@@ -57,7 +57,7 @@ public class DeleteTaskAction extends AnAction {
                             if (testFile != null)
                                 testFile.delete(this);
                         }
-                        VirtualFile taskFile = FileUtilities.getFile(project, task.location + "/" + task.name + ".task");
+                        VirtualFile taskFile = FileUtilities.getFile(project, task.location + "/" + ArchiveAction.canonize(task.name) + ".task");
                         if (taskFile != null)
                             taskFile.delete(this);
                         manager.removeConfiguration(manager.getSelectedConfiguration());

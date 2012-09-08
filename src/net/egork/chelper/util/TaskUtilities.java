@@ -3,6 +3,7 @@ package net.egork.chelper.util;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
+import net.egork.chelper.actions.ArchiveAction;
 import net.egork.chelper.task.Task;
 
 import java.util.HashMap;
@@ -65,7 +66,7 @@ public class TaskUtilities {
 
     public static String getTaskFileName(String location, String name) {
         if (location != null && name != null)
-            return location + "/" + name + ".task";
+            return location + "/" + ArchiveAction.canonize(name) + ".task";
         return null;
     }
 

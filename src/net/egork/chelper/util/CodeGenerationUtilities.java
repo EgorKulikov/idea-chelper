@@ -6,6 +6,7 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.search.searches.ReferencesSearch;
+import net.egork.chelper.actions.ArchiveAction;
 import net.egork.chelper.actions.TopCoderAction;
 import net.egork.chelper.task.*;
 
@@ -351,7 +352,7 @@ public class CodeGenerationUtilities {
             public void run() {
                 String taskFilePath;
                 try {
-                    VirtualFile taskFile = directory.createChildData(null, finalTask.name + ".task");
+                    VirtualFile taskFile = directory.createChildData(null, ArchiveAction.canonize(finalTask.name) + ".task");
                     OutputStream outputStream = taskFile.getOutputStream(null);
                     finalTask.saveTask(new OutputWriter(outputStream));
                     outputStream.close();

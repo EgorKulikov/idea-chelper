@@ -65,7 +65,7 @@ public class ArchiveAction extends AnAction {
                                 testFile.delete(this);
                             }
                         }
-                        VirtualFile taskFile = FileUtilities.getFile(project, task.location + "/" + task.name + ".task");
+                        VirtualFile taskFile = FileUtilities.getFile(project, task.location + "/" + canonize(task.name) + ".task");
                         if (taskFile != null) {
                             VfsUtil.copyFile(this, taskFile, directory);
                             taskFile.delete(this);
@@ -139,7 +139,7 @@ public class ArchiveAction extends AnAction {
         return canonize(yearAndMonth) + "/" + canonize(task.date + " - " + (task.contestName.length() == 0 ? "unsorted" : task.contestName));
     }
 
-    private String canonize(String filename) {
+    public static String canonize(String filename) {
         return filename.replaceAll("[\\\\?%*:|\"<>]", "-");
     }
 

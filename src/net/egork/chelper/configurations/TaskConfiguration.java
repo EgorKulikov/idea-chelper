@@ -12,6 +12,7 @@ import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.WriteExternalException;
 import com.intellij.psi.PsiDirectory;
+import net.egork.chelper.actions.ArchiveAction;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.ui.TaskConfigurationEditor;
 import net.egork.chelper.util.FileUtilities;
@@ -35,7 +36,7 @@ public class TaskConfiguration extends ModuleBasedConfiguration<JavaRunConfigura
 
 	@Override
 	public Collection<Module> getValidModules() {
-		return JavaRunConfigurationModule.getModulesForClass(getProject(), TaskUtilities.getFQN(configuration.location, configuration.name, getProject()));
+		return JavaRunConfigurationModule.getModulesForClass(getProject(), configuration.taskClass);
 	}
 
 	@Override
@@ -83,7 +84,7 @@ public class TaskConfiguration extends ModuleBasedConfiguration<JavaRunConfigura
 
 	private void saveConfiguration(Task configuration) {
 		if (configuration != null && configuration.location != null && configuration.name != null && configuration.name.length() != 0)
-			FileUtilities.saveConfiguration(configuration.location, configuration.name + ".task", configuration, getProject());
+			FileUtilities.saveConfiguration(configuration.location, ArchiveAction.canonize(configuration.name) + ".task", configuration, getProject());
 	}
 
 	@Override

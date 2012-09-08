@@ -42,6 +42,11 @@ public class TopCoderConfiguration extends ModuleBasedConfiguration<JavaRunConfi
 	}
 
 	@Override
+	public Collection<Module> getAllModules() {
+		return getValidModules();
+	}
+
+	@Override
 	protected ModuleBasedConfiguration createInstance() {
 		return new TopCoderConfiguration(getName(), getProject(), configuration, getFactory());
 	}

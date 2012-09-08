@@ -44,6 +44,11 @@ public class TaskConfiguration extends ModuleBasedConfiguration<JavaRunConfigura
 		return new TaskConfiguration(getName(), getProject(), configuration, getFactory());
 	}
 
+	@Override
+	public Collection<Module> getAllModules() {
+		return getValidModules();
+	}
+
 	public SettingsEditor<? extends RunConfiguration> getConfigurationEditor() {
 		return new TaskConfigurationEditor(this);
 	}

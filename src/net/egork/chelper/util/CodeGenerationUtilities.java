@@ -330,7 +330,7 @@ public class CodeGenerationUtilities {
         PsiElement checker = JavaPsiFacade.getInstance(project).findClass(task.checkerClass);
         VirtualFile checkerFile = checker == null ? null : checker.getContainingFile() == null ? null : checker.getContainingFile().getVirtualFile();
         if (checkerFile != null && mainFile != null && checkerFile.getParent().equals(mainFile.getParent())) {
-            String checkerContent = FileUtilities.readTextFile(mainFile);
+            String checkerContent = FileUtilities.readTextFile(checkerFile);
             checkerContent = changePackage(checkerContent, packageName);
             String checkerClassSimple = getSimpleName(task.checkerClass);
             FileUtilities.writeTextFile(directory, checkerClassSimple + ".java", checkerContent);

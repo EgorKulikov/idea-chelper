@@ -145,7 +145,7 @@ public class TimusParser implements Parser {
 			}
 			return new Task(description.description, null, StreamConfiguration.STANDARD,
 				StreamConfiguration.STANDARD, tests.toArray(new Test[tests.size()]), null,
-				"-Xmx" + heapMemory + "M -Xss" + Math.min(heapMemory, 64) + "M", null, "Task" + index,
+				"-Xmx" + heapMemory + "M -Xss" + Math.min(heapMemory, 64) + "M", "Main", "Task" + index,
 				TokenChecker.class.getCanonicalName(), "", new String[0], null, null, true, null, null);
 		} catch (ParseException e) {
 			return null;

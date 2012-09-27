@@ -29,7 +29,7 @@ public class ProjectDataDialog extends JDialog {
 	private final int width = new JTextField(20).getPreferredSize().width;
 
     public ProjectDataDialog(Project project, ProjectData data) {
-        super(null, "Project properties", Dialog.ModalityType.APPLICATION_MODAL);
+        super(null, "Project settings", Dialog.ModalityType.APPLICATION_MODAL);
         setAlwaysOnTop(true);
         setResizable(false);
         this.data = data;

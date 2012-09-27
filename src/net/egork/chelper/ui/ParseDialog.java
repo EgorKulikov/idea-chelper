@@ -35,7 +35,6 @@ public class ParseDialog extends JDialog {
     private JComboBox parserCombo;
     private JComboBox testType;
     private DirectorySelector location;
-    private JTextField mainClass;
     private JTextField date;
     private JTextField contestName;
     private JCheckBox truncate;
@@ -62,10 +61,10 @@ public class ParseDialog extends JDialog {
 					if (raw == null)
 						continue;
                     Task task = new Task(raw.name, (TestType)testType.getSelectedItem(), raw.input, raw.output,
-                            raw.tests, location.getText(), raw.vmArgs, mainClass.getText(),
+                            raw.tests, location.getText(), raw.vmArgs, raw.mainClass,
                             FileUtilities.createIfNeeded(raw.taskClass, project, location.getText()), raw.checkerClass,
                             raw.checkerParameters, raw.testClasses, date.getText(), contestName.getText(),
-                            truncate.isSelected(), data.inputClass, data.outputClass);
+                            truncate.isSelected(), data.inputClass, data.outputClass, raw.includeLocale);
                     list.add(task);
                 }
                 result = list;
@@ -183,8 +182,6 @@ public class ParseDialog extends JDialog {
         location = new DirectorySelector(project, data.defaultDirectory);
         leftPanel.add(location);
         leftPanel.add(new JLabel("Main class name:"));
-        mainClass = new JTextField(defaultTask.mainClass);
-        leftPanel.add(mainClass);
         truncate = new JCheckBox("Truncate long tests", defaultTask.truncate);
         leftPanel.add(truncate);
         bottomPanel.add(leftPanel);

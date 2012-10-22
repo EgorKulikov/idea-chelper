@@ -140,26 +140,26 @@ public class Task {
 
     public Task setTests(Test[] tests) {
         return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
-                checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass);
+                checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale);
     }
 
     public Task setTestClasses(String[] testClasses) {
         return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
-                checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass);
+                checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale);
     }
 
     public Task setTaskClass(String taskClass) {
         return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
-                checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass);
+                checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale);
     }
 
     public Task setCheckerClass(String checkerClass) {
         return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
-                checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass);
+                checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale);
     }
 
 	public Task setLocation(String location) {
 		return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
-			checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass);
+			checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale);
 	}
 }

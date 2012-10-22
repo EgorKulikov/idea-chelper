@@ -27,18 +27,20 @@ public class TimusParser implements Parser {
 	}
 
 	public void getContests(DescriptionReceiver receiver) {
-		String currentContestPage = FileUtilities.getWebPageContent("http://acm.timus.ru/contest.aspx?locale=en");
+		String currentContestPage = FileUtilities.getWebPageContent("http://acm.timus.ru/schedule.aspx?locale=en");
 		if (currentContestPage != null) {
 			StringParser parser = new StringParser(currentContestPage);
 			try {
-				if (parser.advanceIfPossible(true, "No contests scheduled at this time.") == null) {
-					parser.advance(true, "<A HREF=\"monitor.aspx?id=");
-					String id = parser.advance(false, "\">");
-					if (!receiver.isStopped())
-						receiver.receiveDescriptions(Collections.singleton(new Description(id, "Current contest")));
-					else
-						return;
+				List<Description> contests = new ArrayList<Description>();
+				while (parser.advanceIfPossible(true, "<A HREF=\"contest.aspx?id=") != null) {
+					String id = parser.advance(true, "\">");
+					String description = parser.advance(false, "</A>");
+					contests.add(new Description(id, description));
 				}
+				if (!receiver.isStopped())
+					receiver.receiveDescriptions(contests);
+				else
+					return;
 			} catch (ParseException ignored) {}
 		}
 		String problemsetPage = FileUtilities.getWebPageContent("http://acm.timus.ru/problemset.aspx?locale=en");

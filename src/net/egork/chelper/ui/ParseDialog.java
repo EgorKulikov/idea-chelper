@@ -181,7 +181,6 @@ public class ParseDialog extends JDialog {
         leftPanel.add(new JLabel("Location:"));
         location = new DirectorySelector(project, data.defaultDirectory);
         leftPanel.add(location);
-        leftPanel.add(new JLabel("Main class name:"));
         truncate = new JCheckBox("Truncate long tests", defaultTask.truncate);
         leftPanel.add(truncate);
         bottomPanel.add(leftPanel);

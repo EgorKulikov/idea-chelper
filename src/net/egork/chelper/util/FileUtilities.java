@@ -9,6 +9,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
+import com.intellij.psi.search.GlobalSearchScope;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.TopCoderTask;
 
@@ -297,8 +298,8 @@ public class FileUtilities {
         return name.matches("[a-zA-Z_$][a-zA-Z\\d_$]*");
     }
 
-    public static String createTaskClass(Project project, String path, String name) {
-        String mainClass = CodeGenerationUtilities.createStub(path, name, project);
+    public static String createTaskClass(Task task, Project project, String path, String name) {
+        String mainClass = CodeGenerationUtilities.createStub(task, path, name, project);
         VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, path);
 		if (directory.findChild(name + ".java") == null) {
 			writeTextFile(directory, name + ".java", mainClass);
@@ -335,15 +336,15 @@ public class FileUtilities {
      return aPackage + "." + name;
  }
 
-    public static String createIfNeeded(String taskClass, Project project, String location) {
+    public static String createIfNeeded(Task task, String taskClass, Project project, String location) {
 		if (taskClass.indexOf('.') == -1) {
-			taskClass = createTaskClass(project, location, taskClass);
+			taskClass = createTaskClass(task, project, location, taskClass);
 		}
         return taskClass;
     }
 
 	public static VirtualFile getFileByFQN(String fqn, Project project) {
-		PsiElement main = JavaPsiFacade.getInstance(project).findClass(fqn);
+		PsiElement main = JavaPsiFacade.getInstance(project).findClass(fqn, GlobalSearchScope.allScope(project));
 		return main == null ? null : main.getContainingFile() == null ? null : main.getContainingFile().getVirtualFile();
 	}
 }

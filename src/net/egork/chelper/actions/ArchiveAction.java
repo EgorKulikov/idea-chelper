@@ -12,6 +12,7 @@ import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.search.GlobalSearchScope;
 import net.egork.chelper.configurations.TaskConfiguration;
 import net.egork.chelper.util.CodeGenerationUtilities;
 import net.egork.chelper.util.FileUtilities;
@@ -52,7 +53,7 @@ public class ArchiveAction extends AnAction {
     						VfsUtil.copyFile(this, mainFile, directory);
 	    					mainFile.delete(this);
                         }
-                        PsiElement checker = JavaPsiFacade.getInstance(project).findClass(task.checkerClass);
+                        PsiElement checker = JavaPsiFacade.getInstance(project).findClass(task.checkerClass, GlobalSearchScope.allScope(project));
 						VirtualFile checkerFile = checker == null ? null : checker.getContainingFile() == null ? null : checker.getContainingFile().getVirtualFile();
 						if (checkerFile != null && mainFile != null && checkerFile.getParent().equals(mainFile.getParent())) {
                             VfsUtil.copyFile(this, checkerFile, directory);

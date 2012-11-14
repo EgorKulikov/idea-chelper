@@ -10,6 +10,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.search.GlobalSearchScope;
 import net.egork.chelper.configurations.TaskConfiguration;
 import net.egork.chelper.configurations.TopCoderConfiguration;
 import net.egork.chelper.task.Task;
@@ -43,16 +44,16 @@ public class DeleteTaskAction extends AnAction {
 			ApplicationManager.getApplication().runWriteAction(new Runnable() {
 				public void run() {
 					try {
-                        PsiElement main = JavaPsiFacade.getInstance(project).findClass(task.taskClass);
+                        PsiElement main = JavaPsiFacade.getInstance(project).findClass(task.taskClass, GlobalSearchScope.allScope(project));
                         VirtualFile mainFile = main == null ? null : main.getContainingFile() == null ? null : main.getContainingFile().getVirtualFile();
                         if (mainFile != null)
                             mainFile.delete(this);
-                        PsiElement checker = JavaPsiFacade.getInstance(project).findClass(task.checkerClass);
+                        PsiElement checker = JavaPsiFacade.getInstance(project).findClass(task.checkerClass, GlobalSearchScope.allScope(project));
                         VirtualFile checkerFile = checker == null ? null : checker.getContainingFile() == null ? null : checker.getContainingFile().getVirtualFile();
                         if (checkerFile != null && mainFile != null && checkerFile.getParent().equals(mainFile.getParent()))
                             checkerFile.delete(this);
                         for (String testClass : task.testClasses) {
-                            PsiElement test = JavaPsiFacade.getInstance(project).findClass(testClass);
+                            PsiElement test = JavaPsiFacade.getInstance(project).findClass(testClass, GlobalSearchScope.allScope(project));
                             VirtualFile testFile = test == null ? null : test.getContainingFile() == null ? null : test.getContainingFile().getVirtualFile();
                             if (testFile != null)
                                 testFile.delete(this);
@@ -77,7 +78,7 @@ public class DeleteTaskAction extends AnAction {
 						if (mainFile != null)
 							mainFile.delete(this);
 						for (String testClass : task.testClasses) {
-							PsiElement test = JavaPsiFacade.getInstance(project).findClass(testClass);
+							PsiElement test = JavaPsiFacade.getInstance(project).findClass(testClass, GlobalSearchScope.allScope(project));
 							VirtualFile testFile = test == null ? null : test.getContainingFile() == null ? null : test.getContainingFile().getVirtualFile();
 							if (testFile != null)
 								testFile.delete(this);

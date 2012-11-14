@@ -8,6 +8,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.*;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.search.GlobalSearchScope;
 import net.egork.chelper.task.TopCoderTask;
 import net.egork.chelper.topcoder.CHelperArenaPlugin;
 import net.egork.chelper.topcoder.Message;
@@ -190,7 +191,7 @@ public class TopCoderAction extends AnAction {
 				task.name + ".java", CodeGenerationUtilities.createTopCoderStub(task));
 		}
 		Utilities.createConfiguration(taskToWrite, true, project);
-		final PsiElement main = JavaPsiFacade.getInstance(project).findClass(fqn);
+		final PsiElement main = JavaPsiFacade.getInstance(project).findClass(fqn, GlobalSearchScope.allScope(project));
 		Utilities.openElement(project, main);
 	}
 

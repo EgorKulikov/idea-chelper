@@ -5,6 +5,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
+import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import net.egork.chelper.actions.ArchiveAction;
 import net.egork.chelper.actions.TopCoderAction;
@@ -149,11 +150,11 @@ public class CodeGenerationUtilities {
 			builder.append("\t\t\tthrow new RuntimeException(e);\n");
 			builder.append("\t\t}\n");
 		}
-		String inputClass = Utilities.getData(project).inputClass;
+		String inputClass = task.inputClass;
 		String inputClassShort = inputClass.substring(inputClass.lastIndexOf('.') + 1);
 		builder.append("\t\t").append(inputClassShort).append(" in = new ").append(inputClassShort).
 			append("(inputStream);\n");
-		String outputClass = Utilities.getData(project).outputClass;
+		String outputClass = task.outputClass;
 		String outputClassShort = outputClass.substring(outputClass.lastIndexOf('.') + 1);
 		builder.append("\t\t").append(outputClassShort).append(" out = new ").append(outputClassShort).
 			append("(outputStream);\n");
@@ -244,11 +245,11 @@ public class CodeGenerationUtilities {
 		return builder.toString();
 	}
 
-	public static String createStub(String location, String name, Project project) {
+	public static String createStub(Task task, String location, String name, Project project) {
 		PsiDirectory directory = FileUtilities.getPsiDirectory(project, location);
-		String inputClass = Utilities.getData(project).inputClass;
+		String inputClass = task.inputClass;
 		String inputClassShort = inputClass.substring(inputClass.lastIndexOf('.') + 1);
-		String outputClass = Utilities.getData(project).outputClass;
+		String outputClass = task.outputClass;
 		String outputClassShort = outputClass.substring(outputClass.lastIndexOf('.') + 1);
 		StringBuilder builder = new StringBuilder();
 		String packageName = FileUtilities.getPackage(directory);
@@ -320,14 +321,14 @@ public class CodeGenerationUtilities {
 			JOptionPane.showMessageDialog(null, "testDirectory should be under project source");
 			return;
 		}
-        PsiElement main = JavaPsiFacade.getInstance(project).findClass(task.taskClass);
+        PsiElement main = JavaPsiFacade.getInstance(project).findClass(task.taskClass, GlobalSearchScope.allScope(project));
         VirtualFile mainFile = main == null ? null : main.getContainingFile() == null ? null : main.getContainingFile().getVirtualFile();
         String mainContent = FileUtilities.readTextFile(mainFile);
         mainContent = changePackage(mainContent, packageName);
         String taskClassSimple = getSimpleName(task.taskClass);
         FileUtilities.writeTextFile(directory, taskClassSimple + ".java", mainContent);
         task = task.setTaskClass(packageName + "." + taskClassSimple);
-        PsiElement checker = JavaPsiFacade.getInstance(project).findClass(task.checkerClass);
+        PsiElement checker = JavaPsiFacade.getInstance(project).findClass(task.checkerClass, GlobalSearchScope.allScope(project));
         VirtualFile checkerFile = checker == null ? null : checker.getContainingFile() == null ? null : checker.getContainingFile().getVirtualFile();
         if (checkerFile != null && mainFile != null && checkerFile.getParent().equals(mainFile.getParent())) {
             String checkerContent = FileUtilities.readTextFile(checkerFile);
@@ -338,7 +339,7 @@ public class CodeGenerationUtilities {
         }
         String[] testClasses = Arrays.copyOf(task.testClasses, task.testClasses.length);
         for (int i = 0; i < testClasses.length; i++) {
-            PsiElement test = JavaPsiFacade.getInstance(project).findClass(task.testClasses[i]);
+            PsiElement test = JavaPsiFacade.getInstance(project).findClass(task.testClasses[i], GlobalSearchScope.allScope(project));
             VirtualFile testFile = test == null ? null : test.getContainingFile() == null ? null : test.getContainingFile().getVirtualFile();
             String testContent = FileUtilities.readTextFile(testFile);
             testContent = changePackage(testContent, packageName);
@@ -414,7 +415,7 @@ public class CodeGenerationUtilities {
         task = task.setFQN(packageName + "." + taskClassSimple);
         String[] testClasses = Arrays.copyOf(task.testClasses, task.testClasses.length);
         for (int i = 0; i < testClasses.length; i++) {
-            PsiElement test = JavaPsiFacade.getInstance(project).findClass(task.testClasses[i]);
+            PsiElement test = JavaPsiFacade.getInstance(project).findClass(task.testClasses[i], GlobalSearchScope.allScope(project));
             VirtualFile testFile = test == null ? null : test.getContainingFile() == null ? null : test.getContainingFile().getVirtualFile();
             String testContent = FileUtilities.readTextFile(testFile);
             testContent = changePackage(testContent, packageName);

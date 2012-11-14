@@ -35,7 +35,7 @@ public class TaskUtilities {
     }
 
     private static PsiElement createMainClass(Task task, Project project) {
-        String mainFileContent = CodeGenerationUtilities.createStub(task.location, task.name, project);
+        String mainFileContent = CodeGenerationUtilities.createStub(task, task.location, task.name, project);
         VirtualFile file = FileUtilities
             .writeTextFile(FileUtilities.getFile(project, task.location), task.name + ".java", mainFileContent);
         if (file == null)

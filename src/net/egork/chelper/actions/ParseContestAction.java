@@ -5,6 +5,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.search.GlobalSearchScope;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.ui.ParseDialog;
 import net.egork.chelper.util.Utilities;
@@ -23,7 +24,7 @@ public class ParseContestAction extends AnAction {
 		boolean firstConfiguration = true;
 		PsiElement firstElement = null;
 		for (Task task : tasks) {
-			PsiElement element = JavaPsiFacade.getInstance(project).findClass(task.taskClass);
+			PsiElement element = JavaPsiFacade.getInstance(project).findClass(task.taskClass, GlobalSearchScope.allScope(project));
 			Utilities.createConfiguration(task, firstConfiguration, project);
 			firstConfiguration = false;
 			if (firstElement == null)

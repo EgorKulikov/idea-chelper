@@ -61,7 +61,7 @@ public class ParseDialog extends JDialog {
 					if (raw == null)
 						continue;
                     Task task = new Task(raw.name, (TestType)testType.getSelectedItem(), raw.input, raw.output,
-                            raw.tests, location.getText(), raw.vmArgs, raw.mainClass,
+                            raw.tests, location.getText(), raw.vmArgs, raw.failOnOverflow, raw.mainClass,
                             FileUtilities.createIfNeeded(raw, raw.taskClass, project, location.getText()), raw.checkerClass,
                             raw.checkerParameters, raw.testClasses, date.getText(), contestName.getText(),
                             truncate.isSelected(), data.inputClass, data.outputClass, raw.includeLocale);

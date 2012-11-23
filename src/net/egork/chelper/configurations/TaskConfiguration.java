@@ -70,6 +70,8 @@ public class TaskConfiguration extends ModuleBasedConfiguration<JavaRunConfigura
                 String[] vmParameters = configuration.vmArgs.split(" ");
                 for (String parameter : vmParameters)
                     parameters.getVMParametersList().add(parameter);
+                if (configuration.failOnOverflow)
+                    parameters.getVMParametersList().add("-javaagent:cojac.jar=-e");
 				parameters.getProgramParametersList().add(TaskUtilities.getTaskFileName(configuration.location, configuration.name));
 				return parameters;
 			}

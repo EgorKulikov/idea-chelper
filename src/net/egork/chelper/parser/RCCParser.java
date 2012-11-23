@@ -92,7 +92,7 @@ public class RCCParser implements Parser {
 				tests.add(new Test(input, output, tests.size()));
 			}
 			return new Task(description.description, null, StreamConfiguration.STANDARD, StreamConfiguration.STANDARD,
-				tests.toArray(new Test[tests.size()]), null, "-Xmx" + memoryLimit + "M -Xss64M", "Main", "Task" + letter,
+				tests.toArray(new Test[tests.size()]), null, "-Xmx" + memoryLimit + "M -Xss64M", false, "Main", "Task" + letter,
 				TokenChecker.class.getCanonicalName(), "", new String[0], null, null, true, null, null);
 		} catch (ParseException e) {
 			return null;

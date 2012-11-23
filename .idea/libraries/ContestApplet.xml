@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="ContestApplet">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/ContestApplet.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

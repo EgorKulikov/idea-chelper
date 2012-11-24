@@ -60,6 +60,7 @@ public class ParseDialog extends JDialog {
                     Task raw = parser.parseTask(description);
 					if (raw == null)
 						continue;
+					raw = raw.setInputOutputClasses(data.inputClass, data.outputClass);
                     Task task = new Task(raw.name, (TestType)testType.getSelectedItem(), raw.input, raw.output,
                             raw.tests, location.getText(), raw.vmArgs, raw.mainClass,
                             FileUtilities.createIfNeeded(raw, raw.taskClass, project, location.getText()), raw.checkerClass,

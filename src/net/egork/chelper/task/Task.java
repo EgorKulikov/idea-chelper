@@ -162,4 +162,9 @@ public class Task {
 		return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
 			checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale);
 	}
+
+	public Task setInputOutputClasses(String inputClass, String outputClass) {
+		return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
+			checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale);
+	}
 }

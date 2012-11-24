@@ -12,6 +12,7 @@ import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.WriteExternalException;
 import com.intellij.psi.PsiDirectory;
+import net.egork.chelper.actions.TopCoderAction;
 import net.egork.chelper.task.TopCoderTask;
 import net.egork.chelper.ui.TopCoderConfigurationEditor;
 import net.egork.chelper.util.CodeGenerationUtilities;
@@ -70,6 +71,11 @@ public class TopCoderConfiguration extends ModuleBasedConfiguration<JavaRunConfi
 				parameters.configureByModule(module, JavaParameters.JDK_AND_CLASSES);
 				parameters.setMainClass("net.egork.chelper.tester.NewTopCoderTester");
 				parameters.getVMParametersList().add("-Xmx64M");
+                if (configuration.failOnOverflow) {
+                    String path = TopCoderAction.getJarPathForClass(ch.eiafr.cojac.Cojac.class);
+                    // TODO(petya): What if there's a space in the filename?..
+                    parameters.getVMParametersList().add("-javaagent:" + path + "=-e");
+                }
                 parameters.setWorkingDirectory(getProject().getBaseDir().getPath());
                 parameters.getProgramParametersList().add(TaskUtilities.getTopCoderTaskFileName(Utilities.getData(getProject()).defaultDirectory, configuration.name));
 				return parameters;

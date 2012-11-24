@@ -228,10 +228,10 @@ public class TaskConfigurationPanel extends JPanel {
         return task = new Task(name.getText(), (TestType)testType.getSelectedItem(),
             new StreamConfiguration((StreamConfiguration.StreamType) inputType.getSelectedItem(), inputFileName.getText()),
             new StreamConfiguration((StreamConfiguration.StreamType) outputType.getSelectedItem(), outputFileName.getText()),
-            task.tests, location.getText(), vmArgs.getText(), failOnOverflow.isSelected(), mainClass.getText(),
+            task.tests, location.getText(), vmArgs.getText(), mainClass.getText(),
             taskClass.getText(), checkerClass.getText(), checkerParameters.getText(), task.testClasses,
             date.getText(), contestName.getText(), truncate.isSelected(), task.inputClass, task.outputClass,
-			includeLocale.isSelected());
+			includeLocale.isSelected(), failOnOverflow.isSelected());
     }
 
     public interface SizeChangeListener {

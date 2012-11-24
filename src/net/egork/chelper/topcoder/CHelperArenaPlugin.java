@@ -93,7 +93,8 @@ public class CHelperArenaPlugin implements ArenaPlugin {
                 testArguments[j] = NewTopCoderTest.parse(testCase.getInput()[j], arguments[j]);
             tests[i] = new NewTopCoderTest(testArguments, testResult, i, true);
         }
-        TopCoderTask task = new TopCoderTask(name, signature, tests, date, contestName);
+        // NOTE: we set failOnOverflow to false here, but it will be overridden on the receiving end.
+        TopCoderTask task = new TopCoderTask(name, signature, tests, date, contestName, new String[0], null, false);
         try {
             Message message = new Message(PORT);
             message.out.printString(Message.NEW_TASK);

@@ -34,8 +34,10 @@ import java.util.Map;
  */
 public class Utilities {
 	private static Map<Project, ProjectData> eligibleProjects = new HashMap<Project, ProjectData>();
+    // TODO: The existence of non-persistent defaultConfiguration together with persistent ProjectData is a bit weird.
+    // It would be natural for everything to be persistent.
 	private static Task defaultConfiguration = new Task(null, TestType.SINGLE, StreamConfiguration.STANDARD,
-		StreamConfiguration.STANDARD, new Test[0], null, "-Xmx256m -Xss64m", false, "Main", null, TokenChecker.class.getCanonicalName(), "", new String[0], null, "", true, null, null);
+		StreamConfiguration.STANDARD, new Test[0], null, "-Xmx256m -Xss64m", "Main", null, TokenChecker.class.getCanonicalName(), "", new String[0], null, "", true, null, null, false, false);
 	private static Parser defaultParser = Parser.PARSERS[0];
 
 	public static void addListeners() {
@@ -65,8 +67,8 @@ public class Utilities {
 	public static void updateDefaultTask(Task task) {
 		if (task != null) {
 			defaultConfiguration = new Task(null, task.testType, task.input, task.output, new Test[0], null,
-                    task.vmArgs, task.failOnOverflow, task.mainClass, null, TokenChecker.class.getCanonicalName(), "", new String[0], null,
-                    task.contestName, task.truncate, null, null);
+                    task.vmArgs, task.mainClass, null, TokenChecker.class.getCanonicalName(), "", new String[0], null,
+                    task.contestName, task.truncate, null, null, task.includeLocale, task.failOnOverflow);
         }
 	}
 

@@ -75,9 +75,11 @@ public class CreateTaskDialog extends JDialog {
         String location = FileUtilities.getRelativePath(project.getBaseDir(), directory.getVirtualFile());
         ProjectData data = Utilities.getData(project);
         Task task = new Task(name, defaultTask.testType, defaultTask.input, defaultTask.output, new Test[0], location,
-                defaultTask.vmArgs, defaultTask.failOnOverflow, defaultTask.mainClass, name,
+                defaultTask.vmArgs, defaultTask.mainClass, name,
                 defaultTask.checkerClass, defaultTask.checkerParameters, new String[0],
-                Task.getDateString(), defaultTask.contestName, defaultTask.truncate, data.inputClass, data.outputClass);
+                Task.getDateString(), defaultTask.contestName, defaultTask.truncate, data.inputClass, data.outputClass,
+                defaultTask.includeLocale,
+                data.failOnIntegerOverflowForNewTasks);
 		CreateTaskDialog dialog = new CreateTaskDialog(task, defaultName == null, project);
 		dialog.setVisible(true);
 		Utilities.updateDefaultTask(dialog.task);

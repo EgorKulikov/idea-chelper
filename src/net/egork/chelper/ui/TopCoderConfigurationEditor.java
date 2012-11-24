@@ -20,6 +20,7 @@ public class TopCoderConfigurationEditor extends SettingsEditor<TopCoderConfigur
 	private TopCoderTask task;
     private JTextField date = new JTextField();
     private JTextField contestName = new JTextField();
+    private JCheckBox failOnOverflow = new JCheckBox("Fail on integer overflow");
     private Project project;
 
 	public TopCoderConfigurationEditor(TopCoderConfiguration configuration) {
@@ -31,6 +32,7 @@ public class TopCoderConfigurationEditor extends SettingsEditor<TopCoderConfigur
 	protected void resetEditorFrom(TopCoderConfiguration s) {
         date.setText(s.getConfiguration().date);
         contestName.setText(s.getConfiguration().contestName);
+        failOnOverflow.setSelected(s.getConfiguration().failOnOverflow);
 		task = s.getConfiguration();
     }
 
@@ -39,7 +41,7 @@ public class TopCoderConfigurationEditor extends SettingsEditor<TopCoderConfigur
 		if (task == null)
 			return;
         TopCoderTask task = s.getConfiguration();
-        task = new TopCoderTask(task.name, task.signature, this.task.tests, date.getText(), contestName.getText(), this.task.testClasses, task.fqn);
+        task = new TopCoderTask(task.name, task.signature, this.task.tests, date.getText(), contestName.getText(), this.task.testClasses, task.fqn, failOnOverflow.isSelected());
         s.setConfiguration(task);
 	}
 
@@ -67,6 +69,7 @@ public class TopCoderConfigurationEditor extends SettingsEditor<TopCoderConfigur
             }
         });
         editor.add(editTestClasses);
+        editor.add(failOnOverflow);
 		return editor;
 	}
 

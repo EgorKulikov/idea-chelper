@@ -20,6 +20,7 @@ public class ProjectDataDialog extends JDialog {
     private final DirectorySelector archiveDirectory;
     private final DirectorySelector outputDirectory;
     private final JCheckBox enableUnitTests;
+    private final JCheckBox failOnIntegerOverflowForNewTasks;
     private final DirectorySelector testDirectory;
     private final ClassSelector inputClass;
     private final ClassSelector outputClass;
@@ -37,6 +38,7 @@ public class ProjectDataDialog extends JDialog {
         archiveDirectory = new DirectorySelector(project, data.archiveDirectory);
         outputDirectory = new DirectorySelector(project, data.outputDirectory);
         enableUnitTests = new JCheckBox("Enable unit tests", data.enableUnitTests);
+        failOnIntegerOverflowForNewTasks = new JCheckBox("Fail on integer overflow for new tasks", data.failOnIntegerOverflowForNewTasks);
         testDirectory = new DirectorySelector(project, data.testDirectory);
         inputClass = new ClassSelector(data.inputClass, project);
         outputClass = new ClassSelector(data.outputClass, project);
@@ -84,6 +86,7 @@ public class ProjectDataDialog extends JDialog {
         main.add(excludePackages);
         main.add(new JLabel("Author:"));
         main.add(author);
+        main.add(failOnIntegerOverflowForNewTasks);
         main.add(okCancelPanel);
         testDirectory.setVisible(enableUnitTests.isSelected());
         testDirectoryLabel.setVisible(enableUnitTests.isSelected());
@@ -102,7 +105,7 @@ public class ProjectDataDialog extends JDialog {
     }
 
     private void onChange() {
-        data = new ProjectData(inputClass.getText(), outputClass.getText(), excludePackages.getText().split(","), outputDirectory.getText(), author.getText(), archiveDirectory.getText(), defaultDirectory.getText(), testDirectory.getText(), enableUnitTests.isSelected());
+        data = new ProjectData(inputClass.getText(), outputClass.getText(), excludePackages.getText().split(","), outputDirectory.getText(), author.getText(), archiveDirectory.getText(), defaultDirectory.getText(), testDirectory.getText(), enableUnitTests.isSelected(), failOnIntegerOverflowForNewTasks.isSelected());
     }
 
     @Override

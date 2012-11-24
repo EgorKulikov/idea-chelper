@@ -182,7 +182,7 @@ public class TopCoderAction extends AnAction {
 			return;
 		}
 		String fqn = (packageName.length() == 0 ? "" : packageName + ".") + task.name;
-		TopCoderTask taskToWrite = task.setFQN(fqn);
+		TopCoderTask taskToWrite = task.setFQN(fqn).setFailOnOverflow(Utilities.getData(project).failOnIntegerOverflowForNewTasks);
 		if (packageName.length() != 0) {
 			FileUtilities.writeTextFile(FileUtilities.getFile(project, defaultDir),
 				task.name + ".java", "package " + packageName + ";\n\n" + CodeGenerationUtilities.createTopCoderStub(task));

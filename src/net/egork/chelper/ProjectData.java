@@ -15,7 +15,7 @@ import java.util.Properties;
 public class ProjectData {
     public static final ProjectData DEFAULT = new ProjectData(
         "java.util.Scanner", "java.io.PrintWriter", "java.,javax.,com.sun.".split(","), "output", "",
-        "archive/unsorted", "main", "lib/test", false);
+        "archive/unsorted", "main", "lib/test", false, false);
 
 	public final String inputClass;
 	public final String outputClass;
@@ -26,8 +26,9 @@ public class ProjectData {
 	public final String defaultDirectory;
 	public final String testDirectory;
 	public final boolean enableUnitTests;
+    public final boolean failOnIntegerOverflowForNewTasks;
 
-    public ProjectData(String inputClass, String outputClass, String[] excludedPackages, String outputDirectory, String author, String archiveDirectory, String defaultDirectory, String testDirectory, boolean enableUnitTests) {
+    public ProjectData(String inputClass, String outputClass, String[] excludedPackages, String outputDirectory, String author, String archiveDirectory, String defaultDirectory, String testDirectory, boolean enableUnitTests, boolean failOnIntegerOverflowForNewTasks) {
         this.inputClass = inputClass;
         this.outputClass = outputClass;
         this.excludedPackages = excludedPackages;
@@ -37,6 +38,7 @@ public class ProjectData {
         this.defaultDirectory = defaultDirectory;
         this.testDirectory = testDirectory;
         this.enableUnitTests = enableUnitTests;
+        this.failOnIntegerOverflowForNewTasks = failOnIntegerOverflowForNewTasks;
     }
 
     public ProjectData(Properties properties) {
@@ -49,6 +51,7 @@ public class ProjectData {
 		defaultDirectory = properties.getProperty("defaultDirectory", DEFAULT.defaultDirectory);
 		testDirectory = properties.getProperty("testDirectory", DEFAULT.testDirectory);
 		enableUnitTests = Boolean.valueOf(properties.getProperty("enableUnitTests", Boolean.toString(DEFAULT.enableUnitTests)));
+        failOnIntegerOverflowForNewTasks = Boolean.valueOf(properties.getProperty("failOnIntegerOverflowForNewTasks", Boolean.toString(DEFAULT.enableUnitTests)));
 	}
 
 	public static ProjectData load(Project project) {
@@ -88,8 +91,8 @@ public class ProjectData {
                     properties.setProperty("defaultDirectory", defaultDirectory);
                     properties.setProperty("testDirectory", testDirectory);
                     properties.setProperty("enableUnitTests", Boolean.toString(enableUnitTests));
+                    properties.setProperty("failOnIntegerOverflowForNewTasks", Boolean.toString(failOnIntegerOverflowForNewTasks));
                     OutputStream outputStream = config.getOutputStream(null);
-//                    outputStream.write("lalala".getBytes());
                     properties.store(outputStream, "");
                     outputStream.close();
                 } catch (IOException e) {

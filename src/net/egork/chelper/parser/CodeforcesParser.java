@@ -150,7 +150,7 @@ public class CodeforcesParser implements Parser {
             String taskClass = "Task" + id;
 			String name = description.description;
             return new Task(name, null, inputType, outputType, tests.toArray(new Test[tests.size()]), null,
-                    "-Xmx" + heapMemory, "Main", taskClass, TokenChecker.class.getCanonicalName(), "", new String[0], null,
+                    "-Xmx" + heapMemory, false, "Main", taskClass, TokenChecker.class.getCanonicalName(), "", new String[0], null,
                     null, true, null, null);
         } catch (ParseException e) {
             return null;

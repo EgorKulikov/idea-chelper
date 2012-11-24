@@ -37,6 +37,7 @@ public class TaskConfigurationPanel extends JPanel {
     //advanced
     private DirectorySelector location;
     private JTextField vmArgs;
+    private JCheckBox failOnOverflow;
     private JTextField mainClass;
     private SelectOrCreateClass taskClass;
     private SelectOrCreateClass checkerClass;
@@ -183,6 +184,9 @@ public class TaskConfigurationPanel extends JPanel {
         rightAdvanced.add(new JLabel("VM arguments:"));
         vmArgs = new JTextField(task.vmArgs);
         rightAdvanced.add(vmArgs);
+        failOnOverflow = new JCheckBox("Fail on integer overflow");
+        failOnOverflow.setSelected(task.failOnOverflow);
+        rightAdvanced.add(failOnOverflow);
         testClasses = new JButton("Test classes");
         testClasses.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -224,7 +228,7 @@ public class TaskConfigurationPanel extends JPanel {
         return task = new Task(name.getText(), (TestType)testType.getSelectedItem(),
             new StreamConfiguration((StreamConfiguration.StreamType) inputType.getSelectedItem(), inputFileName.getText()),
             new StreamConfiguration((StreamConfiguration.StreamType) outputType.getSelectedItem(), outputFileName.getText()),
-            task.tests, location.getText(), vmArgs.getText(), mainClass.getText(),
+            task.tests, location.getText(), vmArgs.getText(), failOnOverflow.isSelected(), mainClass.getText(),
             taskClass.getText(), checkerClass.getText(), checkerParameters.getText(), task.testClasses,
             date.getText(), contestName.getText(), truncate.isSelected(), task.inputClass, task.outputClass,
 			includeLocale.isSelected());

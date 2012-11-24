@@ -215,7 +215,7 @@ public class EOlimpParser implements Parser {
 			}
 			String taskClass = "Task" + name;
 			return new Task(description.description, null, StreamConfiguration.STANDARD, StreamConfiguration.STANDARD,
-				tests.toArray(new Test[tests.size()]), null, "-Xmx" + heapMemory, "Main", taskClass,
+				tests.toArray(new Test[tests.size()]), null, "-Xmx" + heapMemory, false, "Main", taskClass,
 				TokenChecker.class.getCanonicalName(), "", new String[0], null, null, true, null, null, true);
 		} catch (ParseException e) {
 			return null;

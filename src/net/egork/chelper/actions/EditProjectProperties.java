@@ -30,6 +30,7 @@ public class EditProjectProperties extends AnAction {
         ProjectData result = ProjectDataDialog.edit(project, data);
         if (result != null) {
             result.save(project);
+            //CojacInstaller.install(project);
             Utilities.addProjectData(project, result);
 			ApplicationManager.getApplication().runWriteAction(new Runnable() {
 				public void run() {

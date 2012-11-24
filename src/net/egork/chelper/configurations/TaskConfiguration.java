@@ -11,9 +11,14 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.WriteExternalException;
+import com.intellij.openapi.vfs.JarFileSystem;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.PsiDirectory;
 import net.egork.chelper.actions.ArchiveAction;
+import net.egork.chelper.actions.TopCoderAction;
 import net.egork.chelper.task.Task;
+import net.egork.chelper.tester.NewTester;
 import net.egork.chelper.ui.TaskConfigurationEditor;
 import net.egork.chelper.util.FileUtilities;
 import net.egork.chelper.util.TaskUtilities;
@@ -70,6 +75,11 @@ public class TaskConfiguration extends ModuleBasedConfiguration<JavaRunConfigura
                 String[] vmParameters = configuration.vmArgs.split(" ");
                 for (String parameter : vmParameters)
                     parameters.getVMParametersList().add(parameter);
+                if (configuration.failOnOverflow) {
+                    String path = TopCoderAction.getJarPathForClass(ch.eiafr.cojac.Cojac.class);
+                    // TODO(petya): What if there's a space in the filename?..
+                    parameters.getVMParametersList().add("-javaagent:" + path + "=-e");
+                }
 				parameters.getProgramParametersList().add(TaskUtilities.getTaskFileName(configuration.location, configuration.name));
 				return parameters;
 			}

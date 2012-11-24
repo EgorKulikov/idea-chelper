@@ -78,7 +78,7 @@ public class TaskConfiguration extends ModuleBasedConfiguration<JavaRunConfigura
                 if (configuration.failOnOverflow) {
                     String path = TopCoderAction.getJarPathForClass(ch.eiafr.cojac.Cojac.class);
                     // TODO(petya): What if there's a space in the filename?..
-                    parameters.getVMParametersList().add("-javaagent:" + path + "=-e");
+                    parameters.getVMParametersList().add("-javaagent:" + path + "=-e -ints -longs -casts -maths");
                 }
 				parameters.getProgramParametersList().add(TaskUtilities.getTaskFileName(configuration.location, configuration.name));
 				return parameters;

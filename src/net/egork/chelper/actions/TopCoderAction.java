@@ -11,7 +11,6 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.search.GlobalSearchScope;
 import net.egork.chelper.task.TopCoderTask;
 import net.egork.chelper.topcoder.CHelperArenaPlugin;
-import net.egork.chelper.topcoder.Message;
 import net.egork.chelper.util.CodeGenerationUtilities;
 import net.egork.chelper.util.FileUtilities;
 import net.egork.chelper.util.InputReader;
@@ -21,7 +20,6 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import java.io.*;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.URL;
 import java.util.Properties;
 
@@ -89,6 +87,8 @@ public class TopCoderAction extends AnAction {
 
     private void startServerIfNeeded(final Project project) {
         try {
+			throw new IOException();
+			/*
             if (serverSocket != null || alternative)
                 return;
             serverSocket = new ServerSocket(CHelperArenaPlugin.PORT);
@@ -135,10 +135,10 @@ public class TopCoderAction extends AnAction {
                         } catch (IOException ignored) {}
                     }
                 }
-            }).start();
+            }).start();*/
 		} catch (IOException e) {
-			JOptionPane.showMessageDialog(null, "Socket cannot be opened. Files will be used which are less reliable",
-				"Socket error", JOptionPane.INFORMATION_MESSAGE);
+//			JOptionPane.showMessageDialog(null, "Socket cannot be opened. Files will be used which are less reliable",
+//				"Socket error", JOptionPane.INFORMATION_MESSAGE);
 			VirtualFileManager.getInstance().addVirtualFileListener(new VirtualFileAdapter() {
 				@Override
 				public void fileCreated(VirtualFileEvent event) {

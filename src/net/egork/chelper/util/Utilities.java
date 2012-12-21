@@ -15,6 +15,7 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import net.egork.chelper.ProjectData;
+import net.egork.chelper.actions.TopCoderAction;
 import net.egork.chelper.checkers.TokenChecker;
 import net.egork.chelper.configurations.TaskConfiguration;
 import net.egork.chelper.configurations.TaskConfigurationType;
@@ -43,8 +44,10 @@ public class Utilities {
 			@Override
 			public void projectOpened(Project project) {
 				ProjectData configuration = ProjectData.load(project);
-				if (configuration != null)
+				if (configuration != null) {
 					eligibleProjects.put(project, configuration);
+                    TopCoderAction.start(project);
+                }
 			}
 
 			@Override

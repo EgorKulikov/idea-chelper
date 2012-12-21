@@ -8,7 +8,6 @@ import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import net.egork.chelper.actions.ArchiveAction;
-import net.egork.chelper.actions.TopCoderAction;
 import net.egork.chelper.task.*;
 
 import javax.swing.*;
@@ -293,11 +292,9 @@ public class CodeGenerationUtilities {
 				final VirtualFile file = FileUtilities.writeTextFile(directory, task.name + ".java", text.toString());
 				FileUtilities.synchronizeFile(file);
 				removeUnusedCode(project, file, task.name, task.signature.name);
-				if (TopCoderAction.alternative) {
-					String source = FileUtilities.readTextFile(file);
-					VirtualFile virtualFile = FileUtilities.writeTextFile(LocalFileSystem.getInstance().findFileByPath(System.getProperty("user.home")), ".java", source);
-					new File(virtualFile.getCanonicalPath()).deleteOnExit();
-				}
+				String source = FileUtilities.readTextFile(file);
+				VirtualFile virtualFile = FileUtilities.writeTextFile(LocalFileSystem.getInstance().findFileByPath(System.getProperty("user.home")), ".java", source);
+				new File(virtualFile.getCanonicalPath()).deleteOnExit();
 			}
 		});
 	}

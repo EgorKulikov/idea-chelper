@@ -4,6 +4,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import net.egork.chelper.util.FileUtilities;
+import net.egork.chelper.util.Utilities;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -15,7 +16,7 @@ import java.util.Properties;
 public class ProjectData {
     public static final ProjectData DEFAULT = new ProjectData(
         "java.util.Scanner", "java.io.PrintWriter", "java.,javax.,com.sun.".split(","), "output", "",
-        "archive/unsorted", "main", "lib/test", false, false);
+        "archive/unsorted", "main", "lib/test", false, false, false);
 
 	public final String inputClass;
 	public final String outputClass;
@@ -27,8 +28,9 @@ public class ProjectData {
 	public final String testDirectory;
 	public final boolean enableUnitTests;
     public final boolean failOnIntegerOverflowForNewTasks;
+    public final boolean libraryMigrated;
 
-    public ProjectData(String inputClass, String outputClass, String[] excludedPackages, String outputDirectory, String author, String archiveDirectory, String defaultDirectory, String testDirectory, boolean enableUnitTests, boolean failOnIntegerOverflowForNewTasks) {
+    public ProjectData(String inputClass, String outputClass, String[] excludedPackages, String outputDirectory, String author, String archiveDirectory, String defaultDirectory, String testDirectory, boolean enableUnitTests, boolean failOnIntegerOverflowForNewTasks, boolean libraryMigrated) {
         this.inputClass = inputClass;
         this.outputClass = outputClass;
         this.excludedPackages = excludedPackages;
@@ -39,6 +41,7 @@ public class ProjectData {
         this.testDirectory = testDirectory;
         this.enableUnitTests = enableUnitTests;
         this.failOnIntegerOverflowForNewTasks = failOnIntegerOverflowForNewTasks;
+        this.libraryMigrated = libraryMigrated;
     }
 
     public ProjectData(Properties properties) {
@@ -52,6 +55,7 @@ public class ProjectData {
 		testDirectory = properties.getProperty("testDirectory", DEFAULT.testDirectory);
 		enableUnitTests = Boolean.valueOf(properties.getProperty("enableUnitTests", Boolean.toString(DEFAULT.enableUnitTests)));
         failOnIntegerOverflowForNewTasks = Boolean.valueOf(properties.getProperty("failOnIntegerOverflowForNewTasks", Boolean.toString(DEFAULT.enableUnitTests)));
+        libraryMigrated = Boolean.valueOf(properties.getProperty("libraryMigrated", Boolean.toString(DEFAULT.libraryMigrated)));
 	}
 
 	public static ProjectData load(Project project) {
@@ -92,6 +96,7 @@ public class ProjectData {
                     properties.setProperty("testDirectory", testDirectory);
                     properties.setProperty("enableUnitTests", Boolean.toString(enableUnitTests));
                     properties.setProperty("failOnIntegerOverflowForNewTasks", Boolean.toString(failOnIntegerOverflowForNewTasks));
+                    properties.setProperty("libraryMigrated", Boolean.toString(libraryMigrated));
                     OutputStream outputStream = config.getOutputStream(null);
                     properties.store(outputStream, "");
                     outputStream.close();
@@ -110,5 +115,12 @@ public class ProjectData {
             result.append(aPackage);
         }
         return result.toString();
+    }
+
+    public void completeMigration(Project project) {
+        ProjectData newData = new ProjectData(inputClass, outputClass, excludedPackages, outputDirectory, author,
+            archiveDirectory, defaultDirectory, testDirectory, enableUnitTests, failOnIntegerOverflowForNewTasks, true);
+        newData.save(project);
+        Utilities.addProjectData(project, newData);
     }
 }

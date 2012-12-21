@@ -105,7 +105,7 @@ public class ProjectDataDialog extends JDialog {
     }
 
     private void onChange() {
-        data = new ProjectData(inputClass.getText(), outputClass.getText(), excludePackages.getText().split(","), outputDirectory.getText(), author.getText(), archiveDirectory.getText(), defaultDirectory.getText(), testDirectory.getText(), enableUnitTests.isSelected(), failOnIntegerOverflowForNewTasks.isSelected());
+        data = new ProjectData(inputClass.getText(), outputClass.getText(), excludePackages.getText().split(","), outputDirectory.getText(), author.getText(), archiveDirectory.getText(), defaultDirectory.getText(), testDirectory.getText(), enableUnitTests.isSelected(), failOnIntegerOverflowForNewTasks.isSelected(), true);
     }
 
     @Override

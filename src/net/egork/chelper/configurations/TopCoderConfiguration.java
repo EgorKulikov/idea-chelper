@@ -73,7 +73,6 @@ public class TopCoderConfiguration extends ModuleBasedConfiguration<JavaRunConfi
 				parameters.getVMParametersList().add("-Xmx64M");
                 if (configuration.failOnOverflow) {
                     String path = TopCoderAction.getJarPathForClass(ch.eiafr.cojac.Cojac.class);
-                    // TODO(petya): What if there's a space in the filename?..
                     parameters.getVMParametersList().add("-javaagent:" + path + "=-e -ints -longs -casts -maths");
                 }
                 parameters.setWorkingDirectory(getProject().getBaseDir().getPath());

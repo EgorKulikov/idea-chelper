@@ -5,16 +5,24 @@ import com.intellij.execution.impl.RunManagerImpl;
 import com.intellij.execution.impl.RunnerAndConfigurationSettingsImpl;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.project.ProjectManagerAdapter;
+import com.intellij.openapi.roots.OrderRootType;
+import com.intellij.openapi.roots.impl.libraries.ProjectLibraryTable;
+import com.intellij.openapi.roots.libraries.Library;
+import com.intellij.openapi.roots.libraries.LibraryTable;
+import com.intellij.openapi.vfs.JarFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.openapi.wm.WindowManager;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import net.egork.chelper.ProjectData;
+import net.egork.chelper.actions.TopCoderAction;
 import net.egork.chelper.checkers.TokenChecker;
 import net.egork.chelper.configurations.TaskConfiguration;
 import net.egork.chelper.configurations.TaskConfigurationType;
@@ -22,6 +30,7 @@ import net.egork.chelper.configurations.TopCoderConfiguration;
 import net.egork.chelper.configurations.TopCoderConfigurationType;
 import net.egork.chelper.parser.Parser;
 import net.egork.chelper.task.*;
+import net.egork.chelper.tester.NewTester;
 
 import javax.swing.*;
 import java.awt.*;
@@ -45,8 +54,11 @@ public class Utilities {
 			@Override
 			public void projectOpened(Project project) {
 				ProjectData configuration = ProjectData.load(project);
-				if (configuration != null)
+				if (configuration != null) {
 					eligibleProjects.put(project, configuration);
+                    TopCoderAction.start(project);
+                    ensureLibrary(project);
+                }
 			}
 
 			@Override
@@ -56,7 +68,27 @@ public class Utilities {
 		});
 	}
 
-	public static boolean isEligible(DataContext dataContext) {
+    private static void ensureLibrary(final Project project) {
+        final ProjectData data = Utilities.getData(project);
+        if (data.libraryMigrated)
+            return;
+        ApplicationManager.getApplication().runWriteAction(new Runnable() {
+            public void run() {
+                LibraryTable table = ProjectLibraryTable.getInstance(project);
+                String path = TopCoderAction.getJarPathForClass(NewTester.class);
+                VirtualFile jar = VirtualFileManager.getInstance().findFileByUrl(VirtualFileManager.constructUrl(JarFileSystem.PROTOCOL, path) + JarFileSystem.JAR_SEPARATOR);
+                Library library = table.getLibraryByName("CHelper");
+                if (library != null) {
+                    Library.ModifiableModel libraryModel = library.getModifiableModel();
+                    libraryModel.addRoot(jar, OrderRootType.CLASSES);
+                    libraryModel.commit();
+                }
+                data.completeMigration(project);
+            }
+        });
+    }
+
+    public static boolean isEligible(DataContext dataContext) {
 		return eligibleProjects.containsKey(getProject(dataContext));
 	}
 

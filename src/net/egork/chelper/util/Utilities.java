@@ -58,6 +58,9 @@ public class Utilities {
 					eligibleProjects.put(project, configuration);
                     TopCoderAction.start(project);
                     ensureLibrary(project);
+                    CodeGenerationUtilities.createTaskClassTemplateIfNeeded(project);
+                    CodeGenerationUtilities.createCheckerClassTemplateIfNeeded(project);
+                    CodeGenerationUtilities.createTestCaseClassTemplateIfNeeded(project);
                 }
 			}
 

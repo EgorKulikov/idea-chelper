@@ -4,7 +4,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.VerticalFlowLayout;
 import com.intellij.openapi.util.IconLoader;
 import net.egork.chelper.util.FileCreator;
-import net.egork.chelper.util.FileUtilities;
 import net.egork.chelper.util.Provider;
 import net.egork.chelper.util.Utilities;
 
@@ -23,12 +22,12 @@ public class TestClassesDialog extends JDialog {
     private boolean isOk = false;
     private List<TestClassPanel> panels = new ArrayList<TestClassPanel>();
     private JPanel classesPanel;
-	private boolean isTopCoder;
+	private FileCreator fileCreator;
 	private final int width = new JTextField(20).getPreferredSize().width;
 
-	public TestClassesDialog(String[] testClasses, final Project project, final String location, boolean isTopCoder) {
+	public TestClassesDialog(String[] testClasses, final Project project, final String location, FileCreator fileCreator, final String baseName) {
         super(null, "Test classes", ModalityType.APPLICATION_MODAL);
-		this.isTopCoder = isTopCoder;
+		this.fileCreator = fileCreator;
         setIconImage(Utilities.iconToImage(IconLoader.getIcon("/icons/check.png")));
         setAlwaysOnTop(true);
         setResizable(false);
@@ -63,7 +62,7 @@ public class TestClassesDialog extends JDialog {
         buttonPanel.add(add, BorderLayout.WEST);
         add.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                panels.add(new TestClassPanel("TestCase" + panels.size(), project, location));
+                panels.add(new TestClassPanel(baseName + "TestCase" + panels.size(), project, location));
                 rebuild();
             }
         });
@@ -82,8 +81,8 @@ public class TestClassesDialog extends JDialog {
         return testClasses;
     }
 
-    public static String[] showDialog(String[] testClasses, Project project, String location, boolean isTopCoder) {
-        TestClassesDialog dialog = new TestClassesDialog(testClasses, project, location, isTopCoder);
+    public static String[] showDialog(String[] testClasses, Project project, String location, FileCreator fileCreator, String baseName) {
+        TestClassesDialog dialog = new TestClassesDialog(testClasses, project, location, fileCreator, baseName);
         dialog.setVisible(true);
         return dialog.testClasses;
     }
@@ -97,18 +96,7 @@ public class TestClassesDialog extends JDialog {
                 public String provide() {
                     return location;
                 }
-            }, new FileCreator() {
-                public String createFile(Project project, String path, String name) {
-					if (isTopCoder)
-						return FileUtilities.createTopCoderTestClass(project, path, name);
-					else
-                    	return FileUtilities.createTestClass(project, path, name);
-                }
-
-                public boolean isValid(String name) {
-                    return FileUtilities.isValidClassName(name);
-                }
-            });
+            }, fileCreator);
             JButton remove = new JButton("Remove");
             remove.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {

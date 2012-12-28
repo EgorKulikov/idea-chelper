@@ -8,6 +8,7 @@ import net.egork.chelper.task.TestType;
 import net.egork.chelper.util.FileCreator;
 import net.egork.chelper.util.FileUtilities;
 import net.egork.chelper.util.Provider;
+import net.egork.chelper.util.Utilities;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -162,7 +163,7 @@ public class TaskConfigurationPanel extends JPanel {
         leftAdvanced.add(new JLabel("Checker class:"));
         checkerClass = new SelectOrCreateClass(task.checkerClass, project, locationProvider, new FileCreator() {
             public String createFile(Project project, String path, String name) {
-                return FileUtilities.createCheckerClass(project, path, name);
+                return FileUtilities.createCheckerClass(project, path, name, task);
             }
 
             public boolean isValid(String name) {
@@ -191,8 +192,16 @@ public class TaskConfigurationPanel extends JPanel {
         testClasses.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 TaskConfigurationPanel.this.task = TaskConfigurationPanel.this.task.setTestClasses(
-                        TestClassesDialog.showDialog(TaskConfigurationPanel.this.task.testClasses, project,
-                        TaskConfigurationPanel.this.task.location, false));
+                    TestClassesDialog.showDialog(TaskConfigurationPanel.this.task.testClasses, project,
+                    TaskConfigurationPanel.this.task.location, new FileCreator() {
+                        public String createFile(Project project, String path, String name) {
+                            return FileUtilities.createTestClass(project, path, name, task);
+                        }
+
+                        public boolean isValid(String name) {
+                            return FileUtilities.isValidClassName(name);
+                        }
+                    }, Utilities.getSimpleName(task.taskClass)));
                 name.setText(name.getText());
             }
         });

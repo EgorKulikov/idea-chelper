@@ -309,8 +309,8 @@ public class FileUtilities {
         return aPackage + "." + name;
     }
 
-    public static String createCheckerClass(Project project, String path, String name) {
-        String mainClass = CodeGenerationUtilities.createCheckerStub(path, name, project);
+    public static String createCheckerClass(Project project, String path, String name, Task task) {
+        String mainClass = CodeGenerationUtilities.createCheckerStub(path, name, project, task);
         VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, path);
         writeTextFile(directory, name + ".java", mainClass);
         PsiDirectory psiDirectory = getPsiDirectory(project, path);
@@ -318,8 +318,8 @@ public class FileUtilities {
         return aPackage + "." + name;
     }
 
-    public static String createTestClass(Project project, String path, String name) {
-        String mainClass = CodeGenerationUtilities.createTestStub(path, name, project);
+    public static String createTestClass(Project project, String path, String name, Task task) {
+        String mainClass = CodeGenerationUtilities.createTestStub(path, name, project, task);
         VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, path);
         writeTextFile(directory, name + ".java", mainClass);
         PsiDirectory psiDirectory = getPsiDirectory(project, path);

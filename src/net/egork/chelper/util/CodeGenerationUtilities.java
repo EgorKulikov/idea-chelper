@@ -225,23 +225,18 @@ public class CodeGenerationUtilities {
 		});
 	}
 
-	public static String createCheckerStub(String location, String name, Project project) {
-		PsiDirectory directory = FileUtilities.getPsiDirectory(project, location);
-		StringBuilder builder = new StringBuilder();
-		String packageName = FileUtilities.getPackage(directory);
-		if (packageName != null && packageName.length() != 0)
-			builder.append("package ").append(packageName).append(";\n\n");
-		builder.append("import net.egork.chelper.tester.Verdict;\n");
-        builder.append("import net.egork.chelper.checkers.Checker;\n");
-        builder.append("\n");
-		builder.append("public class ").append(name).append(" implements Checker {\n");
-        builder.append("\tpublic ").append(name).append("(String parameters) {\n");
-        builder.append("\t}\n\n");
-		builder.append("\tpublic Verdict check(String input, String expectedOutput, String actualOutput) {\n");
-		builder.append("\t\treturn Verdict.UNDECIDED;\n");
-		builder.append("\t}\n");
-		builder.append("}\n");
-		return builder.toString();
+	public static String createCheckerStub(String location, String name, Project project, Task task) {
+        PsiDirectory directory = FileUtilities.getPsiDirectory(project, location);
+        String inputClass = task.inputClass;
+        String inputClassShort = inputClass.substring(inputClass.lastIndexOf('.') + 1);
+        String outputClass = task.outputClass;
+        String outputClassShort = outputClass.substring(outputClass.lastIndexOf('.') + 1);
+        String packageName = FileUtilities.getPackage(directory);
+        VirtualFile file = createCheckerClassTemplateIfNeeded(project);
+        String template = FileUtilities.readTextFile(file);
+        return template.replace("%package%", packageName).replace("%InputClass%", inputClassShort).
+                replace("%InputClassFQN%", inputClass).replace("%OutputClass%", outputClassShort).
+                replace("%OutputClassFQN%", outputClass).replace("%CheckerClass%", name);
 	}
 
 	public static String createStub(Task task, String location, String name, Project project) {
@@ -250,22 +245,68 @@ public class CodeGenerationUtilities {
 		String inputClassShort = inputClass.substring(inputClass.lastIndexOf('.') + 1);
 		String outputClass = task.outputClass;
 		String outputClassShort = outputClass.substring(outputClass.lastIndexOf('.') + 1);
-		StringBuilder builder = new StringBuilder();
-		String packageName = FileUtilities.getPackage(directory);
-		if (packageName != null && packageName.length() != 0)
-			builder.append("package ").append(packageName).append(";\n\n");
-		builder.append("import ").append(inputClass).append(";\n");
-		builder.append("import ").append(outputClass).append(";\n");
-		builder.append("\n");
-		builder.append("public class ").append(name).append(" {\n");
-		builder.append("\tpublic void solve(int testNumber, ").append(inputClassShort).append(" in, ").
-			append(outputClassShort).append(" out) {\n");
-		builder.append("\t}\n");
-		builder.append("}\n");
-		return builder.toString();
+        String packageName = FileUtilities.getPackage(directory);
+        VirtualFile file = createTaskClassTemplateIfNeeded(project);
+        String template = FileUtilities.readTextFile(file);
+        return template.replace("%package%", packageName).replace("%InputClass%", inputClassShort).
+            replace("%InputClassFQN%", inputClass).replace("%OutputClass%", outputClassShort).
+            replace("%OutputClassFQN%", outputClass).replace("%TaskClass%", name);
 	}
 
-	public static void createSourceFile(final Project project, final TopCoderTask task) {
+    public static VirtualFile createTaskClassTemplateIfNeeded(Project project) {
+        VirtualFile file = FileUtilities.getFile(project, "TaskClass.template");
+        if (file != null)
+            return file;
+        return FileUtilities.writeTextFile(project.getBaseDir(), "TaskClass.template", "package %package%;\n" +
+                "\n" +
+                "import %InputClassFQN%;\n" +
+                "import %OutputClassFQN%;\n" +
+                "\n" +
+                "public class %TaskClass% {\n" +
+                "    public void solve(int testNumber, %InputClass% in, %OutputClass% out) {\n" +
+                "    }\n" +
+                "}\n");
+    }
+
+    public static VirtualFile createCheckerClassTemplateIfNeeded(Project project) {
+        VirtualFile file = FileUtilities.getFile(project, "CheckerClass.template");
+        if (file != null)
+            return file;
+        return FileUtilities.writeTextFile(project.getBaseDir(), "CheckerClass.template", "package %package%;\n" +
+                "\n" +
+                "import net.egork.chelper.tester.Verdict;\n" +
+                "import net.egork.chelper.checkers.Checker;\n" +
+                "\n" +
+                "public class %CheckerClass% implements Checker {\n" +
+                "    public %CheckerClass%(String parameters) {\n" +
+                "    }\n" +
+                "\n" +
+                "    public Verdict check(String input, String expectedOutput, String actualOutput) {\n" +
+                "        return Verdict.UNDECIDED;\n" +
+                "    }\n" +
+                "}\n");
+    }
+
+    public static VirtualFile createTestCaseClassTemplateIfNeeded(Project project) {
+        VirtualFile file = FileUtilities.getFile(project, "TestCaseClass.template");
+        if (file != null)
+            return file;
+        return FileUtilities.writeTextFile(project.getBaseDir(), "TestCaseClass.template", "package %package%;\n" +
+                "\n" +
+                "import net.egork.chelper.task.Test;\n" +
+                "import net.egork.chelper.tester.TestProvider;\n" +
+                "\n" +
+                "import java.util.Collection;\n" +
+                "import java.util.Collections;\n" +
+                "\n" +
+                "public class %TestCaseClass% implements TestProvider {\n" +
+                "    public Collection<Test> createTests() {\n" +
+                "        return Collections.emptyList();\n" +
+                "    }\n" +
+                "}\n");
+    }
+
+    public static void createSourceFile(final Project project, final TopCoderTask task) {
 		ApplicationManager.getApplication().runWriteAction(new Runnable() {
 			public void run() {
 				PsiFile originalSource = FileUtilities.getPsiFile(project,
@@ -528,24 +569,18 @@ public class CodeGenerationUtilities {
 		return sourceFile;
 	}
 
-    public static String createTestStub(String location, String name, Project project) {
+    public static String createTestStub(String location, String name, Project project, Task task) {
         PsiDirectory directory = FileUtilities.getPsiDirectory(project, location);
-        StringBuilder builder = new StringBuilder();
+        String inputClass = task.inputClass;
+        String inputClassShort = inputClass.substring(inputClass.lastIndexOf('.') + 1);
+        String outputClass = task.outputClass;
+        String outputClassShort = outputClass.substring(outputClass.lastIndexOf('.') + 1);
         String packageName = FileUtilities.getPackage(directory);
-        if (packageName != null && packageName.length() != 0)
-            builder.append("package ").append(packageName).append(";\n\n");
-        builder.append("import net.egork.chelper.task.Test;\n");
-        builder.append("import net.egork.chelper.tester.TestProvider;\n");
-        builder.append("\n");
-        builder.append("import java.util.Collection;\n");
-        builder.append("import java.util.Collections;\n");
-        builder.append("\n");
-        builder.append("public class ").append(name).append(" implements TestProvider {\n");
-        builder.append("\tpublic Collection<Test> createTests() {\n");
-        builder.append("\t\treturn Collections.emptyList();\n");
-        builder.append("\t}\n");
-        builder.append("}\n");
-        return builder.toString();
+        VirtualFile file = createTestCaseClassTemplateIfNeeded(project);
+        String template = FileUtilities.readTextFile(file);
+        return template.replace("%package%", packageName).replace("%InputClass%", inputClassShort).
+                replace("%InputClassFQN%", inputClass).replace("%OutputClass%", outputClassShort).
+                replace("%OutputClassFQN%", outputClass).replace("%TestCaseClass%", name);
     }
 
     public static String createTopCoderStub(TopCoderTask task) {

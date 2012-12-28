@@ -6,6 +6,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.VerticalFlowLayout;
 import net.egork.chelper.configurations.TopCoderConfiguration;
 import net.egork.chelper.task.TopCoderTask;
+import net.egork.chelper.util.FileCreator;
+import net.egork.chelper.util.FileUtilities;
 import net.egork.chelper.util.Utilities;
 import org.jetbrains.annotations.NotNull;
 
@@ -64,7 +66,15 @@ public class TopCoderConfigurationEditor extends SettingsEditor<TopCoderConfigur
         JButton editTestClasses = new JButton("Edit test classes");
         editTestClasses.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                task = task.setTestClasses(TestClassesDialog.showDialog(task.testClasses, project, Utilities.getData(project).defaultDirectory, true));
+                task = task.setTestClasses(TestClassesDialog.showDialog(task.testClasses, project, Utilities.getData(project).defaultDirectory, new FileCreator() {
+                    public String createFile(Project project, String path, String name) {
+                        return FileUtilities.createTopCoderTestClass(project, path, name);
+                    }
+
+                    public boolean isValid(String name) {
+                        return FileUtilities.isValidClassName(name);
+                    }
+                }, task.name));
 				date.setText(date.getText());
             }
         });

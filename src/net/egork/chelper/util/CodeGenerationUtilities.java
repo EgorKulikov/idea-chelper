@@ -232,8 +232,7 @@ public class CodeGenerationUtilities {
         String outputClass = task.outputClass;
         String outputClassShort = outputClass.substring(outputClass.lastIndexOf('.') + 1);
         String packageName = FileUtilities.getPackage(directory);
-        VirtualFile file = createCheckerClassTemplateIfNeeded(project);
-        String template = FileUtilities.readTextFile(file);
+        String template = createCheckerClassTemplateIfNeeded(project);
         return template.replace("%package%", packageName).replace("%InputClass%", inputClassShort).
                 replace("%InputClassFQN%", inputClass).replace("%OutputClass%", outputClassShort).
                 replace("%OutputClassFQN%", outputClass).replace("%CheckerClass%", name);
@@ -246,18 +245,17 @@ public class CodeGenerationUtilities {
 		String outputClass = task.outputClass;
 		String outputClassShort = outputClass.substring(outputClass.lastIndexOf('.') + 1);
         String packageName = FileUtilities.getPackage(directory);
-        VirtualFile file = createTaskClassTemplateIfNeeded(project);
-        String template = FileUtilities.readTextFile(file);
+        String template = createTaskClassTemplateIfNeeded(project);
         return template.replace("%package%", packageName).replace("%InputClass%", inputClassShort).
             replace("%InputClassFQN%", inputClass).replace("%OutputClass%", outputClassShort).
             replace("%OutputClassFQN%", outputClass).replace("%TaskClass%", name);
 	}
 
-    public static VirtualFile createTaskClassTemplateIfNeeded(Project project) {
+    public static String createTaskClassTemplateIfNeeded(Project project) {
         VirtualFile file = FileUtilities.getFile(project, "TaskClass.template");
         if (file != null)
-            return file;
-        return FileUtilities.writeTextFile(project.getBaseDir(), "TaskClass.template", "package %package%;\n" +
+            return FileUtilities.readTextFile(file);
+        String template = "package %package%;\n" +
                 "\n" +
                 "import %InputClassFQN%;\n" +
                 "import %OutputClassFQN%;\n" +
@@ -265,14 +263,16 @@ public class CodeGenerationUtilities {
                 "public class %TaskClass% {\n" +
                 "    public void solve(int testNumber, %InputClass% in, %OutputClass% out) {\n" +
                 "    }\n" +
-                "}\n");
+                "}\n";
+        FileUtilities.writeTextFile(project.getBaseDir(), "TaskClass.template", template);
+        return template;
     }
 
-    public static VirtualFile createCheckerClassTemplateIfNeeded(Project project) {
+    public static String createCheckerClassTemplateIfNeeded(Project project) {
         VirtualFile file = FileUtilities.getFile(project, "CheckerClass.template");
         if (file != null)
-            return file;
-        return FileUtilities.writeTextFile(project.getBaseDir(), "CheckerClass.template", "package %package%;\n" +
+            return FileUtilities.readTextFile(file);
+        String template = "package %package%;\n" +
                 "\n" +
                 "import net.egork.chelper.tester.Verdict;\n" +
                 "import net.egork.chelper.checkers.Checker;\n" +
@@ -284,14 +284,16 @@ public class CodeGenerationUtilities {
                 "    public Verdict check(String input, String expectedOutput, String actualOutput) {\n" +
                 "        return Verdict.UNDECIDED;\n" +
                 "    }\n" +
-                "}\n");
+                "}\n";
+        FileUtilities.writeTextFile(project.getBaseDir(), "CheckerClass.template", template);
+        return template;
     }
 
-    public static VirtualFile createTestCaseClassTemplateIfNeeded(Project project) {
+    public static String createTestCaseClassTemplateIfNeeded(Project project) {
         VirtualFile file = FileUtilities.getFile(project, "TestCaseClass.template");
         if (file != null)
-            return file;
-        return FileUtilities.writeTextFile(project.getBaseDir(), "TestCaseClass.template", "package %package%;\n" +
+            return FileUtilities.readTextFile(file);
+        String template = "package %package%;\n" +
                 "\n" +
                 "import net.egork.chelper.task.Test;\n" +
                 "import net.egork.chelper.tester.TestProvider;\n" +
@@ -303,7 +305,9 @@ public class CodeGenerationUtilities {
                 "    public Collection<Test> createTests() {\n" +
                 "        return Collections.emptyList();\n" +
                 "    }\n" +
-                "}\n");
+                "}\n";
+        FileUtilities.writeTextFile(project.getBaseDir(), "TestCaseClass.template", template);
+        return template;
     }
 
     public static void createSourceFile(final Project project, final TopCoderTask task) {
@@ -576,8 +580,7 @@ public class CodeGenerationUtilities {
         String outputClass = task.outputClass;
         String outputClassShort = outputClass.substring(outputClass.lastIndexOf('.') + 1);
         String packageName = FileUtilities.getPackage(directory);
-        VirtualFile file = createTestCaseClassTemplateIfNeeded(project);
-        String template = FileUtilities.readTextFile(file);
+        String template = createTestCaseClassTemplateIfNeeded(project);
         return template.replace("%package%", packageName).replace("%InputClass%", inputClassShort).
                 replace("%InputClassFQN%", inputClass).replace("%OutputClass%", outputClassShort).
                 replace("%OutputClassFQN%", outputClass).replace("%TestCaseClass%", name);

@@ -172,19 +172,14 @@ public class TopCoderAction extends AnAction {
 		String defaultDir = Utilities.getData(project).defaultDirectory;
 		FileUtilities.createDirectoryIfMissing(project, defaultDir);
 		String packageName = FileUtilities.getPackage(FileUtilities.getPsiDirectory(project, defaultDir));
-		if (packageName == null) {
+		if (packageName == null || packageName.length() == 0) {
 			JOptionPane.showMessageDialog(null, "defaultDirectory should be under source and in non-default package");
 			return;
 		}
 		String fqn = (packageName.length() == 0 ? "" : packageName + ".") + task.name;
 		TopCoderTask taskToWrite = task.setFQN(fqn).setFailOnOverflow(Utilities.getData(project).failOnIntegerOverflowForNewTasks);
-		if (packageName.length() != 0) {
-			FileUtilities.writeTextFile(FileUtilities.getFile(project, defaultDir),
-				task.name + ".java", "package " + packageName + ";\n\n" + CodeGenerationUtilities.createTopCoderStub(task));
-		} else {
-			FileUtilities.writeTextFile(FileUtilities.getFile(project, defaultDir),
-				task.name + ".java", CodeGenerationUtilities.createTopCoderStub(task));
-		}
+		FileUtilities.writeTextFile(FileUtilities.getFile(project, defaultDir),
+			task.name + ".java", CodeGenerationUtilities.createTopCoderStub(task, project, packageName));
 		Utilities.createConfiguration(taskToWrite, true, project);
 		final PsiElement main = JavaPsiFacade.getInstance(project).findClass(fqn, GlobalSearchScope.allScope(project));
 		Utilities.openElement(project, main);

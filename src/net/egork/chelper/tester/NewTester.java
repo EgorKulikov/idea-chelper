@@ -42,9 +42,18 @@ public class NewTester {
 		List<Test> tests = new ArrayList<Test>(Arrays.asList(task.tests));
         for (String testClass : task.testClasses) {
             Class test = Class.forName(testClass);
-            TestProvider provider = (TestProvider) test.getConstructor().newInstance();
-            for (Test testCase : provider.createTests())
-                tests.add(new Test(testCase.input, testCase.output, tests.size(), testCase.active));
+            Object provider = test.getConstructor().newInstance();
+            for (Method method : test.getMethods()) {
+                if (method.getAnnotation(TestCase.class) != null) {
+                    Collection<Test> providedTests = (Collection<Test>) method.invoke(provider);
+                    for (Test testCase : providedTests)
+                        tests.add(new Test(testCase.input, testCase.output, tests.size(), testCase.active));
+                }
+            }
+            if (provider instanceof TestProvider) {
+                for (Test testCase : ((TestProvider) provider).createTests())
+                    tests.add(new Test(testCase.input, testCase.output, tests.size(), testCase.active));
+            }
         }
 		String writerFQN = task.outputClass;
 		Class readerClass = Class.forName(readerFQN);

@@ -18,9 +18,11 @@ import com.intellij.openapi.vfs.JarFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.openapi.wm.WindowManager;
+import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.search.GlobalSearchScope;
 import net.egork.chelper.ProjectData;
 import net.egork.chelper.actions.TopCoderAction;
 import net.egork.chelper.checkers.TokenChecker;
@@ -61,6 +63,8 @@ public class Utilities {
                     CodeGenerationUtilities.createTaskClassTemplateIfNeeded(project);
                     CodeGenerationUtilities.createCheckerClassTemplateIfNeeded(project);
                     CodeGenerationUtilities.createTestCaseClassTemplateIfNeeded(project);
+					CodeGenerationUtilities.createTopCoderTaskTemplateIfNeeded(project);
+					CodeGenerationUtilities.createTopCoderTestCaseClassTemplateIfNeeded(project);
                 }
 			}
 
@@ -70,6 +74,10 @@ public class Utilities {
 			}
 		});
 	}
+
+    public static PsiElement getPsiElement(Project project, String classFQN) {
+        return JavaPsiFacade.getInstance(project).findClass(classFQN, GlobalSearchScope.allScope(project));
+    }
 
     private static void ensureLibrary(final Project project) {
         final ProjectData data = Utilities.getData(project);

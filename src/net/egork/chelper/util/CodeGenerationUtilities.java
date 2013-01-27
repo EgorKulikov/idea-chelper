@@ -296,17 +296,54 @@ public class CodeGenerationUtilities {
         String template = "package %package%;\n" +
                 "\n" +
                 "import net.egork.chelper.task.Test;\n" +
-                "import net.egork.chelper.tester.TestProvider;\n" +
+                "import net.egork.chelper.tester.TestCase;\n" +
                 "\n" +
                 "import java.util.Collection;\n" +
                 "import java.util.Collections;\n" +
                 "\n" +
-                "public class %TestCaseClass% implements TestProvider {\n" +
+                "public class %TestCaseClass% {\n" +
+                "    @TestCase\n" +
                 "    public Collection<Test> createTests() {\n" +
                 "        return Collections.emptyList();\n" +
                 "    }\n" +
                 "}\n";
         FileUtilities.writeTextFile(project.getBaseDir(), "TestCaseClass.template", template);
+        return template;
+    }
+
+    public static String createTopCoderTestCaseClassTemplateIfNeeded(Project project) {
+        VirtualFile file = FileUtilities.getFile(project, "TopCoderTestCaseClass.template");
+        if (file != null)
+            return FileUtilities.readTextFile(file);
+        String template = "package %package%;\n" +
+                "\n" +
+                "import net.egork.chelper.task.NewTopCoderTest;\n" +
+                "import net.egork.chelper.tester.TestCase;\n" +
+                "\n" +
+                "import java.util.Collection;\n" +
+                "import java.util.Collections;\n" +
+                "\n" +
+                "public class %TestCaseClass% {\n" +
+                "    @TestCase\n" +
+                "    public Collection<NewTopCoderTest> createTests() {\n" +
+                "        return Collections.emptyList();\n" +
+                "    }\n" +
+                "}\n";
+        FileUtilities.writeTextFile(project.getBaseDir(), "TopCoderTestCaseClass.template", template);
+        return template;
+    }
+
+    public static String createTopCoderTaskTemplateIfNeeded(Project project) {
+        VirtualFile file = FileUtilities.getFile(project, "TopCoderTaskClass.template");
+        if (file != null)
+            return FileUtilities.readTextFile(file);
+        String template = "package %package%;\n" +
+                "\n" +
+                "public class %TaskClass% {\n" +
+                "    public %Signature% {\n" +
+                "    }\n" +
+                "}\n";
+        FileUtilities.writeTextFile(project.getBaseDir(), "TopCoderTaskClass.template", template);
         return template;
     }
 
@@ -586,39 +623,22 @@ public class CodeGenerationUtilities {
                 replace("%OutputClassFQN%", outputClass).replace("%TestCaseClass%", name);
     }
 
-    public static String createTopCoderStub(TopCoderTask task) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("public class ").append(task.name).append(" {\n");
-        builder.append("\tpublic ").append(task.signature.result.getSimpleName()).append(" ").append(task.signature.name).append("(");
+    public static String createTopCoderStub(TopCoderTask task, Project project, String packageName) {
+        String template = createTopCoderTaskTemplateIfNeeded(project);
+        StringBuilder signature = new StringBuilder();
+        signature.append(task.signature.result.getSimpleName()).append(" ").append(task.signature.name).append("(");
         for (int i = 0; i < task.signature.arguments.length; i++) {
             if (i != 0)
-                builder.append(", ");
-            builder.append(task.signature.arguments[i].getSimpleName()).append(' ').append(task.signature.argumentNames[i]);
+                signature.append(", ");
+            signature.append(task.signature.arguments[i].getSimpleName()).append(' ').append(task.signature.argumentNames[i]);
         }
-        builder.append(") {\n");
-        builder.append("\t}\n");
-        builder.append("}\n");
-        return builder.toString();
+		signature.append(')');
+        return template.replace("%package%", packageName).replace("%TaskClass%", task.name).replace("%Signature%", signature.toString());
     }
 
-	public static String createTopCoderTestStub(String location, String name, Project project) {
-		PsiDirectory directory = FileUtilities.getPsiDirectory(project, location);
-  StringBuilder builder = new StringBuilder();
-  String packageName = FileUtilities.getPackage(directory);
-  if (packageName != null && packageName.length() != 0)
-      builder.append("package ").append(packageName).append(";\n\n");
-  builder.append("import net.egork.chelper.task.NewTopCoderTest;\n");
-  builder.append("import net.egork.chelper.tester.TopCoderTestProvider;\n");
-  builder.append("\n");
-  builder.append("import java.util.Collection;\n");
-  builder.append("import java.util.Collections;\n");
-  builder.append("\n");
-  builder.append("public class ").append(name).append(" implements TopCoderTestProvider {\n");
-  builder.append("\tpublic Collection<NewTopCoderTest> createTests() {\n");
-  builder.append("\t\treturn Collections.emptyList();\n");
-  builder.append("\t}\n");
-  builder.append("}\n");
-  return builder.toString();
+	public static String createTopCoderTestStub(Project project, String aPackage, String name) {
+		String template = createTopCoderTestCaseClassTemplateIfNeeded(project);
+		return template.replace("%package%", aPackage).replace("%TestCaseClass%", name);
 	}
 
 	public static class InlineVisitor extends PsiElementVisitor {

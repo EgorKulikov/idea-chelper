@@ -3,10 +3,8 @@ package net.egork.chelper.actions;
 import com.intellij.ide.actions.CreateElementActionBase;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.IncorrectOperationException;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.ui.CreateTaskDialog;
@@ -39,7 +37,7 @@ public class NewTaskAction extends CreateElementActionBase {
 		Task task = CreateTaskDialog.showDialog(psiDirectory, s);
 		if (task == null)
 			return PsiElement.EMPTY_ARRAY;
-		PsiElement main = JavaPsiFacade.getInstance(psiDirectory.getProject()).findClass(task.taskClass, GlobalSearchScope.allScope(psiDirectory.getProject()));
+		PsiElement main = Utilities.getPsiElement(psiDirectory.getProject(), task.taskClass);
 		if (main == null)
 			return PsiElement.EMPTY_ARRAY;
 		Utilities.createConfiguration(task, true, psiDirectory.getProject());

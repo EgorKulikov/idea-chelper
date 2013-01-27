@@ -9,10 +9,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 /**
  * @author Egor Kulikov (kulikov@devexperts.com)
@@ -43,9 +40,19 @@ public class NewTopCoderTester {
         TopCoderTask task = TopCoderTask.load(input);
 		List<NewTopCoderTest> tests = new ArrayList<NewTopCoderTest>(Arrays.asList(task.tests));
         for (String testClass : task.testClasses) {
-            TopCoderTestProvider provider = (TopCoderTestProvider)Class.forName(testClass).newInstance();
-			for (NewTopCoderTest test : provider.createTests())
-            	tests.add(new NewTopCoderTest(test.arguments, test.result, tests.size(), test.active));
+            Class test = Class.forName(testClass);
+            Object provider = test.getConstructor().newInstance();
+            for (Method method : test.getMethods()) {
+                if (method.getAnnotation(TestCase.class) != null) {
+                    Collection<NewTopCoderTest> providedTests = (Collection<NewTopCoderTest>) method.invoke(provider);
+                    for (NewTopCoderTest testCase : providedTests)
+                        tests.add(new NewTopCoderTest(testCase.arguments, testCase.result, tests.size(), testCase.active));
+                }
+            }
+            if (provider instanceof TopCoderTestProvider) {
+                for (NewTopCoderTest testCase : ((TopCoderTestProvider) provider).createTests())
+                    tests.add(new NewTopCoderTest(testCase.arguments, testCase.result, tests.size(), testCase.active));
+            }
         }
 		Class taskClass = Class.forName(task.fqn);
         System.out.println(task.contestName + " - " + task.name);

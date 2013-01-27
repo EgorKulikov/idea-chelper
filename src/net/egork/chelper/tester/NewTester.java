@@ -6,6 +6,7 @@ import net.egork.chelper.task.Test;
 import net.egork.chelper.task.TestType;
 import net.egork.chelper.util.EncodingUtilities;
 import net.egork.chelper.util.InputReader;
+import net.egork.chelper.util.OutputWriter;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -30,6 +31,9 @@ public class NewTester {
 		long maximalTime = 0;
 		boolean ok = true;
 		String taskFileName = args[0];
+		int singleTest = -1;
+		if (args.length > 1)
+			singleTest = Integer.parseInt(args[1]);
 		InputReader input;
 		try {
 			input = new InputReader(new FileInputStream(taskFileName));
@@ -62,9 +66,15 @@ public class NewTester {
 		Class checkerClass = Class.forName(task.checkerClass);
         TestType testType = task.testType;
         boolean truncate = task.truncate;
-        System.out.println(task.contestName + " - " + task.name);
+		if (task.contestName.isEmpty())
+			System.out.println(task.name);
+		else
+        	System.out.println(task.contestName + " - " + task.name);
         System.out.println("------------------------------------------------------------------");
+		int testNumber = 0;
         for (Test test : tests) {
+			if (singleTest != -1 && testNumber++ != singleTest)
+				continue;
 			if (!test.active) {
 				verdicts.add(Verdict.SKIPPED);
 				System.out.println("Test #" + test.index + ": SKIPPED");
@@ -106,11 +116,29 @@ public class NewTester {
 		}
 		System.out.println("==================================================================");
 		System.out.println("Test results:");
-		if (ok)
+		if (ok) {
 			System.out.printf("All test passed input %.3f s.\n", maximalTime / 1000.);
-		else {
-			for (int i = 0; i < verdicts.size(); i++)
-				System.out.println("Test #" + i + ": " + verdicts.get(i));
+			if (singleTest != -1)
+				return test(args[0]);
+		} else {
+			if (singleTest != -1) {
+				for (int i = 0; i < verdicts.size(); i++)
+					System.out.println("Test #" + i + ": " + verdicts.get(i));
+			}
+		}
+		try {
+			OutputWriter report = new OutputWriter(new FileOutputStream("CHelperReport.txt"));
+			report.printString(args[0]);
+			List<Integer> failed = new ArrayList<Integer>();
+			for (int i = 0; i < verdicts.size(); i++) {
+				if (verdicts.get(i).type != Verdict.VerdictType.OK && verdicts.get(i).type != Verdict.VerdictType.UNDECIDED && verdicts.get(i).type != Verdict.VerdictType.SKIPPED)
+					failed.add(i);
+			}
+			report.printLine(failed.size());
+			for (int i : failed)
+				report.printLine(i);
+		} catch (FileNotFoundException e) {
+			System.err.println("Can't write report");
 		}
 		Thread.currentThread().join(100L);
 		return ok;

@@ -11,18 +11,18 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.WriteExternalException;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDirectory;
 import net.egork.chelper.actions.TopCoderAction;
 import net.egork.chelper.task.TopCoderTask;
 import net.egork.chelper.ui.TopCoderConfigurationEditor;
-import net.egork.chelper.util.CodeGenerationUtilities;
-import net.egork.chelper.util.FileUtilities;
-import net.egork.chelper.util.TaskUtilities;
-import net.egork.chelper.util.Utilities;
+import net.egork.chelper.util.*;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.util.Collection;
+import java.util.InputMismatchException;
 
 /**
  * @author Egor Kulikov (kulikov@devexperts.com)
@@ -76,7 +76,25 @@ public class TopCoderConfiguration extends ModuleBasedConfiguration<JavaRunConfi
                     parameters.getVMParametersList().add("-javaagent:" + path + "=-e -ints -longs -casts -maths");
                 }
                 parameters.setWorkingDirectory(getProject().getBaseDir().getPath());
-                parameters.getProgramParametersList().add(TaskUtilities.getTopCoderTaskFileName(Utilities.getData(getProject()).defaultDirectory, configuration.name));
+				String taskFileName = TaskUtilities.getTopCoderTaskFileName(Utilities.getData(getProject()).defaultDirectory, configuration.name);
+				parameters.getProgramParametersList().add(taskFileName);
+				if (Utilities.getData(getProject()).smartTesting) {
+					VirtualFile report = FileUtilities.getFile(getProject(), "CHelperReport.txt");
+					if (report != null) {
+						try {
+							InputReader reader = new InputReader(report.getInputStream());
+							if (reader.readString().equals(taskFileName)) {
+								int failedTestCount = reader.readInt();
+								if (failedTestCount != 0) {
+									int firstFailed = reader.readInt();
+									parameters.getProgramParametersList().add(Integer.toString(firstFailed));
+								}
+							}
+						} catch (IOException ignored) {
+						} catch (InputMismatchException ignored) {
+						}
+					}
+				}
 				return parameters;
 			}
 		};

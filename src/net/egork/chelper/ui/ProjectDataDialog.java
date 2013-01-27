@@ -20,6 +20,7 @@ public class ProjectDataDialog extends JDialog {
     private final DirectorySelector archiveDirectory;
     private final DirectorySelector outputDirectory;
     private final JCheckBox enableUnitTests;
+	private final JCheckBox smartTesting;
     private final JCheckBox failOnIntegerOverflowForNewTasks;
     private final DirectorySelector testDirectory;
     private final ClassSelector inputClass;
@@ -44,6 +45,7 @@ public class ProjectDataDialog extends JDialog {
         outputClass = new ClassSelector(data.outputClass, project);
         excludePackages = new JTextField(ProjectData.join(data.excludedPackages));
         author = new JTextField(data.author);
+		smartTesting = new JCheckBox("Use smart testing", data.smartTesting);
         OkCancelPanel main = new OkCancelPanel(new VerticalFlowLayout()) {
             @Override
             public void onOk() {
@@ -87,6 +89,7 @@ public class ProjectDataDialog extends JDialog {
         main.add(new JLabel("Author:"));
         main.add(author);
         main.add(failOnIntegerOverflowForNewTasks);
+		main.add(smartTesting);
         main.add(okCancelPanel);
         testDirectory.setVisible(enableUnitTests.isSelected());
         testDirectoryLabel.setVisible(enableUnitTests.isSelected());
@@ -105,7 +108,7 @@ public class ProjectDataDialog extends JDialog {
     }
 
     private void onChange() {
-        data = new ProjectData(inputClass.getText(), outputClass.getText(), excludePackages.getText().split(","), outputDirectory.getText(), author.getText(), archiveDirectory.getText(), defaultDirectory.getText(), testDirectory.getText(), enableUnitTests.isSelected(), failOnIntegerOverflowForNewTasks.isSelected(), true);
+        data = new ProjectData(inputClass.getText(), outputClass.getText(), excludePackages.getText().split(","), outputDirectory.getText(), author.getText(), archiveDirectory.getText(), defaultDirectory.getText(), testDirectory.getText(), enableUnitTests.isSelected(), failOnIntegerOverflowForNewTasks.isSelected(), true, smartTesting.isSelected());
     }
 
     @Override

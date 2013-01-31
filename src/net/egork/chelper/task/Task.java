@@ -34,23 +34,23 @@ public class Task {
     public final boolean failOnOverflow;
 
     public Task(String name, TestType testType, StreamConfiguration input, StreamConfiguration output, Test[] tests, String location, String vmArgs, String mainClass, String taskClass, String checkerClass, String checkerParameters, String[] testClasses, String date, String contestName, boolean truncate, String inputClass, String outputClass, boolean includeLocale, boolean failOnOverflow) {
-        this.name = name;
+        this.name = name.trim();
         this.testType = testType;
         this.input = input;
         this.output = output;
         this.tests = tests;
-        this.location = location;
-        this.vmArgs = vmArgs;
-        this.mainClass = mainClass;
-        this.taskClass = taskClass;
-        this.checkerClass = checkerClass;
-        this.checkerParameters = checkerParameters;
+        this.location = location.trim();
+        this.vmArgs = vmArgs.trim();
+        this.mainClass = mainClass.trim();
+        this.taskClass = taskClass.trim();
+        this.checkerClass = checkerClass.trim();
+        this.checkerParameters = checkerParameters.trim();
         this.testClasses = testClasses;
-        this.date = date;
-        this.contestName = contestName;
+        this.date = date.trim();
+        this.contestName = contestName.trim();
         this.truncate = truncate;
-        this.inputClass = inputClass;
-        this.outputClass = outputClass;
+        this.inputClass = inputClass.trim();
+        this.outputClass = outputClass.trim();
 		this.includeLocale = includeLocale;
         this.failOnOverflow = failOnOverflow;
     }

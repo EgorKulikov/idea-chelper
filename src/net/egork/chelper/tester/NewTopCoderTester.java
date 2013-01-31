@@ -112,7 +112,7 @@ public class NewTopCoderTester {
 			if (singleTest != -1)
 				return test(args[0]);
 		} else {
-			if (singleTest != -1) {
+			if (singleTest == -1) {
 				for (int i = 0; i < verdicts.size(); i++)
 					System.out.println("Test #" + i + ": " + verdicts.get(i));
 			}

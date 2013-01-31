@@ -32,14 +32,14 @@ public class ProjectData {
 	public final boolean smartTesting;
 
     public ProjectData(String inputClass, String outputClass, String[] excludedPackages, String outputDirectory, String author, String archiveDirectory, String defaultDirectory, String testDirectory, boolean enableUnitTests, boolean failOnIntegerOverflowForNewTasks, boolean libraryMigrated, boolean smartTesting) {
-        this.inputClass = inputClass;
-        this.outputClass = outputClass;
+        this.inputClass = inputClass.trim();
+        this.outputClass = outputClass.trim();
         this.excludedPackages = excludedPackages;
-        this.outputDirectory = outputDirectory;
-        this.author = author;
-        this.archiveDirectory = archiveDirectory;
-        this.defaultDirectory = defaultDirectory;
-        this.testDirectory = testDirectory;
+        this.outputDirectory = outputDirectory.trim();
+        this.author = author.trim();
+        this.archiveDirectory = archiveDirectory.trim();
+        this.defaultDirectory = defaultDirectory.trim();
+        this.testDirectory = testDirectory.trim();
         this.enableUnitTests = enableUnitTests;
         this.failOnIntegerOverflowForNewTasks = failOnIntegerOverflowForNewTasks;
         this.libraryMigrated = libraryMigrated;

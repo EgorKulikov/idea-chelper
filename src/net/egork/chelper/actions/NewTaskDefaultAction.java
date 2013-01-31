@@ -23,8 +23,12 @@ public class NewTaskDefaultAction extends AnAction {
 		Project project = Utilities.getProject(e.getDataContext());
 		ProjectData data = Utilities.getData(project);
 		PsiDirectory directory = FileUtilities.getPsiDirectory(project, data.defaultDirectory);
-		if (directory == null)
-			return;
+		if (directory == null) {
+			FileUtilities.createDirectoryIfMissing(project, data.defaultDirectory);
+			directory = FileUtilities.getPsiDirectory(project, data.defaultDirectory);
+			if (directory == null)
+				return;
+		}
 		PsiPackage aPackage = JavaDirectoryService.getInstance().getPackage(directory);
 		if (aPackage == null || aPackage.getName() == null || "".equals(aPackage.getName())) {
 			JOptionPane.showMessageDialog(null, "defaultDirectory should be under source and in non-default package");

@@ -16,17 +16,17 @@ import java.util.List;
 /**
  * @author Egor Kulikov (kulikov@devexperts.com)
  */
-public class CodeforcesParser implements Parser {
+public class CodeforcesGymParser implements Parser {
 	public Icon getIcon() {
 		return IconLoader.getIcon("/icons/codeforces.png");
 	}
 
 	public String getName() {
-		return "Codeforces";
+		return "Codeforces Gym";
 	}
 
     public void getContests(DescriptionReceiver receiver) {
-        String contestsPage = FileUtilities.getWebPageContent("http://codeforces.com/contests");
+        String contestsPage = FileUtilities.getWebPageContent("http://codeforces.ru/gyms");
 		if (contestsPage == null)
 			return;
         List<Description> contests = new ArrayList<Description>();
@@ -43,55 +43,19 @@ public class CodeforcesParser implements Parser {
         } catch (ParseException ignored) {}
 		if (!receiver.isStopped())
 			receiver.receiveDescriptions(contests);
-		else
-			return;
-		//noinspection StatementWithEmptyBody
-		while (parser.advanceIfPossible(true, "<span class=\"page-index\" pageIndex=\"") != null);
-		String lastPage = parser.advanceIfPossible(false, "\"");
-		if (lastPage == null)
-			return;
-		int additionalPagesCount;
-		try {
-			additionalPagesCount = Integer.parseInt(lastPage);
-		} catch (NumberFormatException e) {
-			return;
-		}
-		for (int i = 2; i <= additionalPagesCount; i++) {
-			String page = FileUtilities.getWebPageContent("http://codeforces.com/contests/page/" + i);
-			if (page == null)
-				continue;
-			parser = new StringParser(page);
-			List<Description> descriptions = new ArrayList<Description>();
-			try {
-				parser.advance(true, "Contest history");
-				parser.advance(true, "</tr>");
-				while (parser.advanceIfPossible(true, "data-contestId=\"") != null) {
-					String id = parser.advance(false, "\"");
-					parser.advance(true, "<td>");
-					String name = parser.advance(false, "</td>", "<br/>").trim();
-					descriptions.add(new Description(id, name));
-				}
-			} catch (ParseException e) {
-				continue;
-			}
-			if (receiver.isStopped()) {
-				return;
-			}
-			receiver.receiveDescriptions(descriptions);
-		}
     }
 
     public void parseContest(String id, DescriptionReceiver receiver) {
-        String mainPage = FileUtilities.getWebPageContent("http://codeforces.com/contest/" + id);
+        String mainPage = FileUtilities.getWebPageContent("http://codeforces.com/gym/" + id);
 		if (mainPage == null)
 			return;
         List<Description> ids = new ArrayList<Description>();
         StringParser parser = new StringParser(mainPage);
         try {
             parser.advance(true, "<table class=\"problems\">");
-            while (parser.advanceIfPossible(true, "<a href=\"/contest/" + id + "/problem/") != null) {
+            while (parser.advanceIfPossible(true, "<a href=\"/gym/" + id + "/problem/") != null) {
                 String taskID = parser.advance(false, "\">");
-                parser.advance(true, "<a href=\"/contest/" + id + "/problem/" + taskID + "\">");
+                parser.advance(true, "<a href=\"/gym/" + id + "/problem/" + taskID + "\">");
                 String name = taskID + " - " + parser.advance(false, "</a>");
                 ids.add(new Description(id + " " + taskID, name));
             }
@@ -108,7 +72,7 @@ public class CodeforcesParser implements Parser {
             return null;
         String contestId = tokens[0];
         id = tokens[1];
-        String text = FileUtilities.getWebPageContent("http://codeforces.com/contest/" + contestId + "/problem/" + id);
+        String text = FileUtilities.getWebPageContent("http://codeforces.com/gym/" + contestId + "/problem/" + id);
 		if (text == null)
 			return null;
         StringParser parser = new StringParser(text);

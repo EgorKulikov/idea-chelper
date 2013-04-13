@@ -34,28 +34,34 @@ public class Task {
     public final boolean failOnOverflow;
 
     public Task(String name, TestType testType, StreamConfiguration input, StreamConfiguration output, Test[] tests, String location, String vmArgs, String mainClass, String taskClass, String checkerClass, String checkerParameters, String[] testClasses, String date, String contestName, boolean truncate, String inputClass, String outputClass, boolean includeLocale, boolean failOnOverflow) {
-        this.name = name.trim();
+        this.name = trim(name);
         this.testType = testType;
         this.input = input;
         this.output = output;
         this.tests = tests;
-        this.location = location.trim();
-        this.vmArgs = vmArgs.trim();
-        this.mainClass = mainClass.trim();
-        this.taskClass = taskClass.trim();
-        this.checkerClass = checkerClass.trim();
-        this.checkerParameters = checkerParameters.trim();
+        this.location = trim(location);
+        this.vmArgs = trim(vmArgs);
+        this.mainClass = trim(mainClass);
+        this.taskClass = trim(taskClass);
+        this.checkerClass = trim(checkerClass);
+        this.checkerParameters = trim(checkerParameters);
         this.testClasses = testClasses;
-        this.date = date.trim();
-        this.contestName = contestName.trim();
+        this.date = trim(date);
+        this.contestName = trim(contestName);
         this.truncate = truncate;
-        this.inputClass = inputClass.trim();
-        this.outputClass = outputClass.trim();
+        this.inputClass = trim(inputClass);
+        this.outputClass = trim(outputClass);
 		this.includeLocale = includeLocale;
         this.failOnOverflow = failOnOverflow;
     }
 
-    public static String getDateString() {
+	private String trim(String s) {
+		if (s == null)
+			return null;
+		return s.trim();
+	}
+
+	public static String getDateString() {
         Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH) + 1;

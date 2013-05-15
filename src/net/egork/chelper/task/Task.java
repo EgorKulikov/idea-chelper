@@ -34,61 +34,34 @@ public class Task {
     public final boolean failOnOverflow;
 
     public Task(String name, TestType testType, StreamConfiguration input, StreamConfiguration output, Test[] tests, String location, String vmArgs, String mainClass, String taskClass, String checkerClass, String checkerParameters, String[] testClasses, String date, String contestName, boolean truncate, String inputClass, String outputClass, boolean includeLocale, boolean failOnOverflow) {
-		if (name != null)
-        	this.name = name.trim();
-		else
-			this.name = null;
+        this.name = trim(name);
         this.testType = testType;
         this.input = input;
         this.output = output;
         this.tests = tests;
-		if (location != null)
-        	this.location = location.trim();
-		else
-			this.location = null;
-		if (vmArgs != null)
-        	this.vmArgs = vmArgs.trim();
-		else
-			this.vmArgs = null;
-		if (mainClass != null)
-        	this.mainClass = mainClass.trim();
-		else
-			this.mainClass = null;
-		if (taskClass != null)
-        	this.taskClass = taskClass.trim();
-		else
-			this.taskClass = null;
-		if (checkerClass != null)
-        	this.checkerClass = checkerClass.trim();
-		else
-			this.checkerClass = null;
-		if (checkerParameters != null)
-        	this.checkerParameters = checkerParameters.trim();
-		else
-			this.checkerParameters = null;
+        this.location = trim(location);
+        this.vmArgs = trim(vmArgs);
+        this.mainClass = trim(mainClass);
+        this.taskClass = trim(taskClass);
+        this.checkerClass = trim(checkerClass);
+        this.checkerParameters = trim(checkerParameters);
         this.testClasses = testClasses;
-		if (date != null)
-        	this.date = date.trim();
-		else
-			this.date = null;
-		if (contestName != null)
-        	this.contestName = contestName.trim();
-		else
-			this.contestName = null;
+        this.date = trim(date);
+        this.contestName = trim(contestName);
         this.truncate = truncate;
-		if (inputClass != null)
-        	this.inputClass = inputClass.trim();
-		else
-			this.inputClass = null;
-		if (outputClass != null)
-        	this.outputClass = outputClass.trim();
-		else
-			this.outputClass = null;
+        this.inputClass = trim(inputClass);
+        this.outputClass = trim(outputClass);
 		this.includeLocale = includeLocale;
         this.failOnOverflow = failOnOverflow;
     }
 
-    public static String getDateString() {
+	private String trim(String s) {
+		if (s == null)
+			return null;
+		return s.trim();
+	}
+
+	public static String getDateString() {
         Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH) + 1;

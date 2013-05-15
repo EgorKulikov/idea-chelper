@@ -6,7 +6,7 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
     </content>
-    <orderEntry type="jdk" jdkName="IDEA IU-123.67" jdkType="IDEA JDK" />
+    <orderEntry type="jdk" jdkName="IDEA IU-117.798" jdkType="IDEA JDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" scope="PROVIDED" name="ContestApplet" level="project" />
     <orderEntry type="module-library" exported="">

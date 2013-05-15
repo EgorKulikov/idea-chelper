@@ -4,15 +4,14 @@ import net.egork.chelper.task.MethodSignature;
 import net.egork.chelper.task.NewTopCoderTest;
 import net.egork.chelper.task.TopCoderTask;
 import net.egork.chelper.util.InputReader;
+import net.egork.chelper.util.OutputWriter;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 /**
  * @author Egor Kulikov (kulikov@devexperts.com)
@@ -34,6 +33,9 @@ public class NewTopCoderTester {
 		long maximalTime = 0;
 		boolean ok = true;
         String taskFileName = args[0];
+		int singleTest = -1;
+		if (args.length > 1)
+			singleTest = Integer.parseInt(args[1]);
         InputReader input;
         try {
             input = new InputReader(new FileInputStream(taskFileName));
@@ -43,15 +45,26 @@ public class NewTopCoderTester {
         TopCoderTask task = TopCoderTask.load(input);
 		List<NewTopCoderTest> tests = new ArrayList<NewTopCoderTest>(Arrays.asList(task.tests));
         for (String testClass : task.testClasses) {
-            TopCoderTestProvider provider = (TopCoderTestProvider)Class.forName(testClass).newInstance();
-			for (NewTopCoderTest test : provider.createTests())
-            	tests.add(new NewTopCoderTest(test.arguments, test.result, tests.size(), test.active));
+            Class test = Class.forName(testClass);
+            Object provider = test.getConstructor().newInstance();
+            for (Method method : test.getMethods()) {
+                if (method.getAnnotation(TestCase.class) != null) {
+                    Collection<NewTopCoderTest> providedTests = (Collection<NewTopCoderTest>) method.invoke(provider);
+                    for (NewTopCoderTest testCase : providedTests)
+                        tests.add(new NewTopCoderTest(testCase.arguments, testCase.result, tests.size(), testCase.active));
+                }
+            }
+            if (provider instanceof TopCoderTestProvider) {
+                for (NewTopCoderTest testCase : ((TopCoderTestProvider) provider).createTests())
+                    tests.add(new NewTopCoderTest(testCase.arguments, testCase.result, tests.size(), testCase.active));
+            }
         }
 		Class taskClass = Class.forName(task.fqn);
         System.out.println(task.contestName + " - " + task.name);
         System.out.println("------------------------------------------------------------------");
+		int testNumber = 0;
         for (NewTopCoderTest test : tests) {
-			if (!test.active) {
+			if (singleTest != -1 && testNumber++ != singleTest || !test.active) {
 				verdicts.add(Verdict.SKIPPED);
 				System.out.println("Test #" + test.index + ": SKIPPED");
 				System.out.println("------------------------------------------------------------------");
@@ -92,11 +105,29 @@ public class NewTopCoderTester {
 		}
 		System.out.println("==================================================================");
 		System.out.println("Test results:");
-		if (ok)
+		if (ok) {
 			System.out.printf("All test passed in %.3f s.\n", maximalTime / 1000.);
-		else {
-			for (int i = 0; i < verdicts.size(); i++)
-				System.out.println("Test #" + i + ": " + verdicts.get(i));
+			if (singleTest != -1)
+				return test(args[0]);
+		} else {
+			if (singleTest == -1) {
+				for (int i = 0; i < verdicts.size(); i++)
+					System.out.println("Test #" + i + ": " + verdicts.get(i));
+			}
+		}
+		try {
+			OutputWriter report = new OutputWriter(new FileOutputStream("CHelperReport.txt"));
+			report.printString(args[0]);
+			List<Integer> failed = new ArrayList<Integer>();
+			for (int i = 0; i < verdicts.size(); i++) {
+				if (verdicts.get(i).type != Verdict.VerdictType.OK && verdicts.get(i).type != Verdict.VerdictType.UNDECIDED && verdicts.get(i).type != Verdict.VerdictType.SKIPPED)
+					failed.add(i);
+			}
+			report.printLine(failed.size());
+			for (int i : failed)
+				report.printLine(i);
+		} catch (FileNotFoundException e) {
+			System.err.println("Can't write report");
 		}
 		Thread.currentThread().join(100L);
 		return ok;

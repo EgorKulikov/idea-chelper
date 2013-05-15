@@ -65,7 +65,7 @@ public class ParseDialog extends JDialog {
                             raw.tests, location.getText(), raw.vmArgs, raw.mainClass,
                             FileUtilities.createIfNeeded(raw, raw.taskClass, project, location.getText()), raw.checkerClass,
                             raw.checkerParameters, raw.testClasses, date.getText(), contestName.getText(),
-                            truncate.isSelected(), data.inputClass, data.outputClass, raw.includeLocale);
+                            truncate.isSelected(), data.inputClass, data.outputClass, raw.includeLocale, data.failOnIntegerOverflowForNewTasks);
                     list.add(task);
                 }
                 result = list;

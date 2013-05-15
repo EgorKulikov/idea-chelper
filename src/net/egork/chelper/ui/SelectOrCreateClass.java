@@ -15,14 +15,15 @@ import java.awt.event.ActionListener;
  * @author Egor Kulikov (egorku@yandex-team.ru)
  */
 public class SelectOrCreateClass extends JPanel {
-    private ClassSelector classSelector;
+    private final ClassSelector classSelector;
+    private final JButton create;
 
     public SelectOrCreateClass(String initialValue, final Project project, final Provider<String> locationProvider,
         final FileCreator fileCreator)
     {
         super(new BorderLayout());
         classSelector = new ClassSelector(initialValue, project);
-        final JButton create = new JButton("Create");
+        create = new JButton("Create");
         create.setEnabled(fileCreator.isValid(initialValue));
         classSelector.addDocumentListener(new DocumentListener() {
             public void beforeDocumentChange(DocumentEvent event) {
@@ -48,4 +49,11 @@ public class SelectOrCreateClass extends JPanel {
 	public void setText(String text) {
 		classSelector.setText(text);
 	}
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        classSelector.setEnabled(enabled);
+        create.setEnabled(enabled);
+    }
 }

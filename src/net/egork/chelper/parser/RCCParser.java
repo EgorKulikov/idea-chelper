@@ -12,12 +12,21 @@ import javax.swing.*;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
  * @author Egor Kulikov (egor@egork.net)
  */
 public class RCCParser implements Parser {
+	private static final String[] ROUNDS = {
+		"Qualification Round #1",
+		"Qualification Round #2",
+		"Qualification Round #3",
+		"Online Round",
+		"Final Round"
+	};
+
 	public Icon getIcon() {
 		return IconLoader.getIcon("/icons/rcc.png");
 	}
@@ -36,14 +45,21 @@ public class RCCParser implements Parser {
 			parser = new StringParser(parser.advance(false, "</div>"));
 			List<Description> descriptions = new ArrayList<Description>();
 			while (parser.advanceIfPossible(true, "<a href=\"/round/") != null) {
-				String id = parser.advance(true, "/\">");
-				String name = getName() + " " + StringEscapeUtils.unescapeHtml(parser.advance(false, "</a>"));
+				String id = parser.advance(true, "/\" class=\"\">");
+				int asInt = Integer.parseInt(id);
+				int year = 2011 + (asInt - 1) / 5;
+				String name = "Russian CodeCup " + year + " " + ROUNDS[(asInt - 1) % 5];
 				descriptions.add(new Description(id, name));
 			}
-			Collections.reverse(descriptions);
+			Collections.sort(descriptions, new Comparator<Description>() {
+				public int compare(Description o1, Description o2) {
+					return Integer.parseInt(o2.id) - Integer.parseInt(o1.id);
+				}
+			});
 			if (!receiver.isStopped())
 				receiver.receiveDescriptions(descriptions);
 		} catch (ParseException ignored) {
+		} catch (NumberFormatException ignored) {
 		}
 	}
 
@@ -93,7 +109,7 @@ public class RCCParser implements Parser {
 			}
 			return new Task(description.description, null, StreamConfiguration.STANDARD, StreamConfiguration.STANDARD,
 				tests.toArray(new Test[tests.size()]), null, "-Xmx" + memoryLimit + "M -Xss64M", "Main", "Task" + letter,
-				TokenChecker.class.getCanonicalName(), "", new String[0], null, null, true, null, null);
+				TokenChecker.class.getCanonicalName(), "", new String[0], null, null, true, null, null, false, false);
 		} catch (ParseException e) {
 			return null;
 		}

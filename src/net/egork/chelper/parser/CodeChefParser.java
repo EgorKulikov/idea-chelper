@@ -169,7 +169,7 @@ public class CodeChefParser implements Parser {
 			}
             return new Task(description.description, null, StreamConfiguration.STANDARD, StreamConfiguration.STANDARD,
                     tests.toArray(new Test[tests.size()]), null, "-Xmx64M", "Main", taskID,
-                    TokenChecker.class.getCanonicalName(), "", new String[0], null, null, true, null, null);
+                    TokenChecker.class.getCanonicalName(), "", new String[0], null, null, true, null, null, false, false);
 		} catch (ParseException e) {
 			return null;
 		}

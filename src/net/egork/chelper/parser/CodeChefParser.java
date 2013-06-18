@@ -5,6 +5,7 @@ import net.egork.chelper.checkers.TokenChecker;
 import net.egork.chelper.task.StreamConfiguration;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.Test;
+import net.egork.chelper.task.TestType;
 import net.egork.chelper.util.FileUtilities;
 import org.apache.commons.lang.StringEscapeUtils;
 
@@ -175,7 +176,11 @@ public class CodeChefParser implements Parser {
 		}
 	}
 
-    private String dropTags(String s) {
+	public TestType defaultTestType() {
+		return TestType.MULTI_NUMBER;
+	}
+
+	private String dropTags(String s) {
 		int bracket = 0;
 		while (s.length() != 0) {
 			char c = s.charAt(0);

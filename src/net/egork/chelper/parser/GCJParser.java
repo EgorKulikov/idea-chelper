@@ -5,6 +5,7 @@ import net.egork.chelper.checkers.TokenChecker;
 import net.egork.chelper.task.StreamConfiguration;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.Test;
+import net.egork.chelper.task.TestType;
 import net.egork.chelper.tester.StringInputStream;
 import net.egork.chelper.util.FileUtilities;
 import net.egork.chelper.util.InputReader;
@@ -209,7 +210,7 @@ public class GCJParser implements Parser {
 						new StreamConfiguration(StreamConfiguration.StreamType.LOCAL_REGEXP,
 						letter + "-(small|large).*[.]in"),
 						new StreamConfiguration(StreamConfiguration.StreamType.CUSTOM, letter.toLowerCase() + ".out"),
-						new Test[]{new Test(input, output)}, null, "-Xmx512M", "Main",
+						new Test[]{new Test(input, output, 0)}, null, "-Xmx512M", "Main",
 						"Task" + letter,
 						TokenChecker.class.getCanonicalName(), "", new String[0], null, null, true, null, null,
 						true, false);
@@ -219,5 +220,9 @@ public class GCJParser implements Parser {
 			}
 		}
 		return null;
+	}
+
+	public TestType defaultTestType() {
+		return TestType.MULTI_NUMBER;
 	}
 }

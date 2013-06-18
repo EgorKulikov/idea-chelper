@@ -1,6 +1,7 @@
 package net.egork.chelper.parser;
 
 import net.egork.chelper.task.Task;
+import net.egork.chelper.task.TestType;
 
 import javax.swing.*;
 
@@ -16,4 +17,5 @@ public interface Parser {
     public void getContests(DescriptionReceiver receiver);
     public void parseContest(String id, DescriptionReceiver receiver);
     public Task parseTask(Description description);
+	public TestType defaultTestType();
 }

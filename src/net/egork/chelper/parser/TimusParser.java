@@ -5,6 +5,7 @@ import net.egork.chelper.checkers.TokenChecker;
 import net.egork.chelper.task.StreamConfiguration;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.Test;
+import net.egork.chelper.task.TestType;
 import net.egork.chelper.util.FileUtilities;
 import org.apache.commons.lang.StringEscapeUtils;
 
@@ -152,5 +153,9 @@ public class TimusParser implements Parser {
 		} catch (ParseException e) {
 			return null;
 		}
+	}
+
+	public TestType defaultTestType() {
+		return TestType.SINGLE;
 	}
 }

@@ -95,6 +95,7 @@ public class ParseDialog extends JDialog {
         parserCombo.setSelectedItem(Utilities.getDefaultParser());
         parserCombo.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+				testType.setSelectedItem(((Parser)parserCombo.getSelectedItem()).defaultTestType());
                 refresh();
             }
         });

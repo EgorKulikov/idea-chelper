@@ -1,6 +1,7 @@
 package net.egork.chelper.util;
 
 import com.intellij.execution.RunnerAndConfigurationSettings;
+import com.intellij.execution.configurations.RunConfiguration;
 import com.intellij.execution.impl.RunManagerImpl;
 import com.intellij.execution.impl.RunnerAndConfigurationSettingsImpl;
 import com.intellij.openapi.actionSystem.DataContext;
@@ -101,6 +102,10 @@ public class Utilities {
 
     public static boolean isEligible(DataContext dataContext) {
 		return eligibleProjects.containsKey(getProject(dataContext));
+	}
+
+	public static boolean isEligible(Project project) {
+		return eligibleProjects.containsKey(project);
 	}
 
 	public static Project getProject(DataContext dataContext) {
@@ -204,5 +209,9 @@ public class Utilities {
 		if (position != -1)
 			className = className.substring(position + 1);
 		return className;
+	}
+
+	public static boolean isSupported(RunConfiguration configuration) {
+		return configuration instanceof TaskConfiguration || configuration instanceof TopCoderConfiguration;
 	}
 }

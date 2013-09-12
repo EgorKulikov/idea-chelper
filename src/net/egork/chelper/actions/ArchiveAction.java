@@ -4,6 +4,7 @@ import com.intellij.execution.RunnerAndConfigurationSettings;
 import com.intellij.execution.configurations.RunConfiguration;
 import com.intellij.execution.impl.RunManagerImpl;
 import com.intellij.execution.impl.RunnerAndConfigurationSettingsImpl;
+import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
@@ -14,12 +15,13 @@ import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.search.GlobalSearchScope;
 import net.egork.chelper.configurations.TaskConfiguration;
-import net.egork.chelper.util.CodeGenerationUtilities;
-import net.egork.chelper.util.FileUtilities;
-import net.egork.chelper.util.Utilities;
 import net.egork.chelper.configurations.TopCoderConfiguration;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.TopCoderTask;
+import net.egork.chelper.util.CodeGenerationUtilities;
+import net.egork.chelper.util.FileUtilities;
+import net.egork.chelper.util.Messenger;
+import net.egork.chelper.util.Utilities;
 
 import java.io.IOException;
 
@@ -34,16 +36,22 @@ public class ArchiveAction extends AnAction {
 		final RunManagerImpl manager = RunManagerImpl.getInstanceImpl(project);
 		RunnerAndConfigurationSettings selectedConfiguration =
 			manager.getSelectedConfiguration();
-		if (selectedConfiguration == null)
+		if (selectedConfiguration == null || !Utilities.isSupported(selectedConfiguration.getConfiguration())) {
+			Messenger.publishMessage("Configuration not selected or selected configuration not supported",
+				NotificationType.ERROR);
 			return;
-		RunConfiguration configuration = selectedConfiguration.getConfiguration();
+		}
+		final RunConfiguration configuration = selectedConfiguration.getConfiguration();
 		if (configuration instanceof TaskConfiguration) {
             final Task task = ((TaskConfiguration) configuration).getConfiguration();
             String archiveDir = Utilities.getData(project).archiveDirectory;
             String dateAndContest = getDateAndContest(task);
 			final VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, archiveDir + "/" + dateAndContest);
-			if (directory == null)
+			if (directory == null) {
+				Messenger.publishMessage("Cannot create directory '" + archiveDir + "/" + dateAndContest + "' in archive",
+					NotificationType.ERROR);
 				return;
+			}
 			CodeGenerationUtilities.createUnitTest(task, project);
 			ApplicationManager.getApplication().runWriteAction(new Runnable() {
 				public void run() {
@@ -73,13 +81,16 @@ public class ArchiveAction extends AnAction {
                         }
 						manager.removeConfiguration(manager.getSelectedConfiguration());
 						setOtherConfiguration(manager, task);
+						Messenger.publishMessage("Configuration '" + configuration.getName() + "' successfully archived",
+							NotificationType.INFORMATION);
 					} catch (IOException e) {
-                        throw new RuntimeException(e);
+						Messenger.publishMessage("Error archiving configuration '" + configuration.getName() +
+							"' caused by " + e.getMessage(), NotificationType.ERROR);
+						Messenger.publishMessage("Configuration not deleted", NotificationType.WARNING);
 					}
 				}
 			});
-		}
-		if (configuration instanceof TopCoderConfiguration) {
+		} else if (configuration instanceof TopCoderConfiguration) {
 			final TopCoderTask task = ((TopCoderConfiguration) configuration).getConfiguration();
 			String archiveDir = Utilities.getData(project).archiveDirectory;
 			String dateAndContest = getDateAndContest(task);
@@ -110,8 +121,12 @@ public class ArchiveAction extends AnAction {
 						}
 						manager.removeConfiguration(manager.getSelectedConfiguration());
 						setOtherConfiguration(manager, task);
+						Messenger.publishMessage("Configuration " + configuration.getName() + " successfully archived",
+							NotificationType.INFORMATION);
 					} catch (IOException e) {
-						throw new RuntimeException(e);
+						Messenger.publishMessage("Error archiving configuration '" + configuration.getName() +
+							"' caused by " + e.getMessage(), NotificationType.ERROR);
+						Messenger.publishMessage("Configuration not deleted", NotificationType.WARNING);
 					}
 				}
 			});
@@ -141,7 +156,10 @@ public class ArchiveAction extends AnAction {
     }
 
     public static String canonize(String filename) {
-        return filename.replaceAll("[\\\\?%*:|\"<>]", "-");
+        filename = filename.replaceAll("[\\\\?%*:|\"<>]", "-");
+		while (filename.endsWith("."))
+			filename = filename.substring(0, filename.length() - 1);
+		return filename;
     }
 
     public static void setOtherConfiguration(RunManagerImpl manager, Task task) {

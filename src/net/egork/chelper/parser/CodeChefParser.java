@@ -180,6 +180,10 @@ public class CodeChefParser implements Parser {
 		return TestType.MULTI_NUMBER;
 	}
 
+	public Task parseTaskFromHTML(String html) {
+		throw new UnsupportedOperationException();
+	}
+
 	private String dropTags(String s) {
 		int bracket = 0;
 		while (s.length() != 0) {

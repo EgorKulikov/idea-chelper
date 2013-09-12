@@ -130,7 +130,7 @@ public class TimusParser implements Parser {
 			return null;
 		StringParser parser = new StringParser(text);
 		try {
-			parser.advance(true, "Memory Limit: ");
+			parser.advance(true, "Memory limit: ");
 			Integer heapMemory = Integer.parseInt(parser.advance(false, " "));
 			List<Test> tests = new ArrayList<Test>();
 			parser.advance(false, "<TABLE CLASS=\"sample\">");
@@ -157,5 +157,9 @@ public class TimusParser implements Parser {
 
 	public TestType defaultTestType() {
 		return TestType.SINGLE;
+	}
+
+	public Task parseTaskFromHTML(String html) {
+		throw new UnsupportedOperationException();
 	}
 }

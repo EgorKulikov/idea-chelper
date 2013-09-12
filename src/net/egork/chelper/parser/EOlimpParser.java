@@ -226,4 +226,8 @@ public class EOlimpParser implements Parser {
 	public TestType defaultTestType() {
 		return TestType.SINGLE;
 	}
+
+	public Task parseTaskFromHTML(String html) {
+		throw new UnsupportedOperationException();
+	}
 }

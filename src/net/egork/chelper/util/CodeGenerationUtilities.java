@@ -364,6 +364,7 @@ public class CodeGenerationUtilities {
                 "\n" +
                 "public class %TaskClass% {\n" +
                 "    public %Signature% {\n" +
+				"        return %DefaultValue%;\n" +
                 "    }\n" +
                 "}\n";
         FileUtilities.writeTextFile(project.getBaseDir(), "TopCoderTaskClass.template", template);
@@ -656,7 +657,8 @@ public class CodeGenerationUtilities {
             signature.append(task.signature.arguments[i].getSimpleName()).append(' ').append(task.signature.argumentNames[i]);
         }
 		signature.append(')');
-        return template.replace("%package%", packageName).replace("%TaskClass%", task.name).replace("%Signature%", signature.toString());
+        return template.replace("%package%", packageName).replace("%TaskClass%", task.name).
+			replace("%Signature%", signature.toString()).replace("%DefaultValue%", task.defaultValue());
     }
 
 	public static String createTopCoderTestStub(Project project, String aPackage, String name) {

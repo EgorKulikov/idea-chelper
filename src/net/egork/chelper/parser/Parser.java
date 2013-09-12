@@ -18,4 +18,5 @@ public interface Parser {
     public void parseContest(String id, DescriptionReceiver receiver);
     public Task parseTask(Description description);
 	public TestType defaultTestType();
+	public Task parseTaskFromHTML(String html);
 }

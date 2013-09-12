@@ -1,6 +1,8 @@
 package net.egork.chelper.task;
 
+import com.intellij.notification.NotificationType;
 import net.egork.chelper.util.InputReader;
+import net.egork.chelper.util.Messenger;
 import net.egork.chelper.util.OutputWriter;
 
 import java.util.InputMismatchException;
@@ -83,6 +85,29 @@ public class TopCoderTask {
             return null;
         }
     }
+
+	public String defaultValue() {
+		Class returnType = signature.result;
+		if (returnType == int.class)
+			return "0";
+		if (returnType == long.class)
+			return "0L";
+		if (returnType == double.class)
+			return "0D";
+		if (returnType == String.class)
+			return "\"\"";
+		if (returnType == int[].class)
+			return "new int[0]";
+		if (returnType == long[].class)
+			return "new long[0]";
+		if (returnType == double[].class)
+			return "new double[0]";
+		if (returnType == String[].class)
+			return "new String[0]";
+		Messenger.publishMessage("Task " + name + " has unrecognized return type - " +
+			signature.result.getSimpleName(), NotificationType.ERROR);
+		return "";
+	}
 
     private static Class forName(String s) throws ClassNotFoundException {
         if ("int".equals(s))

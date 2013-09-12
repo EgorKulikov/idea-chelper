@@ -225,4 +225,8 @@ public class GCJParser implements Parser {
 	public TestType defaultTestType() {
 		return TestType.MULTI_NUMBER;
 	}
+
+	public Task parseTaskFromHTML(String html) {
+		throw new UnsupportedOperationException();
+	}
 }

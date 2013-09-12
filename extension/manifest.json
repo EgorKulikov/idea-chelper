@@ -1,0 +1,31 @@
+{
+    // Extension ID: mfjbdpicmljdlioohnbkeebljjnfnpan
+    "manifest_version": 2,
+
+    "name": "CHelper Chrome extension",
+    "description": "Allows to parse tasks directly from browser.",
+    "background": { "scripts": ["background.js"] },
+    "version": "1.0",
+
+    "permissions": [
+        "tabs",
+        "http://localhost/"
+    ],
+
+    "content_scripts": [
+        {
+            "matches": [
+                "http://algorithm.contest.yandex.ru/*",
+                "http://algorithm.contest.yandex.com/*"
+            ],
+            "js": ["contentscript.js"],
+            "run_at": "document_idle",
+            "all_frames": false
+        }
+    ],
+
+    "page_action": {
+        "default_icon": "newTask.png",
+        "default_title": "Parse task"
+    }
+}

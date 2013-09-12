@@ -1,5 +1,6 @@
 package net.egork.chelper.ui;
 
+import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.VerticalFlowLayout;
 import com.intellij.openapi.util.IconLoader;
@@ -12,6 +13,7 @@ import net.egork.chelper.parser.ParserTask;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.TestType;
 import net.egork.chelper.util.FileUtilities;
+import net.egork.chelper.util.Messenger;
 import net.egork.chelper.util.Utilities;
 
 import javax.swing.*;
@@ -58,8 +60,11 @@ public class ParseDialog extends JDialog {
                 for (Object taskDescription : tasks) {
                     Description description = (Description) taskDescription;
                     Task raw = parser.parseTask(description);
-					if (raw == null)
+					if (raw == null) {
+						Messenger.publishMessage("Unable to parse task " + description.description +
+							". Connection problems or format change", NotificationType.ERROR);
 						continue;
+					}
 					raw = raw.setInputOutputClasses(data.inputClass, data.outputClass);
                     Task task = new Task(raw.name, (TestType)testType.getSelectedItem(), raw.input, raw.output,
                             raw.tests, location.getText(), raw.vmArgs, raw.mainClass,

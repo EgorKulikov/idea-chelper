@@ -24,6 +24,7 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.search.GlobalSearchScope;
+import net.egork.chelper.ChromeParser;
 import net.egork.chelper.ProjectData;
 import net.egork.chelper.actions.TopCoderAction;
 import net.egork.chelper.checkers.TokenChecker;
@@ -66,6 +67,7 @@ public class Utilities {
                     CodeGenerationUtilities.createTestCaseClassTemplateIfNeeded(project);
 					CodeGenerationUtilities.createTopCoderTaskTemplateIfNeeded(project);
 					CodeGenerationUtilities.createTopCoderTestCaseClassTemplateIfNeeded(project);
+					ChromeParser.checkInstalled(project, configuration);
                 }
 			}
 

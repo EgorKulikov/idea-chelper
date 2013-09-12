@@ -16,7 +16,7 @@ import java.util.Properties;
 public class ProjectData {
     public static final ProjectData DEFAULT = new ProjectData(
         "java.util.Scanner", "java.io.PrintWriter", "java.,javax.,com.sun.".split(","), "output", "",
-        "archive/unsorted", "main", "lib/test", false, false, false, true);
+        "archive/unsorted", "main", "lib/test", false, false, false, true, false);
 
 	public final String inputClass;
 	public final String outputClass;
@@ -30,9 +30,11 @@ public class ProjectData {
     public final boolean failOnIntegerOverflowForNewTasks;
     public final boolean libraryMigrated;
 	public final boolean smartTesting;
+	public final boolean extensionProposed;
 
-    public ProjectData(String inputClass, String outputClass, String[] excludedPackages, String outputDirectory, String author, String archiveDirectory, String defaultDirectory, String testDirectory, boolean enableUnitTests, boolean failOnIntegerOverflowForNewTasks, boolean libraryMigrated, boolean smartTesting) {
-        this.inputClass = inputClass.trim();
+    public ProjectData(String inputClass, String outputClass, String[] excludedPackages, String outputDirectory, String author, String archiveDirectory, String defaultDirectory, String testDirectory, boolean enableUnitTests, boolean failOnIntegerOverflowForNewTasks, boolean libraryMigrated, boolean smartTesting, boolean extensionProposed) {
+		this.extensionProposed = extensionProposed;
+		this.inputClass = inputClass.trim();
         this.outputClass = outputClass.trim();
         this.excludedPackages = excludedPackages;
         this.outputDirectory = outputDirectory.trim();
@@ -59,6 +61,7 @@ public class ProjectData {
         failOnIntegerOverflowForNewTasks = Boolean.valueOf(properties.getProperty("failOnIntegerOverflowForNewTasks", Boolean.toString(DEFAULT.enableUnitTests)));
         libraryMigrated = Boolean.valueOf(properties.getProperty("libraryMigrated", Boolean.toString(DEFAULT.libraryMigrated)));
 		smartTesting = Boolean.valueOf(properties.getProperty("smartTesting", Boolean.toString(DEFAULT.smartTesting)));
+		extensionProposed = Boolean.valueOf(properties.getProperty("extensionProposed", Boolean.toString(DEFAULT.extensionProposed)));
 	}
 
 	public static ProjectData load(Project project) {
@@ -101,6 +104,7 @@ public class ProjectData {
                     properties.setProperty("failOnIntegerOverflowForNewTasks", Boolean.toString(failOnIntegerOverflowForNewTasks));
                     properties.setProperty("libraryMigrated", Boolean.toString(libraryMigrated));
 					properties.setProperty("smartTesting", Boolean.toString(smartTesting));
+					properties.setProperty("extensionProposed", Boolean.toString(extensionProposed));
                     OutputStream outputStream = config.getOutputStream(null);
                     properties.store(outputStream, "");
                     outputStream.close();
@@ -123,8 +127,15 @@ public class ProjectData {
 
     public void completeMigration(Project project) {
         ProjectData newData = new ProjectData(inputClass, outputClass, excludedPackages, outputDirectory, author,
-            archiveDirectory, defaultDirectory, testDirectory, enableUnitTests, failOnIntegerOverflowForNewTasks, true, smartTesting);
+            archiveDirectory, defaultDirectory, testDirectory, enableUnitTests, failOnIntegerOverflowForNewTasks, true, smartTesting, extensionProposed);
         newData.save(project);
         Utilities.addProjectData(project, newData);
     }
+
+	public void completeExtensionProposal(Project project) {
+     ProjectData newData = new ProjectData(inputClass, outputClass, excludedPackages, outputDirectory, author,
+         archiveDirectory, defaultDirectory, testDirectory, enableUnitTests, failOnIntegerOverflowForNewTasks, libraryMigrated, smartTesting, true);
+     newData.save(project);
+     Utilities.addProjectData(project, newData);
+ }
 }

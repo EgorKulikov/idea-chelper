@@ -48,7 +48,7 @@ public class TaskConfigurationPanel extends JPanel {
     private JTextField date;
     private JTextField contestName;
     private JCheckBox truncate;
-	private int panelWidth = new JTextField(20).getPreferredSize().width;
+	private int panelWidth = new JTextField(27).getPreferredSize().width;
 	private JCheckBox includeLocale;
 
     public TaskConfigurationPanel(final Task task, boolean firstEdit, final Project project, final SizeChangeListener listener, JPanel buttonPanel) {
@@ -80,7 +80,7 @@ public class TaskConfigurationPanel extends JPanel {
 			}
 
 			private void update() {
-				if (taskClass.getText().indexOf('.') == -1)
+				if (name.isEnabled() && taskClass.getText().indexOf('.') == -1)
 					taskClass.setText(name.getText());
 			}
 		});

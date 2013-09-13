@@ -22,7 +22,7 @@ function send(message, sender, sendResponse) {
     xhr.open('POST', 'http://localhost:4243', true);
     xhr.setRequestHeader('Content-type', 'text/plain');
     xhr.send(message);
-    window.setTimeout(reload, 100);
+    window.setTimeout(reload, 500);
     console.log('hi again');
 }
 

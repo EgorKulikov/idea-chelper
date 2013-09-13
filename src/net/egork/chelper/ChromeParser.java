@@ -17,7 +17,6 @@ import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URISyntaxException;
@@ -62,40 +61,34 @@ public class ChromeParser implements ProjectComponent {
 							if (serverSocket.isClosed())
 								return;
 							final Socket socket = serverSocket.accept();
-							SwingUtilities.invokeLater(new Runnable() {
-								public void run() {
-									try {
-										BufferedReader reader = new BufferedReader(
-											new InputStreamReader(socket.getInputStream(), "UTF-8"));
-										String s;
-										while (!(s = reader.readLine()).isEmpty()) ;
-										String type = reader.readLine();
-										StringBuilder builder = new StringBuilder();
-										while ((s = reader.readLine()) != null)
-											builder.append(s).append('\n');
-										String page = builder.toString();
+							try {
+								BufferedReader reader = new BufferedReader(
+									new InputStreamReader(socket.getInputStream(), "UTF-8"));
+								while (!reader.readLine().isEmpty()) ;
+								final String type = reader.readLine();
+								StringBuilder builder = new StringBuilder();
+								String s;
+								while ((s = reader.readLine()) != null)
+									builder.append(s).append('\n');
+								final String page = builder.toString();
+								SwingUtilities.invokeLater(new Runnable() {
+									public void run() {
 										final Task task;
 										if (type.startsWith(YANDEX)) {
 											task = new YandexParser().parseTaskFromHTML(page);
 										} else {
-											Messenger.publishMessage("Unknown task type from Chrome parser: " + s,
+											Messenger.publishMessage("Unknown task type from Chrome parser: " + type,
 												NotificationType.WARNING);
 											return;
 										}
-										OutputStream out = socket.getOutputStream();
-										out.write("HTTP/1.1 200 OK".getBytes());
-										out.flush();
 										NewTaskDefaultAction.createTaskInDefaultDirectory(project, task);
-									} catch (Throwable ignored) {
-									} finally {
-										try {
-											socket.close();
-										} catch (IOException ignored) {
-										}
 									}
-								}
-							});
-						} catch (IOException ignored) {}
+								});
+							} finally {
+								socket.close();
+							}
+						} catch (IOException ignored) {
+						}
 					}
 				}
 			}).start();
@@ -116,7 +109,7 @@ public class ChromeParser implements ProjectComponent {
 
 	public static void checkInstalled(Project project, ProjectData configuration) {
 		if (!configuration.extensionProposed) {
-			JPanel panel = new JPanel(new BorderLayout());
+			JPanel panel = new JPanel(new BorderLayout(15, 15));
 			JLabel description = new JLabel("<html>You can now use new CHelper extension to parse<br>" +
 				"tasks directly from Google Chrome<br>(currently supported - Yandex.Contest)<br><br>Do you want to install it?</html>");
 			JButton download = new JButton("Download");

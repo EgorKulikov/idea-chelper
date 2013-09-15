@@ -3,6 +3,7 @@ package net.egork.chelper;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.wm.WindowManager;
 import net.egork.chelper.actions.NewTaskDefaultAction;
 import net.egork.chelper.parser.YandexParser;
 import net.egork.chelper.task.Task;
@@ -60,7 +61,7 @@ public class ChromeParser implements ProjectComponent {
 						try {
 							if (serverSocket.isClosed())
 								return;
-							final Socket socket = serverSocket.accept();
+							Socket socket = serverSocket.accept();
 							try {
 								BufferedReader reader = new BufferedReader(
 									new InputStreamReader(socket.getInputStream(), "UTF-8"));
@@ -81,13 +82,16 @@ public class ChromeParser implements ProjectComponent {
 												NotificationType.WARNING);
 											return;
 										}
+										JFrame projectFrame = WindowManager.getInstance().getFrame(project);
+										if (projectFrame.getState() == JFrame.ICONIFIED)
+											projectFrame.setState(Frame.NORMAL);
 										NewTaskDefaultAction.createTaskInDefaultDirectory(project, task);
 									}
 								});
 							} finally {
 								socket.close();
 							}
-						} catch (IOException ignored) {
+						} catch (Throwable ignored) {
 						}
 					}
 				}

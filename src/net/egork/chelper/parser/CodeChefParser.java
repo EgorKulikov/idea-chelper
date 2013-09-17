@@ -209,11 +209,11 @@ public class CodeChefParser implements Parser {
 		return s + "\n";
 	}
 
-	private String getTaskID(String title) {
+	public static String getTaskID(String title) {
 		boolean shouldBeCapital = true;
 		StringBuilder id = new StringBuilder();
 		for (int i = 0; i < title.length(); i++) {
-			if (Character.isLetter(title.charAt(i))) {
+			if (Character.isLetter(title.charAt(i)) || id.length() > 0 && Character.isDigit(title.charAt(i))) {
 				if (shouldBeCapital) {
 					shouldBeCapital = false;
 					id.append(Character.toUpperCase(title.charAt(i)));

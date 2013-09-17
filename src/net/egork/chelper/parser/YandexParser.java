@@ -63,7 +63,7 @@ public class YandexParser implements Parser {
 			parser.advance(true, "<td>");
 			String rawOutput = parser.advance(false, "</td>");
 			StreamConfiguration output;
-			if (rawInput.contains(" "))
+			if (rawOutput.contains(" "))
 				output = StreamConfiguration.STANDARD;
 			else
 				output = new StreamConfiguration(StreamConfiguration.StreamType.CUSTOM, rawOutput);

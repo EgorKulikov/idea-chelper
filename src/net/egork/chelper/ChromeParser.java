@@ -6,6 +6,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.WindowManager;
 import net.egork.chelper.actions.NewTaskDefaultAction;
 import net.egork.chelper.parser.CodeforcesParser;
+import net.egork.chelper.parser.HackerRankParser;
 import net.egork.chelper.parser.Parser;
 import net.egork.chelper.parser.YandexParser;
 import net.egork.chelper.task.Task;
@@ -39,6 +40,7 @@ public class ChromeParser implements ProjectComponent {
 		Map<String, Parser> taskParsers = new HashMap<String, Parser>();
 		taskParsers.put("yandex", new YandexParser());
 		taskParsers.put("codeforces", new CodeforcesParser());
+		taskParsers.put("hackerrank", new HackerRankParser());
 		TASK_PARSERS = Collections.unmodifiableMap(taskParsers);
 	}
 
@@ -88,6 +90,8 @@ public class ChromeParser implements ProjectComponent {
 									public void run() {
 										if (TASK_PARSERS.containsKey(type)) {
 											Task task = TASK_PARSERS.get(type).parseTaskFromHTML(page);
+											if (task == null)
+												return;
 											JFrame projectFrame = WindowManager.getInstance().getFrame(project);
 											if (projectFrame.getState() == JFrame.ICONIFIED)
 												projectFrame.setState(Frame.NORMAL);
@@ -125,7 +129,7 @@ public class ChromeParser implements ProjectComponent {
 		if (!configuration.extensionProposed) {
 			JPanel panel = new JPanel(new BorderLayout(15, 15));
 			JLabel description = new JLabel("<html>You can now use new CHelper extension to parse<br>" +
-				"tasks directly from Google Chrome<br>(currently supported - Yandex.Contest)<br><br>Do you want to install it?</html>");
+				"tasks directly from Google Chrome<br>(currently supported - Yandex.Contest, Codeforces and HackerRank)<br><br>Do you want to install it?</html>");
 			JButton download = new JButton("Download");
 			JButton close = new JButton("Close");
 			JPanel buttonPanel = new JPanel(new BorderLayout());

@@ -1,9 +1,8 @@
-function parseTask(url, sender, sendResponse) {
+function parseTask(message, sender, sendResponse) {
     if (sender.tab)
         return;
-    console.log('hi');
-    chrome.runtime.sendMessage('yandex' + '\n' + document.body.innerHTML);
-    console.log('hi again');
+    console.log(message);
+    chrome.runtime.sendMessage(message + '\n' + document.body.innerHTML);
 }
 
 chrome.runtime.onMessage.addListener(parseTask);

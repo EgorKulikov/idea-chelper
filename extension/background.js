@@ -1,5 +1,6 @@
 function checkForValidUrl(tabId, changeInfo, tab) {
-    if (/http:\/\/algorithm.contest.yandex.(ru|com)\/contest\/\d*\/problems.*/.test(tab.url)) {
+    if (/http:\/\/algorithm[.]contest[.]yandex[.](ru|com)\/contest\/\d*\/problems.*/.test(tab.url) ||
+        /http:\/\/codeforces[.](ru|com)\/(contest|problemset|gym)\/\d*\/problem\/.+/.test(tab.url)) {
         chrome.pageAction.show(tabId);
     } else {
         chrome.pageAction.hide(tabId);
@@ -9,13 +10,17 @@ function checkForValidUrl(tabId, changeInfo, tab) {
 chrome.tabs.onUpdated.addListener(checkForValidUrl);
 
 function parseTask(tab) {
-    chrome.tabs.sendMessage(tab.id, tab.url);
+    console.log(tab.url);
+    if (/http:\/\/algorithm[.]contest[.]yandex[.](ru|com)\/contest\/\d*\/problems.*/.test(tab.url)) {
+        chrome.tabs.sendMessage(tab.id, 'yandex');
+    } else if (/http:\/\/codeforces[.](ru|com)\/(contest|problemset|gym)\/\d*\/problem\/.+/.test(tab.url)) {
+        chrome.tabs.sendMessage(tab.id, 'codeforces');
+    }
 }
 
 chrome.pageAction.onClicked.addListener(parseTask);
 
 function send(message, sender, sendResponse) {
-    console.log('hi');
     if (!sender.tab)
         return;
     var xhr = new XMLHttpRequest();
@@ -23,7 +28,6 @@ function send(message, sender, sendResponse) {
     xhr.setRequestHeader('Content-type', 'text/plain');
     xhr.send(message);
     window.setTimeout(reload, 500);
-    console.log('hi again');
 }
 
 function reload() {

@@ -85,7 +85,7 @@ public class YandexParser implements Parser {
 					break;
 				}
 			}
-			return new Task(taskName, defaultTestType(), input, output, tests.toArray(new Test[tests.size()]), null,
+			return new Task(problemLetter + " - " + taskName, defaultTestType(), input, output, tests.toArray(new Test[tests.size()]), null,
 				"-Xmx" + memoryLimit, "Main", "Task" + problemLetter, TokenChecker.class.getCanonicalName(), "",
 				new String[0], null, contestName, true, null, null, false, false);
 		} catch (ParseException e) {

@@ -5,6 +5,8 @@ import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.WindowManager;
 import net.egork.chelper.actions.NewTaskDefaultAction;
+import net.egork.chelper.parser.CodeforcesParser;
+import net.egork.chelper.parser.Parser;
 import net.egork.chelper.parser.YandexParser;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.util.Messenger;
@@ -22,13 +24,23 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author egorku@yandex-team.ru
  */
 public class ChromeParser implements ProjectComponent {
 	private static final int PORT = 4243;
-	private static final String YANDEX = "yandex";
+	private static final Map<String, Parser> TASK_PARSERS;
+
+	static {
+		Map<String, Parser> taskParsers = new HashMap<String, Parser>();
+		taskParsers.put("yandex", new YandexParser());
+		taskParsers.put("codeforces", new CodeforcesParser());
+		TASK_PARSERS = Collections.unmodifiableMap(taskParsers);
+	}
 
 	private final Project project;
 	private ServerSocket serverSocket;
@@ -74,18 +86,16 @@ public class ChromeParser implements ProjectComponent {
 								final String page = builder.toString();
 								SwingUtilities.invokeLater(new Runnable() {
 									public void run() {
-										final Task task;
-										if (type.startsWith(YANDEX)) {
-											task = new YandexParser().parseTaskFromHTML(page);
+										if (TASK_PARSERS.containsKey(type)) {
+											Task task = TASK_PARSERS.get(type).parseTaskFromHTML(page);
+											JFrame projectFrame = WindowManager.getInstance().getFrame(project);
+											if (projectFrame.getState() == JFrame.ICONIFIED)
+												projectFrame.setState(Frame.NORMAL);
+											NewTaskDefaultAction.createTaskInDefaultDirectory(project, task);
 										} else {
 											Messenger.publishMessage("Unknown task type from Chrome parser: " + type,
 												NotificationType.WARNING);
-											return;
 										}
-										JFrame projectFrame = WindowManager.getInstance().getFrame(project);
-										if (projectFrame.getState() == JFrame.ICONIFIED)
-											projectFrame.setState(Frame.NORMAL);
-										NewTaskDefaultAction.createTaskInDefaultDirectory(project, task);
 									}
 								});
 							} finally {

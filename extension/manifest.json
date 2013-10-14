@@ -14,8 +14,10 @@
     "content_scripts": [
         {
             "matches": [
-                "http://algorithm.contest.yandex.ru/*",
-                "http://algorithm.contest.yandex.com/*",
+                "http://*.contest.yandex.ru/*",
+                "http://*.contest.yandex.com/*",
+                "http://*.contest2.yandex.ru/*",
+                "http://*.contest2.yandex.com/*",
                 "http://codeforces.ru/*",
                 "http://codeforces.com/*",
                 "https://hackerrank.com/*",

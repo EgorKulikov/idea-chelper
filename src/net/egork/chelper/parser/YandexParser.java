@@ -44,6 +44,8 @@ public class YandexParser implements Parser {
 		try {
 			parser.advance(true, "<td class=\"b-contest-status__name\"><h2>");
 			String contestName = parser.advance(false, "</h2>");
+			if (contestName.startsWith("<a"))
+				contestName = contestName.substring(contestName.indexOf(">") + 1, contestName.indexOf("</a>"));
 			parser.advance(true, "<div class=\"problem-statement\">");
 			parser.advance(true, "<h1 class=\"title\">");
 			String taskName = parser.advance(false, "</h1>");
@@ -52,16 +54,22 @@ public class YandexParser implements Parser {
 			String memoryLimit = parser.advance(false, "</td>");
 			memoryLimit = memoryLimit.substring(0, memoryLimit.length() - 1);
 			parser.advance(true, "<tr class=\"input-file\">");
-			parser.advance(true, "<td>");
-			String rawInput = parser.advance(false, "</td>");
+			if (parser.advanceIfPossible(true, "<td>") == null) {
+				parser.advance(true, "<td colspan=\"");
+				parser.advance(true, "\">");
+			}
+			String rawInput = removeTags(parser);
 			StreamConfiguration input;
 			if (rawInput.contains(" "))
 				input = StreamConfiguration.STANDARD;
 			else
 				input = new StreamConfiguration(StreamConfiguration.StreamType.CUSTOM, rawInput);
 			parser.advance(true, "<tr class=\"output-file\">");
-			parser.advance(true, "<td>");
-			String rawOutput = parser.advance(false, "</td>");
+			if (parser.advanceIfPossible(true, "<td>") == null) {
+				parser.advance(true, "<td colspan=\"");
+				parser.advance(true, "\">");
+			}
+			String rawOutput = removeTags(parser);
 			StreamConfiguration output;
 			if (rawOutput.contains(" "))
 				output = StreamConfiguration.STANDARD;
@@ -91,5 +99,12 @@ public class YandexParser implements Parser {
 		} catch (ParseException e) {
 			return null;
 		}
+	}
+
+	private String removeTags(StringParser parser) throws ParseException {
+		String rawInput = parser.advance(false, "</td>");
+		if (rawInput.contains("<center>"))
+			rawInput = rawInput.substring(rawInput.indexOf("<center>") + 8, rawInput.indexOf("</center>"));
+		return rawInput;
 	}
 }

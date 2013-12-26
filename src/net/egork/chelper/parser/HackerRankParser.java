@@ -42,16 +42,11 @@ public class HackerRankParser implements Parser {
 	public Task parseTaskFromHTML(String html) {
 		StringParser parser = new StringParser(html);
 		try {
-			parser.advance(true, "<div class=\"challenge-header\">");
-			String header = parser.advance(true, "</ul></div>");
-			StringParser headerParser = new StringParser(header);
-			//noinspection StatementWithEmptyBody
-			while (headerParser.advanceIfPossible(true, "<li>") != null);
-			headerParser.advance(true, "class=\"backbone\">");
-			String contestName = headerParser.advance(false, "</a>").trim().replace('/', '-');
-			parser.advance(true, "<h1");
-			parser.advance(true, "\">");
-			String taskName = parser.advance(false, "</h1>").trim();
+			parser.advance(true, "<div id=\"contest-navigation\">");
+			parser.advance(true, "<span>");
+			String contestName = parser.advance(false, "</span>").trim().replace('/', '-');
+			parser.advance(true, "<h1 class=\"hr_tour-challenge-name pull-left\">");
+			String taskName = parser.advance(false, "</h1>");
 			String taskClass = CodeChefParser.getTaskID(taskName);
 			StreamConfiguration	input = StreamConfiguration.STANDARD;
 			StreamConfiguration output = StreamConfiguration.STANDARD;

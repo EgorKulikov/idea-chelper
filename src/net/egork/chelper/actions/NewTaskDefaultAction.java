@@ -31,8 +31,10 @@ public class NewTaskDefaultAction extends AnAction {
 		if (directory == null) {
 			FileUtilities.createDirectoryIfMissing(project, data.defaultDirectory);
 			directory = FileUtilities.getPsiDirectory(project, data.defaultDirectory);
-			if (directory == null)
+			if (directory == null) {
+				Messenger.publishMessage("Unable to create default directory", NotificationType.ERROR);
 				return;
+			}
 		}
 		PsiPackage aPackage = JavaDirectoryService.getInstance().getPackage(directory);
 		if (aPackage == null || aPackage.getName() == null || "".equals(aPackage.getName())) {

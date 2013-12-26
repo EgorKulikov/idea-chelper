@@ -100,7 +100,7 @@ public class TopCoderAction extends AnAction {
                                     if (task == null)
                                         message.out.printString(Message.OTHER_ERROR);
                                     else {
-                                        final VirtualFile directory = FileUtilities.getFile(project, Utilities.getData(project).defaultDirectory);
+                                        final VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, Utilities.getData(project).defaultDirectory);
                                         VirtualFile taskFile = directory.findChild(task.name + ".tctask");
                                         if (taskFile != null)
                                             message.out.printString(Message.ALREADY_DEFINED);

@@ -298,8 +298,8 @@ public class FileUtilities {
 	}
 
 	public static String createTaskClass(Task task, Project project, String path, String name) {
-		String mainClass = CodeGenerationUtilities.createStub(task, path, name, project);
 		VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, path);
+		String mainClass = CodeGenerationUtilities.createStub(task, path, name, project);
 		if (directory.findChild(name + ".java") == null) {
 			writeTextFile(directory, name + ".java", mainClass);
 		}

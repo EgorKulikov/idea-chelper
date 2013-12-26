@@ -156,7 +156,7 @@ public class ArchiveAction extends AnAction {
     }
 
     public static String canonize(String filename) {
-        filename = filename.replaceAll("[\\\\?%*:|\"<>]", "-");
+        filename = filename.replaceAll("[\\\\?%*:|\"<>/]", "-");
 		while (filename.endsWith("."))
 			filename = filename.substring(0, filename.length() - 1);
 		return filename;

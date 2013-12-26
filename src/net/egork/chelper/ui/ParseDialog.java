@@ -183,7 +183,7 @@ public class ParseDialog extends JDialog {
         Task defaultTask = Utilities.getDefaultTask();
         leftPanel.add(new JLabel("Test type:"));
         testType = new JComboBox(TestType.values());
-        testType.setSelectedItem(defaultTask.testType);
+        testType.setSelectedItem(Utilities.getDefaultParser().defaultTestType());
         leftPanel.add(testType);
         leftPanel.add(new JLabel("Location:"));
         location = new DirectorySelector(project, data.defaultDirectory);

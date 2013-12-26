@@ -5,10 +5,7 @@ import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.WindowManager;
 import net.egork.chelper.actions.NewTaskDefaultAction;
-import net.egork.chelper.parser.CodeforcesParser;
-import net.egork.chelper.parser.HackerRankParser;
-import net.egork.chelper.parser.Parser;
-import net.egork.chelper.parser.YandexParser;
+import net.egork.chelper.parser.*;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.util.Messenger;
 import net.egork.chelper.util.Utilities;
@@ -41,6 +38,8 @@ public class ChromeParser implements ProjectComponent {
 		taskParsers.put("yandex", new YandexParser());
 		taskParsers.put("codeforces", new CodeforcesParser());
 		taskParsers.put("hackerrank", new HackerRankParser());
+		taskParsers.put("facebook", new FacebookParser());
+		taskParsers.put("usaco", new UsacoParser());
 		TASK_PARSERS = Collections.unmodifiableMap(taskParsers);
 	}
 
@@ -90,8 +89,10 @@ public class ChromeParser implements ProjectComponent {
 									public void run() {
 										if (TASK_PARSERS.containsKey(type)) {
 											Task task = TASK_PARSERS.get(type).parseTaskFromHTML(page);
-											if (task == null)
+											if (task == null) {
+												Messenger.publishMessage("Unable to parse task from " + type, NotificationType.WARNING);
 												return;
+											}
 											JFrame projectFrame = WindowManager.getInstance().getFrame(project);
 											if (projectFrame.getState() == JFrame.ICONIFIED)
 												projectFrame.setState(Frame.NORMAL);
@@ -99,6 +100,7 @@ public class ChromeParser implements ProjectComponent {
 										} else {
 											Messenger.publishMessage("Unknown task type from Chrome parser: " + type,
 												NotificationType.WARNING);
+											System.err.println(page);
 										}
 									}
 								});

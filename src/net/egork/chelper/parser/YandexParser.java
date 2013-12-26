@@ -42,8 +42,8 @@ public class YandexParser implements Parser {
 	public Task parseTaskFromHTML(String html) {
 		StringParser parser = new StringParser(html);
 		try {
-			parser.advance(true, "<td class=\"b-contest-status__name\"><h2>");
-			String contestName = parser.advance(false, "</h2>");
+			parser.advance(true, "<div class=\"status__contest inline-block\">");
+			String contestName = parser.advance(false, "</div>");
 			if (contestName.startsWith("<a"))
 				contestName = contestName.substring(contestName.indexOf(">") + 1, contestName.indexOf("</a>"));
 			parser.advance(true, "<div class=\"problem-statement\">");

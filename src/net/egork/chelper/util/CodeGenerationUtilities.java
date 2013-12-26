@@ -700,7 +700,7 @@ public class CodeGenerationUtilities {
 		}
 
 		private void addClass(PsiClass aClass) {
-			if (!(aClass.getScope() instanceof PsiFile))
+			if (aClass == null || !(aClass.getScope() instanceof PsiFile))
 				return;
 			if (!shouldSkip(aClass)) {
 				if (!set.contains(aClass)) {

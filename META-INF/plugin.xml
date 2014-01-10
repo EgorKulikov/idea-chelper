@@ -1,7 +1,7 @@
 <idea-plugin version="2">
   <name>CHelper</name>
   <description>Inlines library code and provides testing framework</description>
-  <version>3.73</version>
+  <version>3.80</version>
   <vendor>Egor Kulikov</vendor>
   <idea-version since-build="111.69"/>
 
@@ -54,6 +54,8 @@
               description="Restores previously archived task"/>
       <action id="launchArena" class="net.egork.chelper.actions.TopCoderAction" text="Launch TopCoder Arena" icon="/icons/topcoder.png"
               description="Launches TopCoder Arena with integrated plugin to interact with idea"/>
+      <action id="editTask" class="net.egork.chelper.actions.EditTask" text="Edit Task" icon="/icons/check.png"
+              description="Edit current task"/>
   </actions>
 
   <extensions defaultExtensionNs="com.intellij">

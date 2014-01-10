@@ -70,7 +70,7 @@ public class TopCoderConfiguration extends ModuleBasedConfiguration<JavaRunConfi
 					directory.getVirtualFile());
 				parameters.configureByModule(module, JavaParameters.JDK_AND_CLASSES);
 				parameters.setMainClass("net.egork.chelper.tester.NewTopCoderTester");
-				parameters.getVMParametersList().add("-Xmx64M");
+				parameters.getVMParametersList().add("-Xmx" + configuration.memoryLimit);
                 if (configuration.failOnOverflow) {
                     String path = TopCoderAction.getJarPathForClass(ch.eiafr.cojac.Cojac.class);
                     parameters.getVMParametersList().add("-javaagent:" + path + "=-e -ints -longs -casts -maths");

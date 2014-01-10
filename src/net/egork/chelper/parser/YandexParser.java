@@ -54,27 +54,9 @@ public class YandexParser implements Parser {
 			String memoryLimit = parser.advance(false, "</td>");
 			memoryLimit = memoryLimit.substring(0, memoryLimit.length() - 1);
 			parser.advance(true, "<tr class=\"input-file\">");
-			if (parser.advanceIfPossible(true, "<td>") == null) {
-				parser.advance(true, "<td colspan=\"");
-				parser.advance(true, "\">");
-			}
-			String rawInput = removeTags(parser);
-			StreamConfiguration input;
-			if (rawInput.contains(" "))
-				input = StreamConfiguration.STANDARD;
-			else
-				input = new StreamConfiguration(StreamConfiguration.StreamType.CUSTOM, rawInput);
+			StreamConfiguration input = getStreamConfiguration(parser);
 			parser.advance(true, "<tr class=\"output-file\">");
-			if (parser.advanceIfPossible(true, "<td>") == null) {
-				parser.advance(true, "<td colspan=\"");
-				parser.advance(true, "\">");
-			}
-			String rawOutput = removeTags(parser);
-			StreamConfiguration output;
-			if (rawOutput.contains(" "))
-				output = StreamConfiguration.STANDARD;
-			else
-				output = new StreamConfiguration(StreamConfiguration.StreamType.CUSTOM, rawOutput);
+			StreamConfiguration output = getStreamConfiguration(parser);
 			List<Test> tests = new ArrayList<Test>();
 			while (parser.advanceIfPossible(true, "<table class=\"sample-tests\">") != null) {
 				parser.advance(true, "<tbody>");
@@ -99,6 +81,21 @@ public class YandexParser implements Parser {
 		} catch (ParseException e) {
 			return null;
 		}
+	}
+
+	private StreamConfiguration getStreamConfiguration(StringParser parser) throws ParseException {
+		StringParser inputParser = new StringParser(parser.advance(false, "</tr>"));
+		if (inputParser.advanceIfPossible(true, "<td>") == null) {
+			inputParser.advance(true, "<td colspan=\"");
+			inputParser.advance(true, "\">");
+		}
+		String rawInput = removeTags(inputParser);
+		StreamConfiguration input;
+		if (rawInput.contains(" ") || rawInput.contains("/"))
+			input = StreamConfiguration.STANDARD;
+		else
+			input = new StreamConfiguration(StreamConfiguration.StreamType.CUSTOM, rawInput);
+		return input;
 	}
 
 	private String removeTags(StringParser parser) throws ParseException {

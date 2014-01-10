@@ -23,7 +23,7 @@ public class TopCoderConfigurationType implements ConfigurationType {
 			@Override
 			public RunConfiguration createTemplateConfiguration(Project project) {
 				return new TopCoderConfiguration("TopCoderTask", project,
-					new TopCoderTask("TopCoderTask", null, null, "", "", new String[0], null, false), factory);
+					new TopCoderTask("TopCoderTask", null, null, "", "", new String[0], null, false, "256M"), factory);
 			}
 		};
 		INSTANCE = this;

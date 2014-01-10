@@ -94,7 +94,13 @@ public class CodeforcesParser implements Parser {
 			while (parser.advanceIfPossible(true, "<a href=\"/contest/" + id + "/problem/") != null) {
 				String taskID = parser.advance(false, "\">");
 				parser.advance(true, "<a href=\"/contest/" + id + "/problem/" + taskID + "\">");
-				String name = taskID + " - " + parser.advance(false, "</a>");
+				String title = parser.advance(false, "</a>");
+				while (title.contains("<!--")) {
+					int start = title.indexOf("<!--");
+					int end = title.indexOf("-->");
+					title = title.substring(0, start) + title.substring(end + 3);
+				}
+				String name = taskID + " - " + title.trim();
 				ids.add(new Description(id + " " + taskID, name));
 			}
 		} catch (ParseException ignored) {

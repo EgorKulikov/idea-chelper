@@ -67,7 +67,7 @@ public class CreateTaskDialog extends JDialog {
 		setLocation(center);
 	}
 
-	public static Task showDialog(PsiDirectory directory, String defaultName, Task template) {
+	public static Task showDialog(PsiDirectory directory, String defaultName, Task template, boolean allowNameChange) {
         Task defaultTask = template == null ? Utilities.getDefaultTask() : template;
         String name = defaultName == null ? "Task" : defaultName;
         Project project = directory.getProject();
@@ -79,7 +79,7 @@ public class CreateTaskDialog extends JDialog {
                 Task.getDateString(), defaultTask.contestName, defaultTask.truncate, data.inputClass, data.outputClass,
                 defaultTask.includeLocale,
                 data.failOnIntegerOverflowForNewTasks);
-		CreateTaskDialog dialog = new CreateTaskDialog(task, defaultName == null, project);
+		CreateTaskDialog dialog = new CreateTaskDialog(task, allowNameChange, project);
 		dialog.setVisible(true);
 		Utilities.updateDefaultTask(dialog.task);
         if (dialog.task != null)

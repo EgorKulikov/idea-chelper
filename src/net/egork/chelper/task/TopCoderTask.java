@@ -19,8 +19,9 @@ public class TopCoderTask {
     public final String[] testClasses;
     public final String fqn;
     public final boolean failOnOverflow;
+	public final String memoryLimit;
 
-    public TopCoderTask(String name, MethodSignature signature, NewTopCoderTest[] tests, String date, String contestName, String[] testClasses, String fqn, boolean failOnOverflow) {
+    public TopCoderTask(String name, MethodSignature signature, NewTopCoderTest[] tests, String date, String contestName, String[] testClasses, String fqn, boolean failOnOverflow, String memoryLimit) {
         this.name = name;
         this.signature = signature;
         this.tests = tests;
@@ -29,6 +30,7 @@ public class TopCoderTask {
         this.testClasses = testClasses;
         this.fqn = fqn;
         this.failOnOverflow = failOnOverflow;
+		this.memoryLimit = memoryLimit;
     }
 
     public void saveTask(OutputWriter out) {
@@ -50,6 +52,7 @@ public class TopCoderTask {
             out.printString(testClass);
         out.printString(fqn);
         out.printBoolean(failOnOverflow);
+		out.printString(memoryLimit);
     }
 
     public static TopCoderTask load(InputReader in) {
@@ -77,10 +80,12 @@ public class TopCoderTask {
                 testClasses[i] = in.readString();
             String fqn = in.readString();
             boolean failOnOverflow = false;
+			String memoryLimit = "64M";
             try {
                 failOnOverflow = in.readBoolean();
+				memoryLimit = in.readString();
             } catch (InputMismatchException ignored) {}
-            return new TopCoderTask(name, signature, tests, date, contestName, testClasses, fqn, failOnOverflow);
+            return new TopCoderTask(name, signature, tests, date, contestName, testClasses, fqn, failOnOverflow, memoryLimit);
         } catch (ClassNotFoundException e) {
             return null;
         }
@@ -130,18 +135,18 @@ public class TopCoderTask {
     }
 
     public TopCoderTask setFQN(String fqn) {
-        return new TopCoderTask(name, signature, tests, date, contestName, testClasses, fqn, failOnOverflow);
+        return new TopCoderTask(name, signature, tests, date, contestName, testClasses, fqn, failOnOverflow, memoryLimit);
     }
 
     public TopCoderTask setTests(NewTopCoderTest[] tests) {
-        return new TopCoderTask(name, signature, tests, date, contestName, testClasses, fqn, failOnOverflow);
+        return new TopCoderTask(name, signature, tests, date, contestName, testClasses, fqn, failOnOverflow, memoryLimit);
     }
 
     public TopCoderTask setTestClasses(String[] testClasses) {
-        return new TopCoderTask(name, signature, tests, date, contestName, testClasses, fqn, failOnOverflow);
+        return new TopCoderTask(name, signature, tests, date, contestName, testClasses, fqn, failOnOverflow, memoryLimit);
     }
 
     public TopCoderTask setFailOnOverflow(boolean failOnOverflow) {
-        return new TopCoderTask(name, signature, tests, date, contestName, testClasses, fqn, failOnOverflow);
+        return new TopCoderTask(name, signature, tests, date, contestName, testClasses, fqn, failOnOverflow, memoryLimit);
     }
 }

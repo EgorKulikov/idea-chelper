@@ -67,6 +67,8 @@ public class TaskConfigurationPanel extends JPanel {
         name = new JTextField(task.name);
         name.setEnabled(firstEdit);
 		name.getDocument().addDocumentListener(new DocumentListener() {
+			String lastText = name.getText();
+
 			public void insertUpdate(DocumentEvent e) {
 				update();
 			}
@@ -80,8 +82,9 @@ public class TaskConfigurationPanel extends JPanel {
 			}
 
 			private void update() {
-				if (name.isEnabled() && taskClass.getText().indexOf('.') == -1)
+				if (name.isEnabled() && taskClass.getText().equals(lastText))
 					taskClass.setText(name.getText());
+				lastText = name.getText();
 			}
 		});
         basic.add(name);

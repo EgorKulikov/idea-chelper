@@ -42,7 +42,7 @@ public class HackerRankParser implements Parser {
 	public Task parseTaskFromHTML(String html) {
 		StringParser parser = new StringParser(html);
 		try {
-			parser.advance(true, "<div id=\"contest-navigation\">");
+			parser.advance(true, "<div id=\"contest-navigation");
 			parser.advance(true, "<span>");
 			String contestName = parser.advance(false, "</span>").trim().replace('/', '-');
 			parser.advance(true, "<h1 class=\"hr_tour-challenge-name pull-left\">");

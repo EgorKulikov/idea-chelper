@@ -31,8 +31,10 @@ public class EditTask extends AnAction {
 		if (configuration instanceof TaskConfiguration) {
 			TaskConfiguration taskConfiguration = (TaskConfiguration) configuration;
 			Task task = taskConfiguration.getConfiguration();
-			taskConfiguration.setConfiguration(CreateTaskDialog.showDialog(
-				FileUtilities.getPsiDirectory(project, task.location), task.name, task, false));
+			task = CreateTaskDialog.showDialog(
+				FileUtilities.getPsiDirectory(project, task.location), task.name, task, false);
+			if (task != null)
+				taskConfiguration.setConfiguration(task);
 		}
 		if (configuration instanceof TopCoderConfiguration) {
 			TopCoderConfiguration taskConfiguration = (TopCoderConfiguration) configuration;

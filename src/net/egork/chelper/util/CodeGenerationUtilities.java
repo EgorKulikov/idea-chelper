@@ -1,6 +1,7 @@
 package net.egork.chelper.util;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -113,10 +114,15 @@ public class CodeGenerationUtilities {
 			});
 			if (toRemove.isEmpty())
 				break;
-			for (PsiElement element : toRemove) {
-				if (element.isValid())
-					element.delete();
-			}
+			new WriteCommandAction.Simple<Object>(project, file) {
+				@Override
+				protected void run() throws Throwable {
+					for (PsiElement element : toRemove) {
+						if (element.isValid())
+							element.delete();
+					}
+				}
+			}.execute();
 		}
 		FileUtilities.synchronizeFile(virtualFile);
 	}

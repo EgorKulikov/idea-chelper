@@ -1,7 +1,7 @@
 <idea-plugin version="2">
   <name>CHelper</name>
   <description>Inlines library code and provides testing framework</description>
-  <version>3.81</version>
+  <version>3.83</version>
   <vendor>Egor Kulikov</vendor>
   <idea-version since-build="111.69"/>
 
@@ -56,6 +56,7 @@
               description="Launches TopCoder Arena with integrated plugin to interact with idea"/>
       <action id="editTask" class="net.egork.chelper.actions.EditTask" text="Edit Task" icon="/icons/check.png"
               description="Edit current task"/>
+      <action id="bulkAdd" class="net.egork.chelper.actions.BulkAddTests" text="Bulk Add Tests" icon="/icons/editTests.png"/>
   </actions>
 
   <extensions defaultExtensionNs="com.intellij">

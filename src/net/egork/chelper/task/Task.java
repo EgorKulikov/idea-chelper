@@ -53,6 +53,12 @@ public class Task {
         this.outputClass = trim(outputClass);
 		this.includeLocale = includeLocale;
         this.failOnOverflow = failOnOverflow;
+		if (tests != null) {
+			for (int i = 0; i < tests.length; i++) {
+				if (tests[i].index != i)
+					tests[i] = new Test(tests[i].input, tests[i].output, i, tests[i].active);
+			}
+		}
     }
 
 	private String trim(String s) {

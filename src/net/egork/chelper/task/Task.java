@@ -176,6 +176,16 @@ public class Task {
 			checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale, failOnOverflow);
 	}
 
+	public Task setTestType(TestType testType) {
+		return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
+			checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale, failOnOverflow);
+	}
+
+	public Task setContestName(String contestName) {
+		return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
+			checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale, failOnOverflow);
+	}
+
 	public Task setInputOutputClasses(String inputClass, String outputClass) {
 		return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
 			checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale, failOnOverflow);

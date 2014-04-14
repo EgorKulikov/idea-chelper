@@ -198,25 +198,7 @@ public class GCJParser implements Parser {
 				String body = map.containsKey("body") ? map.get("body").nonJSON : null;
 				if (body == null)
 					return null;
-				StringParser parser = new StringParser(body);
-				try {
-					parser.advance(true, "<div class=\"problem-io-wrapper\">");
-					parser.advance(true, "<code>");
-					String input = parser.advance(false, "</code>").replaceAll("\\\\r\\\\n", "\n").trim().replaceAll("<br/>", "") + "\n";
-					parser.advance(true, "<code>");
-					String output = parser.advance(false, "</code>").replaceAll("\\\\r\\\\n", "\n").trim().replaceAll("<br/>", "");
-					String letter = description.description.split(" ")[0];
-					return new Task(description.description, null,
-						new StreamConfiguration(StreamConfiguration.StreamType.LOCAL_REGEXP,
-						letter + "-(small|large).*[.]in"),
-						new StreamConfiguration(StreamConfiguration.StreamType.CUSTOM, letter.toLowerCase() + ".out"),
-						new Test[]{new Test(input, output, 0)}, null, "-Xmx512M", "Main",
-						"Task" + letter,
-						TokenChecker.class.getCanonicalName(), "", new String[0], null, null, true, null, null,
-						true, false);
-				} catch (ParseException e) {
-					return null;
-				}
+				return parseTask(body, description.description);
 			}
 		}
 		return null;
@@ -226,7 +208,42 @@ public class GCJParser implements Parser {
 		return TestType.MULTI_NUMBER;
 	}
 
+	public Task parseTask(String html, String description) {
+		StringParser parser = new StringParser(html);
+		try {
+			parser.advance(true, "<div class=\"problem-io-wrapper\">");
+			parser.advance(true, "<pre class=\"io-content\">");
+			String input = parser.advance(false, "</pre>").replaceAll("\\\\r\\\\n", "\n").trim().replaceAll("<br/>", "") + "\n";
+			parser.advance(true, "<pre class=\"io-content\">");
+			String output = parser.advance(false, "</pre>").replaceAll("\\\\r\\\\n", "\n").trim().replaceAll("<br/>", "");
+			String letter = description.split(" ")[0];
+			return new Task(description, null,
+				new StreamConfiguration(StreamConfiguration.StreamType.LOCAL_REGEXP,
+					letter + "-(small|large).*[.]in"),
+				new StreamConfiguration(StreamConfiguration.StreamType.CUSTOM, letter.toLowerCase() + ".out"),
+				new Test[]{new Test(input, output, 0)}, null, "-Xmx512M", "Main",
+				"Task" + letter,
+				TokenChecker.class.getCanonicalName(), "", new String[0], null, null, true, null, null,
+				true, false);
+		} catch (ParseException e) {
+			return null;
+		}
+	}
+
 	public Task parseTaskFromHTML(String html) {
-		throw new UnsupportedOperationException();
+		StringParser parser = new StringParser(html);
+		try {
+			parser.advance(true, "<div id=\"dsb-contest-title\">");
+			String contest = parser.advance(false, "</div>").trim();
+			parser.advance(true, "<div id=\"dsb-problem-title0\" class=\"dynamic-link\">");
+			String description = parser.advance(false, "</div>").trim();
+			description = description.substring(0, 1) + " - " + description.substring(3);
+			Task task = parseTask(html, description);
+			if (task == null)
+				return null;
+			return task.setTestType(defaultTestType()).setContestName(getName() + " " + contest);
+		} catch (ParseException e) {
+			return null;
+		}
 	}
 }

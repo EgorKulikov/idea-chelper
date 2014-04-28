@@ -211,10 +211,10 @@ public class GCJParser implements Parser {
 	public Task parseTask(StringParser parser, String description) {
 		try {
 			parser.advance(true, "<div class=\"problem-io-wrapper\">");
-			parser.advance(true, "<pre class=\"io-content\">");
-			String input = parser.advance(false, "</pre>").replaceAll("(\\\\r)?\\\\n", "\n").trim().replaceAll("<br/>", "") + "\n";
-			parser.advance(true, "<pre class=\"io-content\">");
-			String output = parser.advance(false, "</pre>").replaceAll("(\\\\r)?\\\\n", "\n").trim().replaceAll("<br/>", "");
+			parser.advance(true, "<pre class=\"io-content\">", "<code>");
+			String input = parser.advance(false, "</pre>", "</code>").replaceAll("(\\\\r)?\\\\n", "\n").trim().replaceAll("<br/>", "") + "\n";
+			parser.advance(true, "<pre class=\"io-content\">", "<code>");
+			String output = parser.advance(false, "</pre>", "</code>").replaceAll("(\\\\r)?\\\\n", "\n").trim().replaceAll("<br/>", "");
 			String letter = description.split(" ")[0];
 			return new Task(description, null,
 				new StreamConfiguration(StreamConfiguration.StreamType.LOCAL_REGEXP,

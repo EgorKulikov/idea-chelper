@@ -8,6 +8,8 @@ import net.egork.chelper.task.TestType;
 
 import javax.swing.*;
 import java.text.ParseException;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * @author egorku@yandex-team.ru
@@ -37,7 +39,7 @@ public class FacebookParser implements Parser {
 		return TestType.MULTI_NUMBER;
 	}
 
-	public Task parseTaskFromHTML(String html) {
+	public Collection<Task> parseTaskFromHTML(String html) {
 		StringParser parser = new StringParser(html);
 		try {
 			parser.advance(true, "<div id=\"headerArea\">");
@@ -65,11 +67,11 @@ public class FacebookParser implements Parser {
 			String testInput = parser.advance(false, "</pre>");
 			parser.advance(true, "<pre>");
 			String testOutput = parser.advance(false, "</pre>");
-			return new Task(taskName, defaultTestType(), input, output, new Test[]{new Test(testInput, testOutput)},
+			return Collections.singleton(new Task(taskName, defaultTestType(), input, output, new Test[]{new Test(testInput, testOutput)},
 				null, "-Xmx1024M", "Main", taskClass, TokenChecker.class.getCanonicalName(), "",
-				new String[0], null, contestName, true, null, null, true, false);
+				new String[0], null, contestName, true, null, null, true, false));
 		} catch (ParseException e) {
-			return null;
+			return Collections.emptyList();
 		}
 	}
 }

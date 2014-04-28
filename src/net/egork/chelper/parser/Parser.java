@@ -4,6 +4,8 @@ import net.egork.chelper.task.Task;
 import net.egork.chelper.task.TestType;
 
 import javax.swing.*;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * @author Egor Kulikov (kulikov@devexperts.com)
@@ -18,5 +20,5 @@ public interface Parser {
     public void parseContest(String id, DescriptionReceiver receiver);
     public Task parseTask(Description description);
 	public TestType defaultTestType();
-	public Task parseTaskFromHTML(String html);
+	public Collection<Task> parseTaskFromHTML(String html);
 }

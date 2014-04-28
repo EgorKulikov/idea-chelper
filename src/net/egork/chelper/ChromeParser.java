@@ -22,6 +22,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -89,15 +90,16 @@ public class ChromeParser implements ProjectComponent {
 								SwingUtilities.invokeLater(new Runnable() {
 									public void run() {
 										if (TASK_PARSERS.containsKey(type)) {
-											Task task = TASK_PARSERS.get(type).parseTaskFromHTML(page);
-											if (task == null) {
+											Collection<Task> tasks = TASK_PARSERS.get(type).parseTaskFromHTML(page);
+											if (tasks.isEmpty()) {
 												Messenger.publishMessage("Unable to parse task from " + type, NotificationType.WARNING);
 												return;
 											}
 											JFrame projectFrame = WindowManager.getInstance().getFrame(project);
 											if (projectFrame.getState() == JFrame.ICONIFIED)
 												projectFrame.setState(Frame.NORMAL);
-											NewTaskDefaultAction.createTaskInDefaultDirectory(project, task);
+											for (Task task : tasks)
+												NewTaskDefaultAction.createTaskInDefaultDirectory(project, task);
 										} else {
 											Messenger.publishMessage("Unknown task type from Chrome parser: " + type,
 												NotificationType.WARNING);

@@ -12,6 +12,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import javax.swing.*;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -227,7 +228,7 @@ public class EOlimpParser implements Parser {
 		return TestType.SINGLE;
 	}
 
-	public Task parseTaskFromHTML(String html) {
+	public Collection<Task> parseTaskFromHTML(String html) {
 		throw new UnsupportedOperationException();
 	}
 }

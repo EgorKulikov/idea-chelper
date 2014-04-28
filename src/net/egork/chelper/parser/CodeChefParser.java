@@ -180,7 +180,7 @@ public class CodeChefParser implements Parser {
 		return TestType.MULTI_NUMBER;
 	}
 
-	public Task parseTaskFromHTML(String html) {
+	public Collection<Task> parseTaskFromHTML(String html) {
 		throw new UnsupportedOperationException();
 	}
 

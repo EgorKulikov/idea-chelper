@@ -12,6 +12,8 @@ import org.apache.commons.lang.StringEscapeUtils;
 import javax.swing.*;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -119,14 +121,17 @@ public class CodeforcesParser implements Parser {
 		String text = FileUtilities.getWebPageContent("http://codeforces.com/contest/" + contestId + "/problem/" + id);
 		if (text == null)
 			return null;
-		return parseTaskFromHTML(text);
+		Collection<Task> tasks = parseTaskFromHTML(text);
+		if (!tasks.isEmpty())
+			return tasks.iterator().next();
+		return null;
 	}
 
 	public TestType defaultTestType() {
 		return TestType.SINGLE;
 	}
 
-	public Task parseTaskFromHTML(String html) {
+	public Collection<Task> parseTaskFromHTML(String html) {
 		StringParser parser = new StringParser(html);
 		try {
 			parser.advance(true, "<table class=\"rtable \">");
@@ -172,11 +177,11 @@ public class CodeforcesParser implements Parser {
 			}
 			String taskClass = "Task" + letter;
 			String name = letter + " - " + taskName;
-			return new Task(name, defaultTestType(), inputType, outputType, tests.toArray(new Test[tests.size()]), null,
+			return Collections.singleton(new Task(name, defaultTestType(), inputType, outputType, tests.toArray(new Test[tests.size()]), null,
 				"-Xmx" + heapMemory, "Main", taskClass, TokenChecker.class.getCanonicalName(), "", new String[0], null,
-				contestName, true, null, null, false, false);
+				contestName, true, null, null, false, false));
 		} catch (ParseException e) {
-			return null;
+			return Collections.emptyList();
 		}
 	}
 }

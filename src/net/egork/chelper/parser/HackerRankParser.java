@@ -9,6 +9,8 @@ import net.egork.chelper.task.TestType;
 import javax.swing.*;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -39,7 +41,7 @@ public class HackerRankParser implements Parser {
 		return TestType.MULTI_NUMBER;
 	}
 
-	public Task parseTaskFromHTML(String html) {
+	public Collection<Task> parseTaskFromHTML(String html) {
 		StringParser parser = new StringParser(html);
 		try {
 			parser.advance(true, "<div id=\"contest-navigation");
@@ -59,11 +61,11 @@ public class HackerRankParser implements Parser {
 				String testOutput = parser.advance(false, "</code></pre>");
 				tests.add(new Test(testInput, testOutput, tests.size()));
 			}
-			return new Task(taskName, defaultTestType(), input, output, tests.toArray(new Test[tests.size()]), null,
+			return Collections.singleton(new Task(taskName, defaultTestType(), input, output, tests.toArray(new Test[tests.size()]), null,
 				"-Xmx256M", "Solution", taskClass, TokenChecker.class.getCanonicalName(), "",
-				new String[0], null, contestName, true, null, null, false, false);
+				new String[0], null, contestName, true, null, null, false, false));
 		} catch (ParseException e) {
-			return null;
+			return Collections.emptyList();
 		}
 	}
 }

@@ -9,6 +9,8 @@ import net.egork.chelper.task.TestType;
 import javax.swing.*;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -39,7 +41,7 @@ public class YandexParser implements Parser {
 		return TestType.SINGLE;
 	}
 
-	public Task parseTaskFromHTML(String html) {
+	public Collection<Task> parseTaskFromHTML(String html) {
 		StringParser parser = new StringParser(html);
 		try {
 			parser.advance(true, "<div class=\"status__contest inline-block\">");
@@ -75,11 +77,11 @@ public class YandexParser implements Parser {
 					break;
 				}
 			}
-			return new Task(problemLetter + " - " + taskName, defaultTestType(), input, output, tests.toArray(new Test[tests.size()]), null,
+			return Collections.singleton(new Task(problemLetter + " - " + taskName, defaultTestType(), input, output, tests.toArray(new Test[tests.size()]), null,
 				"-Xmx" + memoryLimit, "Main", "Task" + problemLetter, TokenChecker.class.getCanonicalName(), "",
-				new String[0], null, contestName, true, null, null, false, false);
+				new String[0], null, contestName, true, null, null, false, false));
 		} catch (ParseException e) {
-			return null;
+			return Collections.emptyList();
 		}
 	}
 

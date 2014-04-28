@@ -8,6 +8,8 @@ import net.egork.chelper.task.TestType;
 
 import javax.swing.*;
 import java.text.ParseException;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * @author egorku@yandex-team.ru
@@ -37,7 +39,7 @@ public class UsacoParser implements Parser {
 		return TestType.SINGLE;
 	}
 
-	public Task parseTaskFromHTML(String html) {
+	public Collection<Task> parseTaskFromHTML(String html) {
 		StringParser parser = new StringParser(html);
 		try {
 			parser.advance(true, "<h2>");
@@ -55,11 +57,11 @@ public class UsacoParser implements Parser {
 			parser.advance(true, "SAMPLE OUTPUT");
 			parser.advance(true, "\n");
 			String testOutput = parser.advance(false, "OUTPUT DETAILS", "</span>").trim() + "\n";
-			return new Task(taskName, defaultTestType(), input, output, new Test[]{new Test(testInput, testOutput)},
+			return Collections.singleton(new Task(taskName, defaultTestType(), input, output, new Test[]{new Test(testInput, testOutput)},
 				null, "-Xmx1024M", "Main", taskClass, TokenChecker.class.getCanonicalName(), "",
-				new String[0], null, contestName, true, null, null, false, false);
+				new String[0], null, contestName, true, null, null, false, false));
 		} catch (ParseException e) {
-			return null;
+			return Collections.emptyList();
 		}
 	}
 }

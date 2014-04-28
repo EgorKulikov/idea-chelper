@@ -198,7 +198,7 @@ public class GCJParser implements Parser {
 				String body = map.containsKey("body") ? map.get("body").nonJSON : null;
 				if (body == null)
 					return null;
-				return parseTask(body, description.description);
+				return parseTask(new StringParser(body), description.description);
 			}
 		}
 		return null;
@@ -208,14 +208,13 @@ public class GCJParser implements Parser {
 		return TestType.MULTI_NUMBER;
 	}
 
-	public Task parseTask(String html, String description) {
-		StringParser parser = new StringParser(html);
+	public Task parseTask(StringParser parser, String description) {
 		try {
 			parser.advance(true, "<div class=\"problem-io-wrapper\">");
 			parser.advance(true, "<pre class=\"io-content\">");
-			String input = parser.advance(false, "</pre>").replaceAll("\\\\r\\\\n", "\n").trim().replaceAll("<br/>", "") + "\n";
+			String input = parser.advance(false, "</pre>").replaceAll("(\\\\r)?\\\\n", "\n").trim().replaceAll("<br/>", "") + "\n";
 			parser.advance(true, "<pre class=\"io-content\">");
-			String output = parser.advance(false, "</pre>").replaceAll("\\\\r\\\\n", "\n").trim().replaceAll("<br/>", "");
+			String output = parser.advance(false, "</pre>").replaceAll("(\\\\r)?\\\\n", "\n").trim().replaceAll("<br/>", "");
 			String letter = description.split(" ")[0];
 			return new Task(description, null,
 				new StreamConfiguration(StreamConfiguration.StreamType.LOCAL_REGEXP,
@@ -230,20 +229,30 @@ public class GCJParser implements Parser {
 		}
 	}
 
-	public Task parseTaskFromHTML(String html) {
+	public Collection<Task> parseTaskFromHTML(String html) {
 		StringParser parser = new StringParser(html);
+		List<Task> result = new ArrayList<Task>();
 		try {
 			parser.advance(true, "<div id=\"dsb-contest-title\">");
 			String contest = parser.advance(false, "</div>").trim();
-			parser.advance(true, "<div id=\"dsb-problem-title0\" class=\"dynamic-link\">");
-			String description = parser.advance(false, "</div>").trim();
-			description = description.substring(0, 1) + " - " + description.substring(3);
-			Task task = parseTask(html, description);
-			if (task == null)
-				return null;
-			return task.setTestType(defaultTestType()).setContestName(getName() + " " + contest);
-		} catch (ParseException e) {
-			return null;
+			List<String> titles = new ArrayList<String>();
+			for (int i = 0; ; i++) {
+				if (parser.advanceIfPossible(true, "<div id=\"dsb-problem-title" + i + "\" class=\"dynamic-link\">") != null) {
+					String description = parser.advance(false, "</div>").trim();
+					description = description.substring(0, 1) + " - " + description.substring(3);
+					titles.add(description);
+				} else
+					break;
+			}
+			for (String description : titles) {
+				Task task = parseTask(parser, description);
+				if (task == null)
+					break;
+				task = task.setTestType(defaultTestType()).setContestName(getName() + " " + contest);
+				result.add(task);
+			}
+		} catch (ParseException ignored) {
 		}
+		return result;
 	}
 }

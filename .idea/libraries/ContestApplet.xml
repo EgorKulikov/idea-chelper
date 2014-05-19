@@ -2,7 +2,8 @@
   <library name="ContestApplet">
     <CLASSES>
       <root url="jar://$PROJECT_DIR$/lib/arena-client-7.0.8.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/arena-shared-7.5.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/arena-shared-7.5.5.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/custom-serialization-1.1.1.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

@@ -45,8 +45,8 @@ public class HackerRankParser implements Parser {
 		StringParser parser = new StringParser(html);
 		try {
 			parser.advance(true, "<div id=\"contest-navigation");
-			parser.advance(true, "<span>");
-			String contestName = parser.advance(false, "</span>").trim().replace('/', '-');
+			parser.advance(true, "Current Contest: </span>");
+			String contestName = parser.advance(false, "<span").trim().replace('/', '-');
 			parser.advance(true, "<h1 class=\"hr_tour-challenge-name pull-left\">");
 			String taskName = parser.advance(false, "</h1>");
 			String taskClass = CodeChefParser.getTaskID(taskName);

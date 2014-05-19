@@ -7,7 +7,6 @@ import com.intellij.ui.components.JBScrollPane;
 import net.egork.chelper.task.NewTopCoderTest;
 import net.egork.chelper.task.TopCoderTask;
 import net.egork.chelper.util.Utilities;
-import sun.awt.VariableGridLayout;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;

@@ -11,7 +11,10 @@ import org.apache.commons.lang.StringEscapeUtils;
 
 import javax.swing.*;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Egor Kulikov (egor@egork.net)
@@ -29,23 +32,28 @@ public class RCCParser implements Parser {
 		int currentRound = -1;
 		String currentPage = FileUtilities.getWebPageContent("http://russiancodecup.ru/championship/", "UTF-8");
 		StringParser parser = new StringParser(currentPage);
+		List<Integer> championshipIDs = new ArrayList<Integer>();
 		try {
+			parser.advance(true, "<div class=\"subMenu fontLarge\">");
+			while (parser.advanceIfPossible(true, "<li><a href=\"/championship/round/") != null)
+				championshipIDs.add(Integer.parseInt(parser.advance(false, "/")));
 			parser.advance(true, "/championship/result/round/");
 			String id = parser.advance(false, "/");
 			currentRound = Integer.parseInt(id);
 			processChampionshipPage(receiver, currentRound, currentPage);
 		} catch (ParseException ignored) {
-		} catch (NumberFormatException e) {
+		} catch (NumberFormatException ignored) {
 		}
-		for (int id = 1; id < 100; id++) {
-			if (id == currentRound)
-				continue;
-			String page = FileUtilities.getWebPageContent("http://russiancodecup.ru/championship/round/" + id + "/problem/A/", "UTF-8");
-			if (page == null || page.contains("<title>RCC | 404</title>")) {
-				processArchivePage(receiver, id);
-			} else {
-				processChampionshipPage(receiver, id, page);
-			}
+		for (int id : championshipIDs)
+			processChampionshipPage(receiver, id, FileUtilities.getWebPageContent("http://russiancodecup.ru/championship/round/" + id + "/problem/A/", "UTF-8"));
+		currentPage = FileUtilities.getWebPageContent("http://www.russiancodecup.ru/tasks/", "UTF-8");
+		parser = new StringParser(currentPage);
+		try {
+			parser.advance(true, "var arYear");
+			while (parser.advanceIfPossible(true, "\"ID\":\"") != null)
+				processArchivePage(receiver, Integer.parseInt(parser.advance(false, "\"")));
+		} catch (ParseException ignored) {
+		} catch (NumberFormatException ignored) {
 		}
 	}
 
@@ -84,6 +92,7 @@ public class RCCParser implements Parser {
 			page = FileUtilities.getWebPageContent(url, "UTF-8");
 		}
 		List<Description> descriptions = new ArrayList<Description>();
+		char taskID = 'A';
 		while (true) {
 			if (page == null || page.contains("<title>RCC | 404</title>")) {
 				receiver.receiveDescriptions(descriptions);
@@ -99,7 +108,12 @@ public class RCCParser implements Parser {
 					return;
 				}
 				char letter = name.charAt(1);
+				if (letter != taskID) {
+					receiver.receiveDescriptions(descriptions);
+					return;
+				}
 				descriptions.add(new Description(url, letter + " - " + name.substring(4)));
+				taskID = ((char)(url.charAt(url.length() - 2) + 1));
 				url = url.substring(0, url.length() - 2) + ((char)(url.charAt(url.length() - 2) + 1)) + "/";
 				page = FileUtilities.getWebPageContent(url, "UTF-8");
 			} catch (ParseException e) {

@@ -16,8 +16,8 @@ import net.egork.chelper.configurations.TopCoderConfiguration;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.TopCoderTask;
 import net.egork.chelper.util.FileUtilities;
-import net.egork.chelper.util.TaskUtilities;
 import net.egork.chelper.util.Utilities;
+import net.egork.chelper.util.TaskUtilities;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;

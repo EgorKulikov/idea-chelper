@@ -27,16 +27,22 @@ public class StreamConfiguration {
 		return null;
 	}
 
+	public static final StreamType[] OUTPUT_TYPES = {
+		StreamType.STANDARD, StreamType.TASK_ID, StreamType.CUSTOM
+	};
+
 	public static enum StreamType {
-		STANDARD("Standard stream"),
-        TASK_ID("Name.in/.out"),
-        CUSTOM("Custom filename");
+		STANDARD("Standard stream", false),
+        TASK_ID("Name.in/.out", false),
+        CUSTOM("Custom filename", true),
+		LOCAL_REGEXP("Local regular expression", true);
         private final String uiDescription;
+		public final boolean hasStringParameter;
 
-        private StreamType(String uiDescription) {
+        private StreamType(String uiDescription, boolean hasStringParameter) {
             this.uiDescription = uiDescription;
+			this.hasStringParameter = hasStringParameter;
         }
-
 
         @Override
         public String toString() {

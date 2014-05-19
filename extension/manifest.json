@@ -1,0 +1,42 @@
+{
+    "manifest_version": 2,
+
+    "name": "CHelper extension",
+    "description": "Allows to parse tasks directly from browser.",
+    "background": { "scripts": ["background.js"] },
+    "version": "3.84.1",
+
+    "permissions": [
+        "tabs",
+        "http://localhost/"
+    ],
+
+    "content_scripts": [
+        {
+            "matches": [
+                "http://*.contest.yandex.ru/*",
+                "http://*.contest.yandex.com/*",
+                "http://*.contest2.yandex.ru/*",
+                "http://*.contest2.yandex.com/*",
+                "http://codeforces.ru/*",
+                "http://codeforces.com/*",
+                "https://hackerrank.com/*",
+                "https://www.hackerrank.com/*",
+                "https://www.facebook.com/hackercup/*",
+                "http://usaco.org/*",
+                "http://www.usaco.org/*",
+                "https://code.google.com/codejam/contest/*"
+            ],
+            "js": ["contentscript.js"],
+            "run_at": "document_idle",
+            "all_frames": false
+        }
+    ],
+
+    "page_action": {
+        "default_icon": "newTask.png",
+        "default_title": "Parse task"
+    },
+
+    "icons": { "16": "newTask16.png"}
+}

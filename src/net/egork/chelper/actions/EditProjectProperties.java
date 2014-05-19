@@ -16,7 +16,6 @@ import com.intellij.openapi.vfs.JarFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import net.egork.chelper.ProjectData;
-import net.egork.chelper.cojac.CojacInstaller;
 import net.egork.chelper.tester.NewTester;
 import net.egork.chelper.ui.ProjectDataDialog;
 import net.egork.chelper.util.Utilities;
@@ -31,7 +30,6 @@ public class EditProjectProperties extends AnAction {
         ProjectData result = ProjectDataDialog.edit(project, data);
         if (result != null) {
             result.save(project);
-            CojacInstaller.install(project);
             Utilities.addProjectData(project, result);
 			ApplicationManager.getApplication().runWriteAction(new Runnable() {
 				public void run() {

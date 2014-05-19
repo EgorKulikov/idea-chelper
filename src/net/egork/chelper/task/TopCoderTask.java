@@ -1,7 +1,11 @@
 package net.egork.chelper.task;
 
+import com.intellij.notification.NotificationType;
 import net.egork.chelper.util.InputReader;
+import net.egork.chelper.util.Messenger;
 import net.egork.chelper.util.OutputWriter;
+
+import java.util.InputMismatchException;
 
 /**
  * @author Egor Kulikov (kulikov@devexperts.com)
@@ -14,12 +18,10 @@ public class TopCoderTask {
     public final String contestName;
     public final String[] testClasses;
     public final String fqn;
+    public final boolean failOnOverflow;
+	public final String memoryLimit;
 
-    public TopCoderTask(String name, MethodSignature signature, NewTopCoderTest[] tests, String date, String contestName){
-        this(name, signature, tests, date, contestName, new String[0], null);
-    }
-
-    public TopCoderTask(String name, MethodSignature signature, NewTopCoderTest[] tests, String date, String contestName, String[] testClasses, String fqn) {
+    public TopCoderTask(String name, MethodSignature signature, NewTopCoderTest[] tests, String date, String contestName, String[] testClasses, String fqn, boolean failOnOverflow, String memoryLimit) {
         this.name = name;
         this.signature = signature;
         this.tests = tests;
@@ -27,6 +29,8 @@ public class TopCoderTask {
         this.contestName = contestName;
         this.testClasses = testClasses;
         this.fqn = fqn;
+        this.failOnOverflow = failOnOverflow;
+		this.memoryLimit = memoryLimit;
     }
 
     public void saveTask(OutputWriter out) {
@@ -47,6 +51,8 @@ public class TopCoderTask {
         for (String testClass : testClasses)
             out.printString(testClass);
         out.printString(fqn);
+        out.printBoolean(failOnOverflow);
+		out.printString(memoryLimit);
     }
 
     public static TopCoderTask load(InputReader in) {
@@ -73,11 +79,40 @@ public class TopCoderTask {
             for (int i = 0; i < testClassCount; i++)
                 testClasses[i] = in.readString();
             String fqn = in.readString();
-            return new TopCoderTask(name, signature, tests, date, contestName, testClasses, fqn);
+            boolean failOnOverflow = false;
+			String memoryLimit = "64M";
+            try {
+                failOnOverflow = in.readBoolean();
+				memoryLimit = in.readString();
+            } catch (InputMismatchException ignored) {}
+            return new TopCoderTask(name, signature, tests, date, contestName, testClasses, fqn, failOnOverflow, memoryLimit);
         } catch (ClassNotFoundException e) {
             return null;
         }
     }
+
+	public String defaultValue() {
+		Class returnType = signature.result;
+		if (returnType == int.class)
+			return "0";
+		if (returnType == long.class)
+			return "0L";
+		if (returnType == double.class)
+			return "0D";
+		if (returnType == String.class)
+			return "\"\"";
+		if (returnType == int[].class)
+			return "new int[0]";
+		if (returnType == long[].class)
+			return "new long[0]";
+		if (returnType == double[].class)
+			return "new double[0]";
+		if (returnType == String[].class)
+			return "new String[0]";
+		Messenger.publishMessage("Task " + name + " has unrecognized return type - " +
+			signature.result.getSimpleName(), NotificationType.ERROR);
+		return "";
+	}
 
     private static Class forName(String s) throws ClassNotFoundException {
         if ("int".equals(s))
@@ -100,14 +135,18 @@ public class TopCoderTask {
     }
 
     public TopCoderTask setFQN(String fqn) {
-        return new TopCoderTask(name, signature, tests, date, contestName, testClasses, fqn);
+        return new TopCoderTask(name, signature, tests, date, contestName, testClasses, fqn, failOnOverflow, memoryLimit);
     }
 
     public TopCoderTask setTests(NewTopCoderTest[] tests) {
-        return new TopCoderTask(name, signature, tests, date, contestName, testClasses, fqn);
+        return new TopCoderTask(name, signature, tests, date, contestName, testClasses, fqn, failOnOverflow, memoryLimit);
     }
 
     public TopCoderTask setTestClasses(String[] testClasses) {
-        return new TopCoderTask(name, signature, tests, date, contestName, testClasses, fqn);
+        return new TopCoderTask(name, signature, tests, date, contestName, testClasses, fqn, failOnOverflow, memoryLimit);
+    }
+
+    public TopCoderTask setFailOnOverflow(boolean failOnOverflow) {
+        return new TopCoderTask(name, signature, tests, date, contestName, testClasses, fqn, failOnOverflow, memoryLimit);
     }
 }

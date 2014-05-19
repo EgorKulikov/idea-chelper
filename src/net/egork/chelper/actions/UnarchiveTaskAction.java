@@ -39,7 +39,7 @@ public class UnarchiveTaskAction extends AnAction {
                         return super.isFileVisible(file, showHiddenFiles) &&
                                 (file.isDirectory() || "task".equals(file.getExtension()) || "tctask".equals(file.getExtension()));
                     }
-                }, project);
+                }, project, null);
         final VirtualFile[] files = dialog.choose(FileUtilities.getFile(project, Utilities.getData(project).archiveDirectory), project);
         ApplicationManager.getApplication().runWriteAction(new Runnable() {
             public void run() {

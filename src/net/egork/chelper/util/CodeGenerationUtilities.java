@@ -1,6 +1,7 @@
 package net.egork.chelper.util;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -8,7 +9,6 @@ import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import net.egork.chelper.actions.ArchiveAction;
-import net.egork.chelper.actions.TopCoderAction;
 import net.egork.chelper.task.*;
 
 import javax.swing.*;
@@ -114,10 +114,15 @@ public class CodeGenerationUtilities {
 			});
 			if (toRemove.isEmpty())
 				break;
-			for (PsiElement element : toRemove) {
-				if (element.isValid())
-					element.delete();
-			}
+			new WriteCommandAction.Simple<Object>(project, file) {
+				@Override
+				protected void run() throws Throwable {
+					for (PsiElement element : toRemove) {
+						if (element.isValid())
+							element.delete();
+					}
+				}
+			}.execute();
 		}
 		FileUtilities.synchronizeFile(virtualFile);
 	}
@@ -130,11 +135,30 @@ public class CodeGenerationUtilities {
 			builder.append("\t\tLocale.setDefault(Locale.US);\n");
 		if (task.input.type == StreamConfiguration.StreamType.STANDARD)
 			builder.append("\t\tInputStream inputStream = System.in;\n");
-		else {
+		else if (task.input.type != StreamConfiguration.StreamType.LOCAL_REGEXP) {
 			builder.append("\t\tInputStream inputStream;\n");
 			builder.append("\t\ttry {\n");
 			builder.append("\t\t\tinputStream = new FileInputStream(\"").append(task.input.
 				getFileName(task.name, ".in")).append("\");\n");
+			builder.append("\t\t} catch (IOException e) {\n");
+			builder.append("\t\t\tthrow new RuntimeException(e);\n");
+			builder.append("\t\t}\n");
+		} else {
+			builder.append("\t\tInputStream inputStream;\n");
+			builder.append("\t\ttry {\n");
+			builder.append("\t\t\tfinal String regex = \"").append(task.input.fileName).append("\";\n");
+			builder.append("\t\t\tFile directory = new File(\".\");\n" +
+				"\t\t\tFile[] candidates = directory.listFiles(new FilenameFilter() {\n" +
+				"\t\t\t\tpublic boolean accept(File dir, String name) {\n" +
+				"\t\t\t\t\treturn name.matches(regex);\n" +
+				"\t\t\t\t}\n" +
+				"\t\t\t});\n" +
+				"\t\t\tFile toRun = null;\n" +
+				"\t\t\tfor (File candidate : candidates) {\n" +
+				"\t\t\t\tif (toRun == null || candidate.lastModified() > toRun.lastModified())\n" +
+				"\t\t\t\t\ttoRun = candidate;\n" +
+				"\t\t\t}\n" +
+				"\t\t\tinputStream = new FileInputStream(toRun);\n");
 			builder.append("\t\t} catch (IOException e) {\n");
 			builder.append("\t\t\tthrow new RuntimeException(e);\n");
 			builder.append("\t\t}\n");
@@ -197,6 +221,10 @@ public class CodeGenerationUtilities {
 					toImport.add("import java.io.FileInputStream;");
 				if (task.output.type != StreamConfiguration.StreamType.STANDARD)
 					toImport.add("import java.io.FileOutputStream;");
+				if (task.input.type == StreamConfiguration.StreamType.LOCAL_REGEXP) {
+					toImport.add("import java.io.File;");
+					toImport.add("import java.io.FilenameFilter;");
+				}
 				if (task.includeLocale)
 					toImport.add("import java.util.Locale;");
 				VirtualFile originalFile = FileUtilities.getFileByFQN(task.taskClass, project);
@@ -226,23 +254,17 @@ public class CodeGenerationUtilities {
 		});
 	}
 
-	public static String createCheckerStub(String location, String name, Project project) {
-		PsiDirectory directory = FileUtilities.getPsiDirectory(project, location);
-		StringBuilder builder = new StringBuilder();
-		String packageName = FileUtilities.getPackage(directory);
-		if (packageName != null && packageName.length() != 0)
-			builder.append("package ").append(packageName).append(";\n\n");
-		builder.append("import net.egork.chelper.tester.Verdict;\n");
-        builder.append("import net.egork.chelper.checkers.Checker;\n");
-        builder.append("\n");
-		builder.append("public class ").append(name).append(" implements Checker {\n");
-        builder.append("\tpublic ").append(name).append("(String parameters) {\n");
-        builder.append("\t}\n\n");
-		builder.append("\tpublic Verdict check(String input, String expectedOutput, String actualOutput) {\n");
-		builder.append("\t\treturn Verdict.UNDECIDED;\n");
-		builder.append("\t}\n");
-		builder.append("}\n");
-		return builder.toString();
+	public static String createCheckerStub(String location, String name, Project project, Task task) {
+        PsiDirectory directory = FileUtilities.getPsiDirectory(project, location);
+        String inputClass = task.inputClass;
+        String inputClassShort = inputClass.substring(inputClass.lastIndexOf('.') + 1);
+        String outputClass = task.outputClass;
+        String outputClassShort = outputClass.substring(outputClass.lastIndexOf('.') + 1);
+        String packageName = FileUtilities.getPackage(directory);
+        String template = createCheckerClassTemplateIfNeeded(project);
+        return template.replace("%package%", packageName).replace("%InputClass%", inputClassShort).
+                replace("%InputClassFQN%", inputClass).replace("%OutputClass%", outputClassShort).
+                replace("%OutputClassFQN%", outputClass).replace("%CheckerClass%", name);
 	}
 
 	public static String createStub(Task task, String location, String name, Project project) {
@@ -251,22 +273,111 @@ public class CodeGenerationUtilities {
 		String inputClassShort = inputClass.substring(inputClass.lastIndexOf('.') + 1);
 		String outputClass = task.outputClass;
 		String outputClassShort = outputClass.substring(outputClass.lastIndexOf('.') + 1);
-		StringBuilder builder = new StringBuilder();
-		String packageName = FileUtilities.getPackage(directory);
-		if (packageName != null && packageName.length() != 0)
-			builder.append("package ").append(packageName).append(";\n\n");
-		builder.append("import ").append(inputClass).append(";\n");
-		builder.append("import ").append(outputClass).append(";\n");
-		builder.append("\n");
-		builder.append("public class ").append(name).append(" {\n");
-		builder.append("\tpublic void solve(int testNumber, ").append(inputClassShort).append(" in, ").
-			append(outputClassShort).append(" out) {\n");
-		builder.append("\t}\n");
-		builder.append("}\n");
-		return builder.toString();
+        String packageName = FileUtilities.getPackage(directory);
+        String template = createTaskClassTemplateIfNeeded(project);
+        return template.replace("%package%", packageName).replace("%InputClass%", inputClassShort).
+            replace("%InputClassFQN%", inputClass).replace("%OutputClass%", outputClassShort).
+            replace("%OutputClassFQN%", outputClass).replace("%TaskClass%", name);
 	}
 
-	public static void createSourceFile(final Project project, final TopCoderTask task) {
+    public static String createTaskClassTemplateIfNeeded(Project project) {
+        VirtualFile file = FileUtilities.getFile(project, "TaskClass.template");
+        if (file != null)
+            return FileUtilities.readTextFile(file);
+        String template = "package %package%;\n" +
+                "\n" +
+                "import %InputClassFQN%;\n" +
+                "import %OutputClassFQN%;\n" +
+                "\n" +
+                "public class %TaskClass% {\n" +
+                "    public void solve(int testNumber, %InputClass% in, %OutputClass% out) {\n" +
+                "    }\n" +
+                "}\n";
+        FileUtilities.writeTextFile(project.getBaseDir(), "TaskClass.template", template);
+        return template;
+    }
+
+    public static String createCheckerClassTemplateIfNeeded(Project project) {
+        VirtualFile file = FileUtilities.getFile(project, "CheckerClass.template");
+        if (file != null)
+            return FileUtilities.readTextFile(file);
+        String template = "package %package%;\n" +
+                "\n" +
+                "import net.egork.chelper.tester.Verdict;\n" +
+                "import net.egork.chelper.checkers.Checker;\n" +
+                "\n" +
+                "public class %CheckerClass% implements Checker {\n" +
+                "    public %CheckerClass%(String parameters) {\n" +
+                "    }\n" +
+                "\n" +
+                "    public Verdict check(String input, String expectedOutput, String actualOutput) {\n" +
+                "        return Verdict.UNDECIDED;\n" +
+                "    }\n" +
+                "}\n";
+        FileUtilities.writeTextFile(project.getBaseDir(), "CheckerClass.template", template);
+        return template;
+    }
+
+    public static String createTestCaseClassTemplateIfNeeded(Project project) {
+        VirtualFile file = FileUtilities.getFile(project, "TestCaseClass.template");
+        if (file != null)
+            return FileUtilities.readTextFile(file);
+        String template = "package %package%;\n" +
+                "\n" +
+                "import net.egork.chelper.task.Test;\n" +
+                "import net.egork.chelper.tester.TestCase;\n" +
+                "\n" +
+                "import java.util.Collection;\n" +
+                "import java.util.Collections;\n" +
+                "\n" +
+                "public class %TestCaseClass% {\n" +
+                "    @TestCase\n" +
+                "    public Collection<Test> createTests() {\n" +
+                "        return Collections.emptyList();\n" +
+                "    }\n" +
+                "}\n";
+        FileUtilities.writeTextFile(project.getBaseDir(), "TestCaseClass.template", template);
+        return template;
+    }
+
+    public static String createTopCoderTestCaseClassTemplateIfNeeded(Project project) {
+        VirtualFile file = FileUtilities.getFile(project, "TopCoderTestCaseClass.template");
+        if (file != null)
+            return FileUtilities.readTextFile(file);
+        String template = "package %package%;\n" +
+                "\n" +
+                "import net.egork.chelper.task.NewTopCoderTest;\n" +
+                "import net.egork.chelper.tester.TestCase;\n" +
+                "\n" +
+                "import java.util.Collection;\n" +
+                "import java.util.Collections;\n" +
+                "\n" +
+                "public class %TestCaseClass% {\n" +
+                "    @TestCase\n" +
+                "    public Collection<NewTopCoderTest> createTests() {\n" +
+                "        return Collections.emptyList();\n" +
+                "    }\n" +
+                "}\n";
+        FileUtilities.writeTextFile(project.getBaseDir(), "TopCoderTestCaseClass.template", template);
+        return template;
+    }
+
+    public static String createTopCoderTaskTemplateIfNeeded(Project project) {
+        VirtualFile file = FileUtilities.getFile(project, "TopCoderTaskClass.template");
+        if (file != null)
+            return FileUtilities.readTextFile(file);
+        String template = "package %package%;\n" +
+                "\n" +
+                "public class %TaskClass% {\n" +
+                "    public %Signature% {\n" +
+				"        return %DefaultValue%;\n" +
+                "    }\n" +
+                "}\n";
+        FileUtilities.writeTextFile(project.getBaseDir(), "TopCoderTaskClass.template", template);
+        return template;
+    }
+
+    public static void createSourceFile(final Project project, final TopCoderTask task) {
 		ApplicationManager.getApplication().runWriteAction(new Runnable() {
 			public void run() {
 				PsiFile originalSource = FileUtilities.getPsiFile(project,
@@ -293,11 +404,9 @@ public class CodeGenerationUtilities {
 				final VirtualFile file = FileUtilities.writeTextFile(directory, task.name + ".java", text.toString());
 				FileUtilities.synchronizeFile(file);
 				removeUnusedCode(project, file, task.name, task.signature.name);
-				if (TopCoderAction.alternative) {
-					String source = FileUtilities.readTextFile(file);
-					VirtualFile virtualFile = FileUtilities.writeTextFile(LocalFileSystem.getInstance().findFileByPath(System.getProperty("user.home")), ".java", source);
-					new File(virtualFile.getCanonicalPath()).deleteOnExit();
-				}
+				String source = FileUtilities.readTextFile(file);
+				VirtualFile virtualFile = FileUtilities.writeTextFile(LocalFileSystem.getInstance().findFileByPath(System.getProperty("user.home")), ".java", source);
+				new File(virtualFile.getCanonicalPath()).deleteOnExit();
 			}
 		});
 	}
@@ -531,59 +640,36 @@ public class CodeGenerationUtilities {
 		return sourceFile;
 	}
 
-    public static String createTestStub(String location, String name, Project project) {
+    public static String createTestStub(String location, String name, Project project, Task task) {
         PsiDirectory directory = FileUtilities.getPsiDirectory(project, location);
-        StringBuilder builder = new StringBuilder();
+        String inputClass = task.inputClass;
+        String inputClassShort = inputClass.substring(inputClass.lastIndexOf('.') + 1);
+        String outputClass = task.outputClass;
+        String outputClassShort = outputClass.substring(outputClass.lastIndexOf('.') + 1);
         String packageName = FileUtilities.getPackage(directory);
-        if (packageName != null && packageName.length() != 0)
-            builder.append("package ").append(packageName).append(";\n\n");
-        builder.append("import net.egork.chelper.task.Test;\n");
-        builder.append("import net.egork.chelper.tester.TestProvider;\n");
-        builder.append("\n");
-        builder.append("import java.util.Collection;\n");
-        builder.append("import java.util.Collections;\n");
-        builder.append("\n");
-        builder.append("public class ").append(name).append(" implements TestProvider {\n");
-        builder.append("\tpublic Collection<Test> createTests() {\n");
-        builder.append("\t\treturn Collections.emptyList();\n");
-        builder.append("\t}\n");
-        builder.append("}\n");
-        return builder.toString();
+        String template = createTestCaseClassTemplateIfNeeded(project);
+        return template.replace("%package%", packageName).replace("%InputClass%", inputClassShort).
+                replace("%InputClassFQN%", inputClass).replace("%OutputClass%", outputClassShort).
+                replace("%OutputClassFQN%", outputClass).replace("%TestCaseClass%", name);
     }
 
-    public static String createTopCoderStub(TopCoderTask task) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("public class ").append(task.name).append(" {\n");
-        builder.append("\tpublic ").append(task.signature.result.getSimpleName()).append(" ").append(task.signature.name).append("(");
+    public static String createTopCoderStub(TopCoderTask task, Project project, String packageName) {
+        String template = createTopCoderTaskTemplateIfNeeded(project);
+        StringBuilder signature = new StringBuilder();
+        signature.append(task.signature.result.getSimpleName()).append(" ").append(task.signature.name).append("(");
         for (int i = 0; i < task.signature.arguments.length; i++) {
             if (i != 0)
-                builder.append(", ");
-            builder.append(task.signature.arguments[i].getSimpleName()).append(' ').append(task.signature.argumentNames[i]);
+                signature.append(", ");
+            signature.append(task.signature.arguments[i].getSimpleName()).append(' ').append(task.signature.argumentNames[i]);
         }
-        builder.append(") {\n");
-        builder.append("\t}\n");
-        builder.append("}\n");
-        return builder.toString();
+		signature.append(')');
+        return template.replace("%package%", packageName).replace("%TaskClass%", task.name).
+			replace("%Signature%", signature.toString()).replace("%DefaultValue%", task.defaultValue());
     }
 
-	public static String createTopCoderTestStub(String location, String name, Project project) {
-		PsiDirectory directory = FileUtilities.getPsiDirectory(project, location);
-  StringBuilder builder = new StringBuilder();
-  String packageName = FileUtilities.getPackage(directory);
-  if (packageName != null && packageName.length() != 0)
-      builder.append("package ").append(packageName).append(";\n\n");
-  builder.append("import net.egork.chelper.task.NewTopCoderTest;\n");
-  builder.append("import net.egork.chelper.tester.TopCoderTestProvider;\n");
-  builder.append("\n");
-  builder.append("import java.util.Collection;\n");
-  builder.append("import java.util.Collections;\n");
-  builder.append("\n");
-  builder.append("public class ").append(name).append(" implements TopCoderTestProvider {\n");
-  builder.append("\tpublic Collection<NewTopCoderTest> createTests() {\n");
-  builder.append("\t\treturn Collections.emptyList();\n");
-  builder.append("\t}\n");
-  builder.append("}\n");
-  return builder.toString();
+	public static String createTopCoderTestStub(Project project, String aPackage, String name) {
+		String template = createTopCoderTestCaseClassTemplateIfNeeded(project);
+		return template.replace("%package%", aPackage).replace("%TestCaseClass%", name);
 	}
 
 	public static class InlineVisitor extends PsiElementVisitor {
@@ -620,7 +706,7 @@ public class CodeGenerationUtilities {
 		}
 
 		private void addClass(PsiClass aClass) {
-			if (!(aClass.getScope() instanceof PsiFile))
+			if (aClass == null || !(aClass.getScope() instanceof PsiFile))
 				return;
 			if (!shouldSkip(aClass)) {
 				if (!set.contains(aClass)) {

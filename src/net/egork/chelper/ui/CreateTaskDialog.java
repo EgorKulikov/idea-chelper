@@ -5,7 +5,6 @@ import com.intellij.openapi.util.IconLoader;
 import com.intellij.psi.PsiDirectory;
 import net.egork.chelper.ProjectData;
 import net.egork.chelper.task.Task;
-import net.egork.chelper.task.Test;
 import net.egork.chelper.util.FileUtilities;
 import net.egork.chelper.util.Utilities;
 
@@ -68,17 +67,19 @@ public class CreateTaskDialog extends JDialog {
 		setLocation(center);
 	}
 
-	public static Task showDialog(PsiDirectory directory, String defaultName) {
-        Task defaultTask = Utilities.getDefaultTask();
+	public static Task showDialog(PsiDirectory directory, String defaultName, Task template, boolean allowNameChange) {
+        Task defaultTask = template == null ? Utilities.getDefaultTask() : template;
         String name = defaultName == null ? "Task" : defaultName;
         Project project = directory.getProject();
         String location = FileUtilities.getRelativePath(project.getBaseDir(), directory.getVirtualFile());
         ProjectData data = Utilities.getData(project);
-        Task task = new Task(name, defaultTask.testType, defaultTask.input, defaultTask.output, new Test[0], location,
-                defaultTask.vmArgs, defaultTask.failOnOverflow, defaultTask.mainClass, name,
-                defaultTask.checkerClass, defaultTask.checkerParameters, new String[0],
-                Task.getDateString(), defaultTask.contestName, defaultTask.truncate, data.inputClass, data.outputClass);
-		CreateTaskDialog dialog = new CreateTaskDialog(task, defaultName == null, project);
+        Task task = new Task(name, defaultTask.testType, defaultTask.input, defaultTask.output, defaultTask.tests, location,
+                defaultTask.vmArgs, defaultTask.mainClass, defaultTask.taskClass == null ? name : defaultTask.taskClass,
+                defaultTask.checkerClass, defaultTask.checkerParameters, defaultTask.testClasses,
+                Task.getDateString(), defaultTask.contestName, defaultTask.truncate, data.inputClass, data.outputClass,
+                defaultTask.includeLocale,
+                data.failOnIntegerOverflowForNewTasks);
+		CreateTaskDialog dialog = new CreateTaskDialog(task, allowNameChange, project);
 		dialog.setVisible(true);
 		Utilities.updateDefaultTask(dialog.task);
         if (dialog.task != null)

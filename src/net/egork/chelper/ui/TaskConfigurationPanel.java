@@ -8,6 +8,7 @@ import net.egork.chelper.task.TestType;
 import net.egork.chelper.util.FileCreator;
 import net.egork.chelper.util.FileUtilities;
 import net.egork.chelper.util.Provider;
+import net.egork.chelper.util.Utilities;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -42,11 +43,12 @@ public class TaskConfigurationPanel extends JPanel {
     private SelectOrCreateClass taskClass;
     private SelectOrCreateClass checkerClass;
     private JTextField checkerParameters;
-    private JButton testClasses;
+    private JCheckBox hasTestCase;
+    private SelectOrCreateClass testClass;
     private JTextField date;
     private JTextField contestName;
     private JCheckBox truncate;
-	private int panelWidth = new JTextField(20).getPreferredSize().width;
+	private int panelWidth = new JTextField(27).getPreferredSize().width;
 	private JCheckBox includeLocale;
 
     public TaskConfigurationPanel(final Task task, boolean firstEdit, final Project project, final SizeChangeListener listener, JPanel buttonPanel) {
@@ -65,6 +67,8 @@ public class TaskConfigurationPanel extends JPanel {
         name = new JTextField(task.name);
         name.setEnabled(firstEdit);
 		name.getDocument().addDocumentListener(new DocumentListener() {
+			String lastText = name.getText();
+
 			public void insertUpdate(DocumentEvent e) {
 				update();
 			}
@@ -78,11 +82,15 @@ public class TaskConfigurationPanel extends JPanel {
 			}
 
 			private void update() {
-				if (taskClass.getText().indexOf('.') == -1)
+				if (name.isEnabled() && taskClass.getText().equals(lastText))
 					taskClass.setText(name.getText());
+				lastText = name.getText();
 			}
 		});
         basic.add(name);
+        basic.add(new JLabel("Contest name:"));
+        contestName = new JTextField(task.contestName);
+        basic.add(contestName);
         basic.add(new JLabel("Test type:"));
         testType = new JComboBox(TestType.values());
         testType.setSelectedItem(task.testType);
@@ -92,30 +100,30 @@ public class TaskConfigurationPanel extends JPanel {
         inputType.setSelectedItem(task.input.type);
         inputType.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                inputFileName.setVisible(inputType.getSelectedItem() == StreamConfiguration.StreamType.CUSTOM);
+				inputFileName.setVisible(((StreamConfiguration.StreamType)inputType.getSelectedItem()).hasStringParameter);
                 if (listener != null)
                     listener.onSizeChanged();
             }
         });
         basic.add(inputType);
-        inputFileName = new JTextField(task.input.type == StreamConfiguration.StreamType.CUSTOM ? task.input.fileName :
+        inputFileName = new JTextField(task.input.type.hasStringParameter ? task.input.fileName :
                 "input.txt");
-        inputFileName.setVisible(task.input.type == StreamConfiguration.StreamType.CUSTOM);
+        inputFileName.setVisible(task.input.type.hasStringParameter);
         basic.add(inputFileName);
         basic.add(new JLabel("Output:"));
-        outputType = new JComboBox(StreamConfiguration.StreamType.values());
+        outputType = new JComboBox(StreamConfiguration.OUTPUT_TYPES);
         outputType.setSelectedItem(task.output.type);
         outputType.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                outputFileName.setVisible(outputType.getSelectedItem() == StreamConfiguration.StreamType.CUSTOM);
+                outputFileName.setVisible(((StreamConfiguration.StreamType)outputType.getSelectedItem()).hasStringParameter);
                 if (listener != null)
                     listener.onSizeChanged();
             }
         });
         basic.add(outputType);
-        outputFileName = new JTextField(task.output.type == StreamConfiguration.StreamType.CUSTOM ?
+        outputFileName = new JTextField(task.output.type.hasStringParameter ?
                 task.output.fileName : "output.txt");
-        outputFileName.setVisible(task.output.type == StreamConfiguration.StreamType.CUSTOM);
+        outputFileName.setVisible(task.output.type.hasStringParameter);
         basic.add(outputFileName);
         tests = new JButton("Edit tests");
         tests.addActionListener(new ActionListener() {
@@ -162,7 +170,7 @@ public class TaskConfigurationPanel extends JPanel {
         leftAdvanced.add(new JLabel("Checker class:"));
         checkerClass = new SelectOrCreateClass(task.checkerClass, project, locationProvider, new FileCreator() {
             public String createFile(Project project, String path, String name) {
-                return FileUtilities.createCheckerClass(project, path, name);
+                return FileUtilities.createCheckerClass(project, path, name, task);
             }
 
             public boolean isValid(String name) {
@@ -187,22 +195,35 @@ public class TaskConfigurationPanel extends JPanel {
         failOnOverflow = new JCheckBox("Fail on integer overflow");
         failOnOverflow.setSelected(task.failOnOverflow);
         rightAdvanced.add(failOnOverflow);
-        testClasses = new JButton("Test classes");
-        testClasses.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                TaskConfigurationPanel.this.task = TaskConfigurationPanel.this.task.setTestClasses(
-                        TestClassesDialog.showDialog(TaskConfigurationPanel.this.task.testClasses, project,
-                        TaskConfigurationPanel.this.task.location, false));
-                name.setText(name.getText());
+        rightAdvanced.add(new JLabel("Test class:"));
+        JPanel testClassPanel = new JPanel(new BorderLayout());
+        hasTestCase = new JCheckBox();
+        hasTestCase.setSelected(task.testClasses.length != 0);
+        testClassPanel.add(hasTestCase, BorderLayout.WEST);
+        testClass = new SelectOrCreateClass(task.testClasses.length != 0 ? task.testClasses[0] : (Utilities.getSimpleName(task.taskClass) + "TestCase"), project, new Provider<String>() {
+            public String provide() {
+                return task.location;
+            }
+        }, new FileCreator() {
+            public String createFile(Project project, String path, String name) {
+                return FileUtilities.createTestClass(project, path, name, task);
+            }
+
+            public boolean isValid(String name) {
+                return FileUtilities.isValidClassName(name);
             }
         });
-        rightAdvanced.add(testClasses);
+        testClass.setEnabled(hasTestCase.isSelected());
+        testClassPanel.add(testClass, BorderLayout.CENTER);
+        rightAdvanced.add(testClassPanel);
+        hasTestCase.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                testClass.setEnabled(hasTestCase.isSelected());
+            }
+        });
         rightAdvanced.add(new JLabel("Date:"));
         date = new JTextField(task.date);
         rightAdvanced.add(date);
-        rightAdvanced.add(new JLabel("Contest name:"));
-        contestName = new JTextField(task.contestName);
-        rightAdvanced.add(contestName);
         truncate = new JCheckBox("Truncate long tests", task.truncate);
         rightAdvanced.add(truncate);
 		includeLocale = new JCheckBox("Force locale", task.includeLocale);
@@ -228,10 +249,17 @@ public class TaskConfigurationPanel extends JPanel {
         return task = new Task(name.getText(), (TestType)testType.getSelectedItem(),
             new StreamConfiguration((StreamConfiguration.StreamType) inputType.getSelectedItem(), inputFileName.getText()),
             new StreamConfiguration((StreamConfiguration.StreamType) outputType.getSelectedItem(), outputFileName.getText()),
-            task.tests, location.getText(), vmArgs.getText(), failOnOverflow.isSelected(), mainClass.getText(),
-            taskClass.getText(), checkerClass.getText(), checkerParameters.getText(), task.testClasses,
+            task.tests, location.getText(), vmArgs.getText(), mainClass.getText(),
+            taskClass.getText(), checkerClass.getText(), checkerParameters.getText(), getTestClass(),
             date.getText(), contestName.getText(), truncate.isSelected(), task.inputClass, task.outputClass,
-			includeLocale.isSelected());
+			includeLocale.isSelected(), failOnOverflow.isSelected());
+    }
+
+    private String[] getTestClass() {
+        if (hasTestCase.isSelected())
+            return new String[]{testClass.getText()};
+        else
+            return new String[0];
     }
 
     public interface SizeChangeListener {

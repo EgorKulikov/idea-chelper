@@ -5,14 +5,13 @@ import net.egork.chelper.checkers.TokenChecker;
 import net.egork.chelper.task.StreamConfiguration;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.Test;
+import net.egork.chelper.task.TestType;
 import net.egork.chelper.util.FileUtilities;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import javax.swing.*;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Egor Kulikov (egor@egork.net)
@@ -27,75 +26,128 @@ public class RCCParser implements Parser {
 	}
 
 	public void getContests(DescriptionReceiver receiver) {
-		String mainPage = FileUtilities.getWebPageContent("http://russiancodecup.ru/", "windows-1251");
-		if (mainPage == null)
-			return;
-		StringParser parser = new StringParser(mainPage);
+		int currentRound = -1;
+		String currentPage = FileUtilities.getWebPageContent("http://russiancodecup.ru/championship/", "UTF-8");
+		StringParser parser = new StringParser(currentPage);
 		try {
-			parser.advance(true, "<ul class=\"lmenu\">");
-			parser = new StringParser(parser.advance(false, "</div>"));
-			List<Description> descriptions = new ArrayList<Description>();
-			while (parser.advanceIfPossible(true, "<a href=\"/round/") != null) {
-				String id = parser.advance(true, "/\">");
-				String name = getName() + " " + StringEscapeUtils.unescapeHtml(parser.advance(false, "</a>"));
-				descriptions.add(new Description(id, name));
+			parser.advance(true, "/championship/result/round/");
+			String id = parser.advance(false, "/");
+			currentRound = Integer.parseInt(id);
+			processChampionshipPage(receiver, currentRound, currentPage);
+		} catch (ParseException ignored) {
+		} catch (NumberFormatException e) {
+		}
+		for (int id = 1; id < 100; id++) {
+			if (id == currentRound)
+				continue;
+			String page = FileUtilities.getWebPageContent("http://russiancodecup.ru/championship/round/" + id + "/problem/A/", "UTF-8");
+			if (page == null || page.contains("<title>RCC | 404</title>")) {
+				processArchivePage(receiver, id);
+			} else {
+				processChampionshipPage(receiver, id, page);
 			}
-			Collections.reverse(descriptions);
+		}
+	}
+
+	private void processChampionshipPage(DescriptionReceiver receiver, int id, String page) {
+		StringParser parser = new StringParser(page);
+		try {
+			parser.advance(true, "<title>");
+			String title = parser.advance(false, "</title>");
 			if (!receiver.isStopped())
-				receiver.receiveDescriptions(descriptions);
+				receiver.receiveDescriptions(Collections.singleton(new Description(Integer.toString(id), title)));
+		} catch (ParseException ignored) {
+		}
+	}
+
+	private void processArchivePage(DescriptionReceiver receiver, int id) {
+		String page;
+		page = FileUtilities.getWebPageContent("http://russiancodecup.ru/tasks/round/" + id + "/A/", "UTF-8");
+		if (page == null || page.contains("<title>RCC | 404</title>"))
+			return;
+		StringParser parser = new StringParser(page);
+		try {
+			parser.advance(true, "<div class=\"blueBlock hTask\">");
+			parser.advance(true, "<span>/ ");
+			String title = getName() + " " + parser.advance(false, "</span>");
+			if (!receiver.isStopped())
+				receiver.receiveDescriptions(Collections.singleton(new Description(Integer.toString(id), title)));
 		} catch (ParseException ignored) {
 		}
 	}
 
 	public void parseContest(String id, DescriptionReceiver receiver) {
-		String contestPage = FileUtilities.getWebPageContent("http://russiancodecup.ru/round/" + id + "/tasks", "windows-1251");
-		if (contestPage == null)
-			return;
-		StringParser parser = new StringParser(contestPage);
-		try {
-			List<Description> descriptions = new ArrayList<Description>();
-			while (parser.advanceIfPossible(true, "<a name=\"p") != null) {
-				String taskID = parser.advance(false, "\"></a>");
-				parser.advance(true, "<th colspan=\"2\">\"");
-				String letter = parser.advance(true, "\" ");
-				String name = StringEscapeUtils.unescapeHtml(parser.advance(false, "</th></tr>"));
-				descriptions.add(new Description(id + " " + taskID, letter + " - " + name));
-			}
-			if (!receiver.isStopped())
+		String url = "http://russiancodecup.ru/championship/round/" + id + "/problem/A/";
+		String page = FileUtilities.getWebPageContent(url, "UTF-8");
+		if (page == null || page.contains("<title>RCC | 404</title>")) {
+			url = "http://www.russiancodecup.ru/tasks/round/" + id + "/A/";
+			page = FileUtilities.getWebPageContent(url, "UTF-8");
+		}
+		List<Description> descriptions = new ArrayList<Description>();
+		while (true) {
+			if (page == null || page.contains("<title>RCC | 404</title>")) {
 				receiver.receiveDescriptions(descriptions);
-		} catch (ParseException ignored) {
+				return;
+			}
+			StringParser parser = new StringParser(page);
+			try {
+				parser.advance(true, "<div class=\"blueBlock hTask\">");
+				parser.advance(true, "<div class=\"container\">\n");
+				String name = parser.advance(false, "</div>", "<span>").trim();
+				if (name.length() < 4) {
+					receiver.receiveDescriptions(descriptions);
+					return;
+				}
+				char letter = name.charAt(1);
+				descriptions.add(new Description(url, letter + " - " + name.substring(4)));
+				url = url.substring(0, url.length() - 2) + ((char)(url.charAt(url.length() - 2) + 1)) + "/";
+				page = FileUtilities.getWebPageContent(url, "UTF-8");
+			} catch (ParseException e) {
+				receiver.receiveDescriptions(descriptions);
+				return;
+			}
 		}
 	}
 
 	public Task parseTask(Description description) {
-		String contestID = description.id.split(" ")[0];
-		String taskID = description.id.split(" ")[1];
-		String page = FileUtilities.getWebPageContent("http://russiancodecup.ru/round/" + contestID + "/tasks", "windows-1251");
+		String page = FileUtilities.getWebPageContent(description.id, "UTF-8");
 		if (page == null)
 			return null;
 		StringParser parser = new StringParser(page);
 		try {
-			parser.advance(true, "<a name=\"p" + taskID + "\"></a>\n");
-			parser = new StringParser(parser.advance(false, "</table>"));
-			parser.advance(true, "<tr class=\"th\"><th colspan=\"2\">\"");
-			String letter = parser.advance(false, "\"");
-			parser.advance(true, "<td>Ограничение по памяти</td>");
+			parser.advance(true, "<div class=\"blueBlock hTask\">");
+			parser.advance(true, "<div class=\"container\">\n");
+			String name = parser.advance(false, "</div>", "<span>").trim();
+			char letter = name.charAt(1);
+			String taskName = letter + " - " + name.substring(4);
+			parser.advance(true, "<span class=\"iconSmall isMemory\">");
 			parser.advance(true, "<td>");
 			String memoryLimit = parser.advance(false, " ");
 			List<Test> tests = new ArrayList<Test>();
-			while (parser.advanceIfPossible(true, "<pre class=\"m0\">") != null) {
+			while (parser.advanceIfPossible(true, "<div class=\"fiftyBox\">\n") != null) {
+				parser.advance(true, "<pre class=\"colorBlue\">");
 				String input = StringEscapeUtils.unescapeHtml(parser.advanceIfPossible(false, "</pre>"));
-				input = input.substring(1);
-				parser.advance(true, "<pre class=\"m0\">");
+				if (input.startsWith("\n"))
+					input = input.substring(1);
+				parser.advance(true, "<pre class=\"colorBlue\">");
 				String output = StringEscapeUtils.unescapeHtml(parser.advanceIfPossible(false, "</pre>"));
-				output = output.substring(1);
+				if (output.startsWith("\n"))
+					output = output.substring(1);
 				tests.add(new Test(input, output, tests.size()));
 			}
 			return new Task(description.description, null, StreamConfiguration.STANDARD, StreamConfiguration.STANDARD,
-				tests.toArray(new Test[tests.size()]), null, "-Xmx" + memoryLimit + "M -Xss64M", false, "Main", "Task" + letter,
-				TokenChecker.class.getCanonicalName(), "", new String[0], null, null, true, null, null);
+				tests.toArray(new Test[tests.size()]), null, "-Xmx" + memoryLimit + "M -Xss64M", "Main", "Task" + letter,
+				TokenChecker.class.getCanonicalName(), "", new String[0], null, null, true, null, null, false, false);
 		} catch (ParseException e) {
 			return null;
 		}
+	}
+
+	public TestType defaultTestType() {
+		return TestType.MULTI_NUMBER;
+	}
+
+	public Collection<Task> parseTaskFromHTML(String html) {
+		throw new UnsupportedOperationException();
 	}
 }

@@ -1,9 +1,9 @@
 <idea-plugin version="2">
   <name>CHelper</name>
   <description>Inlines library code and provides testing framework</description>
-  <version>3.1</version>
+  <version>3.90</version>
   <vendor>Egor Kulikov</vendor>
-  <idea-version since-build="8000"/>
+  <idea-version since-build="111.69"/>
 
   <application-components>
     <!-- Add your application components here -->
@@ -16,6 +16,9 @@
     <!-- Add your project components here -->
       <component>
           <implementation-class>net.egork.chelper.AutoSwitcher</implementation-class>
+      </component>
+      <component>
+          <implementation-class>net.egork.chelper.ChromeParser</implementation-class>
       </component>
   </project-components>
 
@@ -51,6 +54,9 @@
               description="Restores previously archived task"/>
       <action id="launchArena" class="net.egork.chelper.actions.TopCoderAction" text="Launch TopCoder Arena" icon="/icons/topcoder.png"
               description="Launches TopCoder Arena with integrated plugin to interact with idea"/>
+      <action id="editTask" class="net.egork.chelper.actions.EditTask" text="Edit Task" icon="/icons/check.png"
+              description="Edit current task"/>
+      <action id="bulkAdd" class="net.egork.chelper.actions.BulkAddTests" text="Bulk Add Tests" icon="/icons/editTests.png"/>
   </actions>
 
   <extensions defaultExtensionNs="com.intellij">

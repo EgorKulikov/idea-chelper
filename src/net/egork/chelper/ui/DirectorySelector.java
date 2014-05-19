@@ -4,6 +4,7 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserFactory;
 import com.intellij.openapi.fileChooser.PathChooserDialog;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.Consumer;
 import net.egork.chelper.util.FileUtilities;
@@ -12,6 +13,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.List;
 
 /**
@@ -21,7 +23,11 @@ public class DirectorySelector extends JPanel {
     private final JTextField textField;
     private JButton button;
 
-    public DirectorySelector(final Project project, String initialValue) {
+	public DirectorySelector(final Project project, String initialValue) {
+		this(project, initialValue, false);
+	}
+
+    public DirectorySelector(final Project project, String initialValue, final boolean allowAllDirectories) {
         super(new BorderLayout());
         textField = new JTextField(initialValue);
         button = new JButton("...") {
@@ -38,21 +44,21 @@ public class DirectorySelector extends JPanel {
                 PathChooserDialog dialog = FileChooserFactory.getInstance().createPathChooser(new FileChooserDescriptor(false, true, false, false, false, false) {
                     @Override
                     public boolean isFileSelectable(VirtualFile file) {
-                        return super.isFileSelectable(file) && FileUtilities.isChild(project.getBaseDir(), file);
+                        return super.isFileSelectable(file) && (allowAllDirectories || FileUtilities.isChild(project.getBaseDir(), file));
                     }
 
                     @Override
                     public boolean isFileVisible(VirtualFile file, boolean showHiddenFiles) {
-                        return super.isFileVisible(file, showHiddenFiles) && (FileUtilities.isChild(project.getBaseDir(), file) || FileUtilities.isChild(file, project.getBaseDir()));
+                        return super.isFileVisible(file, showHiddenFiles) && (allowAllDirectories || (FileUtilities.isChild(project.getBaseDir(), file) || FileUtilities.isChild(file, project.getBaseDir())));
                     }
                 }, project, DirectorySelector.this);
-                VirtualFile toSelect = project.getBaseDir().findFileByRelativePath(textField.getText());
+                VirtualFile toSelect = allowAllDirectories ? VfsUtil.findFileByIoFile(new File(textField.getText()), false) : project.getBaseDir().findFileByRelativePath(textField.getText());
                 if (toSelect == null)
                     toSelect = project.getBaseDir();
                 dialog.choose(toSelect, new Consumer<List<VirtualFile>>() {
                     public void consume(List<VirtualFile> virtualFiles) {
                         if (virtualFiles.size() == 1) {
-                            String path = FileUtilities.getRelativePath(project.getBaseDir(), virtualFiles.get(0));
+                            String path = allowAllDirectories ? virtualFiles.get(0).getPath() : FileUtilities.getRelativePath(project.getBaseDir(), virtualFiles.get(0));
                             if (path != null)
                                 textField.setText(path);
                         }

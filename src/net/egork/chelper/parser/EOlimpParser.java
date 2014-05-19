@@ -5,12 +5,14 @@ import net.egork.chelper.checkers.TokenChecker;
 import net.egork.chelper.task.StreamConfiguration;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.Test;
+import net.egork.chelper.task.TestType;
 import net.egork.chelper.util.FileUtilities;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import javax.swing.*;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -215,10 +217,18 @@ public class EOlimpParser implements Parser {
 			}
 			String taskClass = "Task" + name;
 			return new Task(description.description, null, StreamConfiguration.STANDARD, StreamConfiguration.STANDARD,
-				tests.toArray(new Test[tests.size()]), null, "-Xmx" + heapMemory, false, "Main", taskClass,
-				TokenChecker.class.getCanonicalName(), "", new String[0], null, null, true, null, null, true);
+				tests.toArray(new Test[tests.size()]), null, "-Xmx" + heapMemory, "Main", taskClass,
+				TokenChecker.class.getCanonicalName(), "", new String[0], null, null, true, null, null, true, false);
 		} catch (ParseException e) {
 			return null;
 		}
+	}
+
+	public TestType defaultTestType() {
+		return TestType.SINGLE;
+	}
+
+	public Collection<Task> parseTaskFromHTML(String html) {
+		throw new UnsupportedOperationException();
 	}
 }

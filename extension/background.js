@@ -1,5 +1,5 @@
 function checkForValidUrl(tabId, changeInfo, tab) {
-    if (/^http:\/\/.*contest2?[.]yandex[.](ru|com)\/contest\/\d*\/problems.*$/.test(tab.url) ||
+    if (/^http:\/\/.*contest2?[.]yandex[.](ru|com)\/.*contest\/\d*\/problems.*$/.test(tab.url) ||
         /^http:\/\/codeforces[.](ru|com)\/(contest|problemset|gym)\/\d*\/problem\/.+$/.test(tab.url) ||
         /^https:\/\/(www[.])?hackerrank[.]com\/(contests\/.+\/)?challenges\/[^/]+$/.test(tab.url) ||
         /^https:\/\/www[.]facebook[.]com\/hackercup\/problems[.]php.+$/.test(tab.url) ||
@@ -15,7 +15,7 @@ function checkForValidUrl(tabId, changeInfo, tab) {
 chrome.tabs.onUpdated.addListener(checkForValidUrl);
 
 function parseTask(tab) {
-    if (/^http:\/\/.*contest2?[.]yandex[.](ru|com)\/contest\/\d*\/problems.*$/.test(tab.url)) {
+    if (/^http:\/\/.*contest2?[.]yandex[.](ru|com)\/.*contest\/\d*\/problems.*$/.test(tab.url)) {
         chrome.tabs.sendMessage(tab.id, 'yandex');
     } else if (/^http:\/\/codeforces[.](ru|com)\/(contest|problemset|gym)\/\d*\/problem\/.+$/.test(tab.url)) {
         chrome.tabs.sendMessage(tab.id, 'codeforces');

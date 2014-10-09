@@ -23,8 +23,7 @@ import java.util.*;
 public class CodeGenerationUtilities {
 	private static final String[] classStarts = {"class ", "abstract class", "interface ", "enum "};
 
-	public static String[] createInlinedSource(Project project, Set<String> mandatoryImports, PsiFile originalSource)
-	{
+	public static String[] createInlinedSource(Project project, Set<String> mandatoryImports, PsiFile originalSource) {
 		InlineVisitor inlineVisitor = new InlineVisitor(project, originalSource);
 		List<PsiClass> toInline = inlineVisitor.toInline;
 		Set<String> toImport = inlineVisitor.toImport;
@@ -81,15 +80,15 @@ public class CodeGenerationUtilities {
 					if (!(element instanceof PsiClass) && !(element instanceof PsiMethod) && !(element instanceof PsiField))
 						return true;
 					if (element instanceof PsiMethod && ((PsiMethod) element).findSuperMethods().length != 0)
-						return false;
-					if (element instanceof PsiMethod && ((PsiMethod) element).isConstructor())
-						return false;
+						return true;
+//					if (element instanceof PsiMethod && ((PsiMethod) element).isConstructor())
+//						return true;
 					if (element instanceof PsiAnonymousClass)
-						return false;
+						return true;
 					if (element instanceof PsiMethod && mainMethod.equals(((PsiMethod) element).getName())) {
 						PsiElement parent = element.getParent();
 						if (parent instanceof PsiClass && mainClass.equals(((PsiClass) parent).getQualifiedName()))
-							return false;
+							return true;
 					}
 					if (element instanceof PsiClass && mainClass.equals(((PsiClass) element).getQualifiedName()))
 						return true;
@@ -100,7 +99,7 @@ public class CodeGenerationUtilities {
 						while (referenceElement != null && referenceElement != element)
 							referenceElement = referenceElement.getParent();
 						if (referenceElement == null)
-							return element instanceof PsiClass;
+							return true;
 					}
 					toRemove.add(element);
 					return false;

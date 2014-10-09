@@ -4,7 +4,8 @@ function checkForValidUrl(tabId, changeInfo, tab) {
         /^https:\/\/(www[.])?hackerrank[.]com\/(contests\/.+\/)?challenges\/[^/]+$/.test(tab.url) ||
         /^https:\/\/www[.]facebook[.]com\/hackercup\/problems[.]php.+$/.test(tab.url) ||
         /^http:\/\/(www[.])?usaco[.]org\/index[.]php[?]page[=]viewproblem.*$/.test(tab.url) ||
-        /^https:\/\/code[.]google[.]com\/codejam\/contest\/\d*\/dashboard.*$/.test(tab.url))
+        /^https:\/\/code[.]google[.]com\/codejam\/contest\/\d*\/dashboard.*$/.test(tab.url) ||
+        /^http:\/\/contest[.]bayan[.]ir\/en\/contest\/.*\/problem\/[A-Z]\/$/.test(tab.url))
     {
         chrome.pageAction.show(tabId);
     } else {
@@ -27,6 +28,8 @@ function parseTask(tab) {
         chrome.tabs.sendMessage(tab.id, 'usaco');
     } else if (/^https:\/\/code[.]google[.]com\/codejam\/contest\/\d*\/dashboard.*$/.test(tab.url)) {
         chrome.tabs.sendMessage(tab.id, 'gcj');
+    } else if (/^http:\/\/contest[.]bayan[.]ir\/en\/contest\/.*\/problem\/[A-Z]\/$/.test(tab.url)) {
+        chrome.tabs.sendMessage(tab.id, 'bayan');
     }
 }
 

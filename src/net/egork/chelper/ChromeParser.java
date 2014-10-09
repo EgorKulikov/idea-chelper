@@ -42,6 +42,7 @@ public class ChromeParser implements ProjectComponent {
 		taskParsers.put("facebook", new FacebookParser());
 		taskParsers.put("usaco", new UsacoParser());
 		taskParsers.put("gcj", new GCJParser());
+		taskParsers.put("bayan", new BayanParser());
 		TASK_PARSERS = Collections.unmodifiableMap(taskParsers);
 	}
 
@@ -90,6 +91,7 @@ public class ChromeParser implements ProjectComponent {
 								SwingUtilities.invokeLater(new Runnable() {
 									public void run() {
 										if (TASK_PARSERS.containsKey(type)) {
+											System.err.println(page);
 											Collection<Task> tasks = TASK_PARSERS.get(type).parseTaskFromHTML(page);
 											if (tasks.isEmpty()) {
 												Messenger.publishMessage("Unable to parse task from " + type, NotificationType.WARNING);

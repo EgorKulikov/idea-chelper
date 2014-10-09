@@ -10,9 +10,7 @@ import java.util.InputMismatchException;
  * @author Egor Kulikov (kulikov@devexperts.com)
  */
 public class InputReader {
-    private boolean finished = false;
-
-    private InputStream stream;
+	private InputStream stream;
     private byte[] buf = new byte[1024];
     private int curChar;
     private int numChars;
@@ -121,40 +119,7 @@ public class InputReader {
         return c == ' ' || c == '\n' || c == '\r' || c == '\t' || c == -1;
     }
 
-    private String readLine0() {
-        StringBuffer buf = new StringBuffer();
-        int c = read();
-        while (c != '\n' && c != -1) {
-            if (c != '\r')
-                buf.appendCodePoint(c);
-            c = read();
-        }
-        return buf.toString();
-    }
-
-    public String readLine() {
-        String s = readLine0();
-        while (s.trim().length() == 0)
-            s = readLine0();
-        return s;
-    }
-
-    public String readLine(boolean ignoreEmptyLines) {
-        if (ignoreEmptyLines)
-            return readLine();
-        else
-            return readLine0();
-    }
-
-    public BigInteger readBigInteger() {
-        try {
-            return new BigInteger(readString());
-        } catch (NumberFormatException e) {
-            throw new InputMismatchException();
-        }
-    }
-
-    public char readCharacter() {
+	public char readCharacter() {
         int c = read();
         while (isSpaceChar(c))
             c = read();
@@ -203,11 +168,7 @@ public class InputReader {
         return value == -1;
     }
 
-    public String next() {
-        return readString();
-    }
-
-    public boolean readBoolean() {
+	public boolean readBoolean() {
         return readInt() == 1;
     }
 

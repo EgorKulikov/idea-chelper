@@ -142,7 +142,7 @@ public class CodeChefParser implements Parser {
 		try {
 			parser.advance(false, "<div class=\"prob\">");
 			parser.advance(true, "<h1>");
-			String taskID = getTaskID(parser.advance(false, "</h1>"));
+			String taskID = getTaskID(parser.advance(false, "<!-- todo -->"));
 			parser.dropTail("<table cellspacing=\"0\" cellpadding=\"0\" align=\"left\">");
 			List<Test> tests = new ArrayList<Test>();
 			int index = 0;

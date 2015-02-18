@@ -46,14 +46,14 @@ public class UsacoParser implements Parser {
 			String contestName = parser.advance(false, "</h2>").trim();
 			parser.advance(true, "<h2>");
 			String taskName = parser.advance(false, "</h2>").trim();
-			parser.advance(true, "PROBLEM NAME:");
-			String taskId = parser.advance(false, "\n").trim();
+			parser.advance(true, "INPUT: (file ");
+			String taskId = parser.advance(false, ".in").trim();
 			String taskClass = Character.toUpperCase(taskId.charAt(0)) + taskId.substring(1);
 			StreamConfiguration	input = new StreamConfiguration(StreamConfiguration.StreamType.CUSTOM, taskId + ".in");
 			StreamConfiguration output = new StreamConfiguration(StreamConfiguration.StreamType.CUSTOM, taskId + ".out");
 			parser.advance(true, "SAMPLE INPUT");
 			parser.advance(true, "\n");
-			String testInput = parser.advance(false, "INPUT DETAILS", "OUTPUT FORMAT").trim() + "\n";
+			String testInput = parser.advance(false, "INPUT DETAILS", "OUTPUT:").trim() + "\n";
 			parser.advance(true, "SAMPLE OUTPUT");
 			parser.advance(true, "\n");
 			String testOutput = parser.advance(false, "OUTPUT DETAILS", "</span>").trim() + "\n";

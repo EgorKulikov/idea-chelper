@@ -5,6 +5,7 @@ import net.egork.chelper.task.StreamConfiguration;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.Test;
 import net.egork.chelper.task.TestType;
+import org.apache.commons.lang.StringEscapeUtils;
 
 import javax.swing.*;
 import java.text.ParseException;
@@ -44,21 +45,23 @@ public class HackerRankParser implements Parser {
 	public Collection<Task> parseTaskFromHTML(String html) {
 		StringParser parser = new StringParser(html);
 		try {
-			parser.advance(true, "class=\"backbone\">All Contests</a>");
-			parser.advance(true, "class=\"backbone\">");
+			parser.advance(true, ">All Contests</a>");
+			parser.advance(true, "class=\"backbone\"");
+			parser.advance(true, ">");
 			String contestName = parser.advance(false, "</a>").trim().replace('/', '-');
-			parser.advance(true, "class=\"backbone\">");
+			parser.advance(true, "class=\"backbone\"");
+			parser.advance(true, ">");
 			String taskName = parser.advance(false, "</a>");
 			String taskClass = CodeChefParser.getTaskID(taskName);
 			StreamConfiguration	input = StreamConfiguration.STANDARD;
 			StreamConfiguration output = StreamConfiguration.STANDARD;
 			List<Test> tests = new ArrayList<Test>();
-			while (parser.advanceIfPossible(true, "<strong>Sample Input") != null) {
+			while (parser.advanceIfPossible(true, "<strong>Sample input", "<strong>Sample Input") != null) {
 				parser.advance(true, "<pre><code>");
-				String testInput = parser.advance(false, "</code></pre>");
-				parser.advance(true, "<strong>Sample Output");
+				String testInput = StringEscapeUtils.unescapeHtml(parser.advance(false, "</code></pre>"));
+				parser.advance(true, "<strong>Sample output", "<strong>Sample Output", "<strong>Example Output");
 				parser.advance(true, "<pre><code>");
-				String testOutput = parser.advance(false, "</code></pre>");
+				String testOutput = StringEscapeUtils.unescapeHtml(parser.advance(false, "</code></pre>"));
 				tests.add(new Test(testInput, testOutput, tests.size()));
 			}
 			return Collections.singleton(new Task(taskName, defaultTestType(), input, output, tests.toArray(new Test[tests.size()]), null,

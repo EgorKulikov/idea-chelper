@@ -44,6 +44,7 @@ public class CodeGenerationUtilities {
 		String imports = importsBuilder.toString();
 		final StringBuilder text = new StringBuilder();
 		for (PsiClass aClass : toInline) {
+			aClass = cleanupClass(aClass);
 			String classText = aClass.getText();
 			int startIndex = -1;
 			for (String start : classStarts) {
@@ -57,6 +58,30 @@ public class CodeGenerationUtilities {
 			text.append("\n\n");
 		}
 		return new String[]{imports, text.toString()};
+	}
+
+	private static PsiClass cleanupClass(PsiClass aClass) {
+		final List<PsiElement> toDelete = new ArrayList<PsiElement>();
+		PsiElementVisitor cleanupVisitor = new PsiElementVisitor() {
+			@Override
+			public void visitElement(PsiElement element) {
+				// Just delete all comments
+				if (element instanceof PsiComment) {
+					toDelete.add(element);
+					return;
+				}
+				super.visitElement(element);
+				element.acceptChildren(this);
+			}
+		};
+		// Not making a copy here leads to IncorrectOperationException
+		// getNavigationElement() is to allow project libraries or maven usage
+		PsiClass copyClass = (PsiClass) aClass.getNavigationElement().copy();
+		copyClass.accept(cleanupVisitor);
+		for (PsiElement element : toDelete) {
+			element.delete();
+		}
+		return copyClass;
 	}
 
 	public static void removeUnusedCode(final Project project, final VirtualFile virtualFile, final String mainClass,
@@ -720,6 +745,9 @@ public class CodeGenerationUtilities {
 
 		@Override
 		public void visitElement(PsiElement element) {
+			// Without this line sources from project libraries or maven are not loaded
+			element = element.getNavigationElement();
+
 			if (element instanceof PsiClass) {
 				processClass((PsiClass) element);
 			} else if (element instanceof PsiVariable) {

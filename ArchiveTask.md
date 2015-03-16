@@ -1,0 +1,1 @@
+Archives current task and all file associated with it. Exception is checker if it located in different directory than task itself. So you can have some set of standard checkers in your project if those provided by plugin are not enough.

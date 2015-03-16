@@ -1,0 +1,1 @@
+Copies target source (with everything inlined, ready to sent to server) content to clipboard. Please note that it copies last generated source, so if you just switched run/debug at least once to create it

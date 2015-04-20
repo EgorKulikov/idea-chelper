@@ -486,7 +486,7 @@ public class CodeGenerationUtilities {
             public void run() {
                 String taskFilePath;
                 try {
-                    VirtualFile taskFile = directory.createChildData(null, ArchiveAction.canonize(finalTask.name) + ".task");
+                    VirtualFile taskFile = directory.findOrCreateChildData(null, ArchiveAction.canonize(finalTask.name) + ".task");
                     OutputStream outputStream = taskFile.getOutputStream(null);
                     finalTask.saveTask(new OutputWriter(outputStream));
                     outputStream.close();
@@ -562,7 +562,7 @@ public class CodeGenerationUtilities {
             public void run() {
                 String taskFilePath;
                 try {
-                    VirtualFile taskFile = directory.createChildData(null, finalTask.name + ".tctask");
+                    VirtualFile taskFile = directory.findOrCreateChildData(null, finalTask.name + ".tctask");
                     OutputStream outputStream = taskFile.getOutputStream(null);
                     finalTask.saveTask(new OutputWriter(outputStream));
                     outputStream.close();

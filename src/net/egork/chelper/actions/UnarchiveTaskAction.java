@@ -1,5 +1,6 @@
 package net.egork.chelper.actions;
 
+import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
@@ -48,8 +49,14 @@ public class UnarchiveTaskAction extends AnAction {
 						if ("task".equals(taskFile.getExtension())) {
 							Task task = Task.loadTask(new InputReader(taskFile.getInputStream()));
 							VirtualFile baseDirectory = FileUtilities.getFile(project, task.location);
-							task.saveTask(new OutputWriter(baseDirectory.createChildData(null, ArchiveAction.canonize(task.name) + ".task").
-									getOutputStream(null)));
+							if (baseDirectory == null) {
+								Messenger.publishMessage("Directory where task was located is no longer exists",
+									NotificationType.ERROR);
+								return;
+							}
+							task.saveTask(new OutputWriter(
+								baseDirectory.findOrCreateChildData(null, ArchiveAction.canonize(task.name) + ".task").
+								getOutputStream(null)));
 							List<String> toCopy = new ArrayList<String>();
 							toCopy.add(task.taskClass);
 							toCopy.add(task.checkerClass);
@@ -98,7 +105,12 @@ public class UnarchiveTaskAction extends AnAction {
 						} else if ("tctask".equals(taskFile.getExtension())) {
 							TopCoderTask task = TopCoderTask.load(new InputReader(taskFile.getInputStream()));
 							VirtualFile baseDirectory = FileUtilities.getFile(project, Utilities.getData(project).defaultDirectory);
-							task.saveTask(new OutputWriter(baseDirectory.createChildData(null, task.name + ".tctask").
+							if (baseDirectory == null) {
+								Messenger.publishMessage("Directory where task was located is no longer exists",
+									NotificationType.ERROR);
+								return;
+							}
+							task.saveTask(new OutputWriter(baseDirectory.findOrCreateChildData(null, task.name + ".tctask").
 									getOutputStream(null)));
 							List<String> toCopy = new ArrayList<String>();
 							VirtualFile mainFile = taskFile.getParent().findChild(task.name + ".java");

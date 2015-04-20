@@ -88,9 +88,7 @@ public class ProjectData {
                 if (root == null)
                     return;
                 try {
-                    VirtualFile config = root.findChild("chelper.properties");
-                    if (config == null)
-                        config = root.createChildData(null, "chelper.properties");
+                    VirtualFile config = root.findOrCreateChildData(null, "chelper.properties");
                     Properties properties = new Properties();
                     properties.setProperty("inputClass", inputClass);
                     properties.setProperty("outputClass", outputClass);

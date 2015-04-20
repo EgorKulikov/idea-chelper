@@ -29,7 +29,7 @@ public class CodeforcesParser implements Parser {
 	}
 
 	public void getContests(DescriptionReceiver receiver) {
-		String contestsPage = FileUtilities.getWebPageContent("http://codeforces.com/contests");
+		String contestsPage = FileUtilities.getWebPageContent("http://codeforces.com/contests?complete=true");
 		if (contestsPage == null)
 			return;
 		List<Description> contests = new ArrayList<Description>();

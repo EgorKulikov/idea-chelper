@@ -37,7 +37,7 @@ public class RCCParser implements Parser {
 			parser.advance(true, "<div class=\"subMenu fontLarge\">");
 			while (parser.advanceIfPossible(true, "<li><a href=\"/championship/round/") != null)
 				championshipIDs.add(Integer.parseInt(parser.advance(false, "/")));
-			parser.advance(true, "/championship/result/round/");
+			parser.advance(true, "<a href=\"/championship/round/");
 			String id = parser.advance(false, "/");
 			currentRound = Integer.parseInt(id);
 			processChampionshipPage(receiver, currentRound, currentPage);
@@ -46,14 +46,8 @@ public class RCCParser implements Parser {
 		}
 		for (int id : championshipIDs)
 			processChampionshipPage(receiver, id, FileUtilities.getWebPageContent("http://russiancodecup.ru/championship/round/" + id + "/problem/A/", "UTF-8"));
-		currentPage = FileUtilities.getWebPageContent("http://www.russiancodecup.ru/tasks/", "UTF-8");
-		parser = new StringParser(currentPage);
-		try {
-			parser.advance(true, "var arYear");
-			while (parser.advanceIfPossible(true, "\"ID\":\"") != null)
-				processArchivePage(receiver, Integer.parseInt(parser.advance(false, "\"")));
-		} catch (ParseException ignored) {
-		} catch (NumberFormatException ignored) {
+		for (int i = 26; i > 0; i--) {
+			processArchivePage(receiver, i);
 		}
 	}
 
@@ -61,25 +55,27 @@ public class RCCParser implements Parser {
 		StringParser parser = new StringParser(page);
 		try {
 			parser.advance(true, "<title>");
-			String title = parser.advance(false, "</title>");
-			if (!receiver.isStopped())
+			String title = parser.advance(false, "</title>").trim();
+			if (!receiver.isStopped()) {
 				receiver.receiveDescriptions(Collections.singleton(new Description(Integer.toString(id), title)));
+			}
 		} catch (ParseException ignored) {
 		}
 	}
 
 	private void processArchivePage(DescriptionReceiver receiver, int id) {
 		String page;
-		page = FileUtilities.getWebPageContent("http://russiancodecup.ru/tasks/round/" + id + "/A/", "UTF-8");
-		if (page == null || page.contains("<title>RCC | 404</title>"))
+		page = FileUtilities.getWebPageContent("http://russiancodecup.ru/tasks/round/" + id, "UTF-8");
+		if (page == null || page.contains("<title>RCC | 404</title>")) {
 			return;
+		}
 		StringParser parser = new StringParser(page);
 		try {
-			parser.advance(true, "<div class=\"blueBlock hTask\">");
-			parser.advance(true, "<span>/ ");
-			String title = getName() + " " + parser.advance(false, "</span>");
-			if (!receiver.isStopped())
+			parser.advance(true, "<span>/");
+			String title = parser.advance(false, "</span>").trim();
+			if (!receiver.isStopped()) {
 				receiver.receiveDescriptions(Collections.singleton(new Description(Integer.toString(id), title)));
+			}
 		} catch (ParseException ignored) {
 		}
 	}
@@ -101,7 +97,7 @@ public class RCCParser implements Parser {
 			StringParser parser = new StringParser(page);
 			try {
 				parser.advance(true, "<div class=\"blueBlock hTask\">");
-				parser.advance(true, "<div class=\"container\">\n");
+				parser.advance(true, "<div class=\"container\">");
 				String name = parser.advance(false, "</div>", "<span>").trim();
 				if (name.length() < 4) {
 					receiver.receiveDescriptions(descriptions);
@@ -130,7 +126,7 @@ public class RCCParser implements Parser {
 		StringParser parser = new StringParser(page);
 		try {
 			parser.advance(true, "<div class=\"blueBlock hTask\">");
-			parser.advance(true, "<div class=\"container\">\n");
+			parser.advance(true, "<div class=\"container\">");
 			String name = parser.advance(false, "</div>", "<span>").trim();
 			char letter = name.charAt(1);
 			String taskName = letter + " - " + name.substring(4);
@@ -140,13 +136,9 @@ public class RCCParser implements Parser {
 			List<Test> tests = new ArrayList<Test>();
 			while (parser.advanceIfPossible(true, "<div class=\"fiftyBox\">\n") != null) {
 				parser.advance(true, "<pre class=\"colorBlue\">");
-				String input = StringEscapeUtils.unescapeHtml(parser.advanceIfPossible(false, "</pre>"));
-				if (input.startsWith("\n"))
-					input = input.substring(1);
+				String input = StringEscapeUtils.unescapeHtml(parser.advanceIfPossible(false, "</pre>")).trim() + "\n";
 				parser.advance(true, "<pre class=\"colorBlue\">");
-				String output = StringEscapeUtils.unescapeHtml(parser.advanceIfPossible(false, "</pre>"));
-				if (output.startsWith("\n"))
-					output = output.substring(1);
+				String output = StringEscapeUtils.unescapeHtml(parser.advanceIfPossible(false, "</pre>")).trim() + "\n";
 				tests.add(new Test(input, output, tests.size()));
 			}
 			return new Task(description.description, null, StreamConfiguration.STANDARD, StreamConfiguration.STANDARD,

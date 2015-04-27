@@ -50,7 +50,9 @@ public class Utilities {
     // TODO: The existence of non-persistent defaultConfiguration together with persistent ProjectData is a bit weird.
     // It would be natural for everything to be persistent.
 	private static Task defaultConfiguration = new Task(null, TestType.SINGLE, StreamConfiguration.STANDARD,
-		StreamConfiguration.STANDARD, new Test[0], null, "-Xmx256m -Xss64m", "Main", null, TokenChecker.class.getCanonicalName(), "", new String[0], null, "", true, null, null, false, false);
+		StreamConfiguration.STANDARD, new Test[0], null, "-Xmx256m -Xss64m", "Main", null,
+		TokenChecker.class.getCanonicalName(), "", new String[0], null, "", true, null, null, false, false,
+		"TaskClass.template");
 	private static Parser defaultParser = Parser.PARSERS[0];
 
 	public static void addListeners() {
@@ -62,7 +64,7 @@ public class Utilities {
 					eligibleProjects.put(project, configuration);
                     TopCoderAction.start(project);
                     ensureLibrary(project);
-                    CodeGenerationUtilities.createTaskClassTemplateIfNeeded(project);
+                    CodeGenerationUtilities.createTaskClassTemplateIfNeeded(project, null);
                     CodeGenerationUtilities.createCheckerClassTemplateIfNeeded(project);
                     CodeGenerationUtilities.createTestCaseClassTemplateIfNeeded(project);
 					CodeGenerationUtilities.createTopCoderTaskTemplateIfNeeded(project);
@@ -118,7 +120,7 @@ public class Utilities {
 		if (task != null) {
 			defaultConfiguration = new Task(null, task.testType, task.input, task.output, new Test[0], null,
                     task.vmArgs, task.mainClass, null, TokenChecker.class.getCanonicalName(), "", new String[0], null,
-                    task.contestName, task.truncate, null, null, task.includeLocale, task.failOnOverflow);
+                    task.contestName, task.truncate, null, null, task.includeLocale, task.failOnOverflow, task.template);
         }
 	}
 

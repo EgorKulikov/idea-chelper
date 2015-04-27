@@ -37,6 +37,7 @@ public class ParseDialog extends JDialog {
     private JComboBox parserCombo;
     private JComboBox testType;
     private DirectorySelector location;
+    private FileSelector template;
     private JTextField date;
     private JTextField contestName;
     private JCheckBox truncate;
@@ -66,14 +67,19 @@ public class ParseDialog extends JDialog {
 						continue;
 					}
 					raw = raw.setInputOutputClasses(data.inputClass, data.outputClass);
+                    raw = raw.setTemplate(template.getText());
                     Task task = new Task(raw.name, (TestType)testType.getSelectedItem(), raw.input, raw.output,
-                            raw.tests, location.getText(), raw.vmArgs, raw.mainClass,
-                            FileUtilities.createIfNeeded(raw, raw.taskClass, project, location.getText()), raw.checkerClass,
-                            raw.checkerParameters, raw.testClasses, date.getText(), contestName.getText(),
-                            truncate.isSelected(), data.inputClass, data.outputClass, raw.includeLocale, data.failOnIntegerOverflowForNewTasks);
+                        raw.tests, location.getText(), raw.vmArgs, raw.mainClass,
+                        FileUtilities.createIfNeeded(raw, raw.taskClass, project, location.getText()), raw.checkerClass,
+                        raw.checkerParameters, raw.testClasses, date.getText(), contestName.getText(),
+                        truncate.isSelected(), data.inputClass, data.outputClass, raw.includeLocale,
+                        data.failOnIntegerOverflowForNewTasks, raw.template);
                     list.add(task);
                 }
                 result = list;
+                if (!result.isEmpty()) {
+                    Utilities.updateDefaultTask(result.iterator().next());
+                }
                 ParseDialog.this.setVisible(false);
                 Utilities.setDefaultParser(parser);
             }
@@ -188,8 +194,10 @@ public class ParseDialog extends JDialog {
         leftPanel.add(new JLabel("Location:"));
         location = new DirectorySelector(project, data.defaultDirectory);
         leftPanel.add(location);
+        leftPanel.add(new JLabel("Template:"));
+        template = new FileSelector(project, defaultTask.template, "template", false);
+        leftPanel.add(template);
         truncate = new JCheckBox("Truncate long tests", defaultTask.truncate);
-        leftPanel.add(truncate);
         bottomPanel.add(leftPanel);
         JPanel rightPanel = new JPanel(new BorderLayout());
         JPanel dateAndContestName = new JPanel(new VerticalFlowLayout()) {
@@ -207,6 +215,7 @@ public class ParseDialog extends JDialog {
         contestName = new JTextField();
         dateAndContestName.add(contestName);
         rightPanel.add(dateAndContestName, BorderLayout.NORTH);
+        rightPanel.add(truncate);
         JPanel buttonPanel = new JPanel(new GridLayout(1, 2));
         buttonPanel.add(contentPanel.getOkButton());
         buttonPanel.add(contentPanel.getCancelButton());

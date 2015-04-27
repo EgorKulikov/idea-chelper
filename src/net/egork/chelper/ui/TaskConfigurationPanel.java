@@ -34,6 +34,7 @@ public class TaskConfigurationPanel extends JPanel {
     private JComboBox outputType;
     private JTextField outputFileName;
     private JButton tests;
+    private FileSelector template;
 
     //advanced
     private DirectorySelector location;
@@ -67,26 +68,26 @@ public class TaskConfigurationPanel extends JPanel {
         name = new JTextField(task.name);
         name.setEnabled(firstEdit);
 		name.getDocument().addDocumentListener(new DocumentListener() {
-			String lastText = name.getText();
+            String lastText = name.getText();
 
-			public void insertUpdate(DocumentEvent e) {
-				update();
-			}
+            public void insertUpdate(DocumentEvent e) {
+                update();
+            }
 
-			public void removeUpdate(DocumentEvent e) {
-				update();
-			}
+            public void removeUpdate(DocumentEvent e) {
+                update();
+            }
 
-			public void changedUpdate(DocumentEvent e) {
-				update();
-			}
+            public void changedUpdate(DocumentEvent e) {
+                update();
+            }
 
-			private void update() {
-				if (name.isEnabled() && taskClass.getText().equals(lastText))
-					taskClass.setText(name.getText());
-				lastText = name.getText();
-			}
-		});
+            private void update() {
+                if (name.isEnabled() && taskClass.getText().equals(lastText))
+                    taskClass.setText(name.getText());
+                lastText = name.getText();
+            }
+        });
         basic.add(name);
         basic.add(new JLabel("Contest name:"));
         contestName = new JTextField(task.contestName);
@@ -100,7 +101,7 @@ public class TaskConfigurationPanel extends JPanel {
         inputType.setSelectedItem(task.input.type);
         inputType.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-				inputFileName.setVisible(((StreamConfiguration.StreamType)inputType.getSelectedItem()).hasStringParameter);
+                inputFileName.setVisible(((StreamConfiguration.StreamType) inputType.getSelectedItem()).hasStringParameter);
                 if (listener != null)
                     listener.onSizeChanged();
             }
@@ -115,7 +116,7 @@ public class TaskConfigurationPanel extends JPanel {
         outputType.setSelectedItem(task.output.type);
         outputType.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                outputFileName.setVisible(((StreamConfiguration.StreamType)outputType.getSelectedItem()).hasStringParameter);
+                outputFileName.setVisible(((StreamConfiguration.StreamType) outputType.getSelectedItem()).hasStringParameter);
                 if (listener != null)
                     listener.onSizeChanged();
             }
@@ -125,6 +126,9 @@ public class TaskConfigurationPanel extends JPanel {
                 task.output.fileName : "output.txt");
         outputFileName.setVisible(task.output.type.hasStringParameter);
         basic.add(outputFileName);
+        template = new FileSelector(project, task.template, "template", false);
+        basic.add(new JLabel("Template:"));
+        basic.add(template);
         tests = new JButton("Edit tests");
         tests.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -252,7 +256,7 @@ public class TaskConfigurationPanel extends JPanel {
             task.tests, location.getText(), vmArgs.getText(), mainClass.getText(),
             taskClass.getText(), checkerClass.getText(), checkerParameters.getText(), getTestClass(),
             date.getText(), contestName.getText(), truncate.isSelected(), task.inputClass, task.outputClass,
-			includeLocale.isSelected(), failOnOverflow.isSelected());
+			includeLocale.isSelected(), failOnOverflow.isSelected(), template.getText());
     }
 
     private String[] getTestClass() {

@@ -298,16 +298,22 @@ public class CodeGenerationUtilities {
 		String outputClass = task.outputClass;
 		String outputClassShort = outputClass.substring(outputClass.lastIndexOf('.') + 1);
         String packageName = FileUtilities.getPackage(directory);
-        String template = createTaskClassTemplateIfNeeded(project);
+        String template = createTaskClassTemplateIfNeeded(project, task.template);
         return template.replace("%package%", packageName).replace("%InputClass%", inputClassShort).
             replace("%InputClassFQN%", inputClass).replace("%OutputClass%", outputClassShort).
             replace("%OutputClassFQN%", outputClass).replace("%TaskClass%", name);
 	}
 
-    public static String createTaskClassTemplateIfNeeded(Project project) {
-        VirtualFile file = FileUtilities.getFile(project, "TaskClass.template");
+    public static String createTaskClassTemplateIfNeeded(Project project, String templateName) {
+        VirtualFile file = FileUtilities.getFile(project, templateName == null ? "TaskClass.template" : templateName);
         if (file != null)
             return FileUtilities.readTextFile(file);
+		if (templateName != null) {
+			file = FileUtilities.getFile(project, "TaskClass.template");
+			if (file != null) {
+				return FileUtilities.readTextFile(file);
+			}
+		}
         String template = "package %package%;\n" +
                 "\n" +
                 "import %InputClassFQN%;\n" +

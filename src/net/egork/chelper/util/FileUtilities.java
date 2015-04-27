@@ -273,12 +273,15 @@ public class FileUtilities {
 	}
 
 	public static boolean isChild(VirtualFile parent, VirtualFile child) {
+		if (!parent.isDirectory()) {
+			return false;
+		}
 		String parentPath = parent.getPath();
 		if (!parentPath.endsWith("/")) {
 			parentPath += "/";
 		}
 		String childPath = child.getPath();
-		if (!childPath.endsWith("/")) {
+		if (child.isDirectory() && !childPath.endsWith("/")) {
 			childPath += "/";
 		}
 		return childPath.startsWith(parentPath);

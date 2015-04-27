@@ -17,6 +17,9 @@ public class Task {
     public final StreamConfiguration output;
     public final Test[] tests;
 
+    //Creation only
+    public final String template;
+
     //Advanced
     public final String location;
     public final String vmArgs;
@@ -33,7 +36,21 @@ public class Task {
 	public final boolean includeLocale;
     public final boolean failOnOverflow;
 
-    public Task(String name, TestType testType, StreamConfiguration input, StreamConfiguration output, Test[] tests, String location, String vmArgs, String mainClass, String taskClass, String checkerClass, String checkerParameters, String[] testClasses, String date, String contestName, boolean truncate, String inputClass, String outputClass, boolean includeLocale, boolean failOnOverflow) {
+    public Task(String name, TestType testType, StreamConfiguration input, StreamConfiguration output, Test[] tests,
+        String location, String vmArgs, String mainClass, String taskClass, String checkerClass,
+        String checkerParameters, String[] testClasses, String date, String contestName, boolean truncate,
+        String inputClass, String outputClass, boolean includeLocale, boolean failOnOverflow)
+    {
+        this(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
+            checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale,
+            failOnOverflow, null);
+    }
+
+    public Task(String name, TestType testType, StreamConfiguration input, StreamConfiguration output, Test[] tests,
+        String location, String vmArgs, String mainClass, String taskClass, String checkerClass,
+        String checkerParameters, String[] testClasses, String date, String contestName, boolean truncate,
+        String inputClass, String outputClass, boolean includeLocale, boolean failOnOverflow, String template)
+    {
         this.name = trim(name);
         this.testType = testType;
         this.input = input;
@@ -53,6 +70,7 @@ public class Task {
         this.outputClass = trim(outputClass);
 		this.includeLocale = includeLocale;
         this.failOnOverflow = failOnOverflow;
+        this.template = template;
 		if (tests != null) {
 			for (int i = 0; i < tests.length; i++) {
 				if (tests[i].index != i)
@@ -153,41 +171,55 @@ public class Task {
 
     public Task setTests(Test[] tests) {
         return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
-                checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale, failOnOverflow);
+            checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale,
+            failOnOverflow, template);
     }
 
     public Task setTestClasses(String[] testClasses) {
         return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
-                checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale, failOnOverflow);
+            checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale,
+            failOnOverflow, template);
     }
 
     public Task setTaskClass(String taskClass) {
         return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
-                checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale, failOnOverflow);
+            checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale,
+            failOnOverflow, template);
     }
 
     public Task setCheckerClass(String checkerClass) {
         return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
-                checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale, failOnOverflow);
+            checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale,
+            failOnOverflow, template);
     }
 
 	public Task setLocation(String location) {
 		return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
-			checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale, failOnOverflow);
+			checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale,
+            failOnOverflow, template);
 	}
 
 	public Task setTestType(TestType testType) {
 		return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
-			checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale, failOnOverflow);
+			checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale,
+            failOnOverflow, template);
 	}
 
 	public Task setContestName(String contestName) {
 		return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
-			checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale, failOnOverflow);
+			checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale,
+            failOnOverflow, template);
 	}
 
 	public Task setInputOutputClasses(String inputClass, String outputClass) {
 		return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
-			checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale, failOnOverflow);
+			checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale,
+            failOnOverflow, template);
 	}
+
+    public Task setTemplate(String template) {
+   		return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
+   			checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale,
+               failOnOverflow, template);
+   	}
 }

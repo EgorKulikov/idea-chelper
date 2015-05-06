@@ -100,8 +100,10 @@ public class ChromeParser implements ProjectComponent {
 											JFrame projectFrame = WindowManager.getInstance().getFrame(project);
 											if (projectFrame.getState() == JFrame.ICONIFIED)
 												projectFrame.setState(Frame.NORMAL);
-											for (Task task : tasks)
+											for (Task task : tasks) {
+//												task = task.setTemplate(Utilities.getDefaultTask().template);
 												NewTaskDefaultAction.createTaskInDefaultDirectory(project, task);
+											}
 										} else {
 											Messenger.publishMessage("Unknown task type from Chrome parser: " + type,
 												NotificationType.WARNING);

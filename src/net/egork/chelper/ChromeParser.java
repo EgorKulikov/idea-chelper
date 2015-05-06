@@ -101,7 +101,7 @@ public class ChromeParser implements ProjectComponent {
 											if (projectFrame.getState() == JFrame.ICONIFIED)
 												projectFrame.setState(Frame.NORMAL);
 											for (Task task : tasks) {
-//												task = task.setTemplate(Utilities.getDefaultTask().template);
+												task = task.setTemplate(Utilities.getDefaultTask().template);
 												NewTaskDefaultAction.createTaskInDefaultDirectory(project, task);
 											}
 										} else {

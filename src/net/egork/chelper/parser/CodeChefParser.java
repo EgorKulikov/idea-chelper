@@ -23,7 +23,8 @@ public class CodeChefParser implements Parser {
     private final static String HARD_ID = "problems/hard";
     private final static String CHALLENGE_ID = "challenge/easy";
     private final static String PEER_ID = "problems/extcontest";
-    private final static List<String> SPECIAL = Arrays.asList(EASY_ID, MEDIUM_ID, HARD_ID, CHALLENGE_ID, PEER_ID);
+	private final static String SCHOOL_ID = "problems/school";
+    private final static List<String> SPECIAL = Arrays.asList(EASY_ID, MEDIUM_ID, HARD_ID, CHALLENGE_ID, PEER_ID, SCHOOL_ID);
 
     public Icon getIcon() {
 		return IconLoader.getIcon("/icons/codechef.png");
@@ -45,8 +46,10 @@ public class CodeChefParser implements Parser {
         StringParser parser = new StringParser(mainPage);
         List<Description> contests = new ArrayList<Description>();
         try {
+			parser.advance(true, "<h3>Present Contests</h3>");
             StringParser nonPastContestParser = new StringParser(parser.advance(false, "<h3>Past Contests</h3>"));
-            while (nonPastContestParser.advanceIfPossible(true, "<tr ><td >") != null) {
+            while (nonPastContestParser.advanceIfPossible(true, "<tr>") != null) {
+				nonPastContestParser.advance(true, "<td>");
                 String id = nonPastContestParser.advance(false, "</td>");
                 nonPastContestParser.advance(true, "<a href=\"");
                 nonPastContestParser.advance(true, "\">");
@@ -63,7 +66,8 @@ public class CodeChefParser implements Parser {
 		}
 		contests = new ArrayList<Description>();
 		try {
-			while (parser.advanceIfPossible(true, "<tr ><td >") != null) {
+			while (parser.advanceIfPossible(true, "<tr>") != null) {
+				parser.advance(true, "<td>");
 				String id = parser.advance(false, "</td>");
 				parser.advance(true, "<a href=\"");
 				parser.advance(true, "\">");
@@ -83,6 +87,7 @@ public class CodeChefParser implements Parser {
         special.add(new Description(HARD_ID, "Hard problems"));
         special.add(new Description(CHALLENGE_ID, "Challenge problems"));
         special.add(new Description(PEER_ID, "External contests problems"));
+		special.add(new Description(SCHOOL_ID, "School problems"));
         return special;
     }
 

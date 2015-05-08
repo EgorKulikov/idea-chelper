@@ -306,13 +306,18 @@ public class CodeGenerationUtilities {
 
     public static String createTaskClassTemplateIfNeeded(Project project, String templateName) {
         VirtualFile file = FileUtilities.getFile(project, templateName == null ? "TaskClass.template" : templateName);
-        if (file != null)
-            return FileUtilities.readTextFile(file);
-		if (templateName != null) {
+		String result = null;
+        if (file != null) {
+			result = FileUtilities.readTextFile(file);
+		}
+		if (result == null && templateName != null) {
 			file = FileUtilities.getFile(project, "TaskClass.template");
 			if (file != null) {
-				return FileUtilities.readTextFile(file);
+				result = FileUtilities.readTextFile(file);
 			}
+		}
+		if (result != null) {
+			return result;
 		}
         String template = "package %package%;\n" +
                 "\n" +

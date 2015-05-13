@@ -43,6 +43,7 @@ public class ChromeParser implements ProjectComponent {
 		taskParsers.put("usaco", new UsacoParser());
 		taskParsers.put("gcj", new GCJParser());
 		taskParsers.put("bayan", new BayanParser());
+		taskParsers.put("kattis", new KattisParser());
 		TASK_PARSERS = Collections.unmodifiableMap(taskParsers);
 	}
 

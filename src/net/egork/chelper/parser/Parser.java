@@ -12,7 +12,7 @@ import java.util.List;
  */
 public interface Parser {
     public static final Parser[] PARSERS = {new CodeforcesParser(), new CodeChefParser(), new TimusParser(),
-		new EOlimpParser(), new RCCParser(), new GCJParser()};
+		new EOlimpParser(), new RCCParser(), new GCJParser(), new KattisParser()};
 
 	public Icon getIcon();
 	public String getName();

@@ -1,5 +1,6 @@
 function checkForValidUrl(tabId, changeInfo, tab) {
-    if (/^https:\/\/.*contest2?[.]yandex[.](ru|com)\/.*contest\/\d*\/problems.*$/.test(tab.url) ||
+    if (/^https:\/\/open[.]kattis[.]com\/problems\/.*$/.test(tab.url) ||
+        /^https:\/\/.*contest2?[.]yandex[.](ru|com)\/.*contest\/\d*\/problems.*$/.test(tab.url) ||
         /^http:\/\/codeforces[.](ru|com)\/(contest|problemset|gym)\/(\d*\/problem|problem\/\d*)\/.+$/.test(tab.url) ||
         /^https:\/\/(www[.])?hackerrank[.]com\/(contests\/.+\/)?challenges\/[^/]+$/.test(tab.url) ||
         /^https:\/\/www[.]facebook[.]com\/hackercup\/problems[.]php.+$/.test(tab.url) ||
@@ -30,6 +31,8 @@ function parseTask(tab) {
         chrome.tabs.sendMessage(tab.id, 'gcj');
     } else if (/^http:\/\/contest[.]bayan[.]ir\/en\/contest\/.*\/problem\/[A-Z]\/$/.test(tab.url)) {
         chrome.tabs.sendMessage(tab.id, 'bayan');
+    } else if (/^https:\/\/open[.]kattis[.]com\/problems\/.*$/.test(tab.url)) {
+        chrome.tabs.sendMessage(tab.id, 'kattis');
     }
 }
 

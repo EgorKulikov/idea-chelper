@@ -211,6 +211,12 @@ public class Task {
             failOnOverflow, template);
 	}
 
+    public Task setName(String name) {
+   		return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
+   			checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale,
+               failOnOverflow, template);
+   	}
+
 	public Task setInputOutputClasses(String inputClass, String outputClass) {
 		return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
 			checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale,

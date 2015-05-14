@@ -1,6 +1,7 @@
 package net.egork.chelper;
 
 import com.intellij.openapi.components.ApplicationComponent;
+import net.egork.chelper.util.SSLUtils;
 import net.egork.chelper.util.Utilities;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,6 +14,8 @@ public class CHelperMain implements ApplicationComponent {
 
 	public void initComponent() {
 		Utilities.addListeners();
+		SSLUtils.trustAllHostnames();
+		SSLUtils.trustAllHttpsCertificates();
 	}
 
 	public void disposeComponent() {

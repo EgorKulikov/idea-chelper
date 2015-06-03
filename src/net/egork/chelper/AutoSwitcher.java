@@ -80,7 +80,7 @@ public class AutoSwitcher implements ProjectComponent {
 		});
 		FileEditorManager.getInstance(project).addFileEditorManagerListener(new FileEditorManagerAdapter() {
 			@Override
-			public void fileOpened(FileEditorManager source, final VirtualFile file) {
+			public void fileOpened(FileEditorManager source, VirtualFile file) {
 				selectTask(file);
 			}
 
@@ -120,7 +120,7 @@ public class AutoSwitcher implements ProjectComponent {
 			}
 
 			@Override
-			public void selectionChanged(final FileEditorManagerEvent event) {
+			public void selectionChanged(FileEditorManagerEvent event) {
 				selectTask(event.getNewFile());
 			}
 		});

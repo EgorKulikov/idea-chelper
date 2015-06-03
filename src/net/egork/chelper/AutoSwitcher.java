@@ -80,7 +80,12 @@ public class AutoSwitcher implements ProjectComponent {
 		FileEditorManager.getInstance(project).addFileEditorManagerListener(new FileEditorManagerAdapter() {
 			@Override
 			public void fileOpened(FileEditorManager source, VirtualFile file) {
-				selectTask(file);
+				DumbService.getInstance(project).smartInvokeLater(new Runnable() {
+					@Override
+					public void run() {
+						selectTask(file);
+					}
+				});
 			}
 
 			private void selectTask(VirtualFile file) {
@@ -112,7 +117,12 @@ public class AutoSwitcher implements ProjectComponent {
 
 			@Override
 			public void selectionChanged(FileEditorManagerEvent event) {
-				selectTask(event.getNewFile());
+				DumbService.getInstance(project).smartInvokeLater(new Runnable() {
+					@Override
+					public void run() {
+						selectTask(event.getNewFile());
+					}
+				});
 			}
 		});
 	}

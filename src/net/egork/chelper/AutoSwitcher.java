@@ -9,6 +9,7 @@ import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.FileEditorManagerAdapter;
 import com.intellij.openapi.fileEditor.FileEditorManagerEvent;
+import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import net.egork.chelper.configurations.TaskConfiguration;
@@ -79,50 +80,48 @@ public class AutoSwitcher implements ProjectComponent {
 		});
 		FileEditorManager.getInstance(project).addFileEditorManagerListener(new FileEditorManagerAdapter() {
 			@Override
-			public void fileOpened(FileEditorManager source, VirtualFile file) {
-				DumbService.getInstance(project).smartInvokeLater(new Runnable() {
-					@Override
-					public void run() {
-						selectTask(file);
-					}
-				});
+			public void fileOpened(FileEditorManager source, final VirtualFile file) {
+				selectTask(file);
 			}
 
-			private void selectTask(VirtualFile file) {
-				if (busy || file == null)
-					return;
-				RunManagerImpl runManager = RunManagerImpl.getInstanceImpl(project);
-				for (RunConfiguration configuration : runManager.getAllConfigurations()) {
-					if (configuration instanceof TopCoderConfiguration) {
-						TopCoderTask task = ((TopCoderConfiguration) configuration).getConfiguration();
-						if (file.equals(TaskUtilities.getFile(Utilities.getData(project).defaultDirectory, task.name, project))) {
-							busy = true;
-							runManager.setActiveConfiguration(new RunnerAndConfigurationSettingsImpl(runManager,
-								configuration, false));
-							busy = false;
+			private void selectTask(final VirtualFile file) {
+				Runnable selectTaskRunnable = new Runnable() {
+					@Override
+					public void run() {
+						if (busy || file == null)
 							return;
+						RunManagerImpl runManager = RunManagerImpl.getInstanceImpl(project);
+						for (RunConfiguration configuration : runManager.getAllConfigurations()) {
+							if (configuration instanceof TopCoderConfiguration) {
+								TopCoderTask task = ((TopCoderConfiguration) configuration).getConfiguration();
+								if (file.equals(TaskUtilities.getFile(Utilities.getData(project).defaultDirectory, task.name, project))) {
+									busy = true;
+									runManager.setActiveConfiguration(new RunnerAndConfigurationSettingsImpl(runManager,
+											configuration, false));
+									busy = false;
+									return;
+								}
+							} else if (configuration instanceof TaskConfiguration) {
+								Task task = ((TaskConfiguration) configuration).getConfiguration();
+								if (file.equals(FileUtilities.getFileByFQN(task.taskClass, configuration.getProject()))) {
+									busy = true;
+									runManager.setActiveConfiguration(new RunnerAndConfigurationSettingsImpl(runManager,
+											configuration, false));
+									busy = false;
+									return;
+								}
+							}
 						}
-					} else if (configuration instanceof TaskConfiguration) {
-						Task task = ((TaskConfiguration) configuration).getConfiguration();
-						if (file.equals(FileUtilities.getFileByFQN(task.taskClass, configuration.getProject()))) {
-							busy = true;
-							runManager.setActiveConfiguration(new RunnerAndConfigurationSettingsImpl(runManager,
-								configuration, false));
-							busy = false;
-							return;
-						}
+
 					}
-				}
+				};
+
+				DumbService.getInstance(project).smartInvokeLater(selectTaskRunnable);
 			}
 
 			@Override
-			public void selectionChanged(FileEditorManagerEvent event) {
-				DumbService.getInstance(project).smartInvokeLater(new Runnable() {
-					@Override
-					public void run() {
-						selectTask(event.getNewFile());
-					}
-				});
+			public void selectionChanged(final FileEditorManagerEvent event) {
+				selectTask(event.getNewFile());
 			}
 		});
 	}

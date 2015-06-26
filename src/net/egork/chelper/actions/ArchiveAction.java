@@ -18,7 +18,7 @@ import net.egork.chelper.configurations.TaskConfiguration;
 import net.egork.chelper.configurations.TopCoderConfiguration;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.TopCoderTask;
-import net.egork.chelper.util.CodeGenerationUtilities;
+import net.egork.chelper.codegeneration.CodeGenerationUtilities;
 import net.egork.chelper.util.FileUtilities;
 import net.egork.chelper.util.Messenger;
 import net.egork.chelper.util.Utilities;

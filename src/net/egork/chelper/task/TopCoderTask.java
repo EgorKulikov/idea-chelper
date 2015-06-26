@@ -1,6 +1,9 @@
 package net.egork.chelper.task;
 
 import com.intellij.notification.NotificationType;
+import com.intellij.openapi.project.Project;
+import com.intellij.psi.PsiMethod;
+import net.egork.chelper.codegeneration.MainFileTemplate;
 import net.egork.chelper.util.InputReader;
 import net.egork.chelper.util.Messenger;
 import net.egork.chelper.util.OutputWriter;
@@ -148,5 +151,13 @@ public class TopCoderTask {
 
     public TopCoderTask setFailOnOverflow(boolean failOnOverflow) {
         return new TopCoderTask(name, signature, tests, date, contestName, testClasses, fqn, failOnOverflow, memoryLimit);
+    }
+
+    public PsiMethod getMethod(Project project) {
+        String[] arguments = new String[signature.arguments.length];
+        for (int i = 0; i < arguments.length; i++) {
+            arguments[i] = signature.arguments[i].getSimpleName();
+        }
+        return MainFileTemplate.getMethod(project, fqn, signature.name, signature.result.getSimpleName(), arguments);
     }
 }

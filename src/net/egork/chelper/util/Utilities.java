@@ -28,6 +28,7 @@ import net.egork.chelper.ChromeParser;
 import net.egork.chelper.ProjectData;
 import net.egork.chelper.actions.TopCoderAction;
 import net.egork.chelper.checkers.TokenChecker;
+import net.egork.chelper.codegeneration.CodeGenerationUtilities;
 import net.egork.chelper.configurations.TaskConfiguration;
 import net.egork.chelper.configurations.TaskConfigurationType;
 import net.egork.chelper.configurations.TopCoderConfiguration;

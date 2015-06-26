@@ -10,6 +10,7 @@ import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
+import net.egork.chelper.codegeneration.CodeGenerationUtilities;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.TopCoderTask;
 

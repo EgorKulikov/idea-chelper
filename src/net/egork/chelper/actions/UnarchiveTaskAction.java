@@ -10,6 +10,7 @@ import com.intellij.openapi.fileChooser.FileChooserFactory;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.vfs.VirtualFile;
+import net.egork.chelper.codegeneration.CodeGenerationUtilities;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.TopCoderTask;
 import net.egork.chelper.util.*;

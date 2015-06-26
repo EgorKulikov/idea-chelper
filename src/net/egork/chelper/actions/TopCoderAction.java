@@ -12,7 +12,7 @@ import com.intellij.psi.search.GlobalSearchScope;
 import net.egork.chelper.task.TopCoderTask;
 import net.egork.chelper.topcoder.CHelperArenaPlugin;
 import net.egork.chelper.topcoder.Message;
-import net.egork.chelper.util.CodeGenerationUtilities;
+import net.egork.chelper.codegeneration.CodeGenerationUtilities;
 import net.egork.chelper.util.FileUtilities;
 import net.egork.chelper.util.InputReader;
 import net.egork.chelper.util.Utilities;

@@ -3,6 +3,7 @@ package net.egork.chelper.util;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import net.egork.chelper.actions.ArchiveAction;
+import net.egork.chelper.codegeneration.CodeGenerationUtilities;
 import net.egork.chelper.task.Task;
 
 /**

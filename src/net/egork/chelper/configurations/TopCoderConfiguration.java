@@ -14,6 +14,7 @@ import com.intellij.openapi.util.WriteExternalException;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDirectory;
 import net.egork.chelper.actions.TopCoderAction;
+import net.egork.chelper.codegeneration.CodeGenerationUtilities;
 import net.egork.chelper.task.TopCoderTask;
 import net.egork.chelper.ui.TopCoderConfigurationEditor;
 import net.egork.chelper.util.*;

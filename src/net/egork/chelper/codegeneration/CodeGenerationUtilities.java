@@ -112,6 +112,19 @@ public class CodeGenerationUtilities {
 			toInline.addAll(addOnStep);
 			queue.addAll(addOnStep);
 		}
+		Set<String> single = new HashSet<String>();
+		final Set<String> multiple = new HashSet<String>();
+		single.add(firstToDisplay.getName());
+		for (PsiElement element : toInline) {
+			if (element instanceof PsiClass) {
+				String name = ((PsiClass) element).getName();
+				if (single.contains(name)) {
+					multiple.add(name);
+				} else {
+					single.add(name);
+				}
+			}
+		}
 		final StringBuilder inlinedSource = new StringBuilder();
 		PsiElementVisitor inlineVisitor = new PsiElementVisitor() {
 			@Override
@@ -120,7 +133,7 @@ public class CodeGenerationUtilities {
 					element.getParent() instanceof PsiReference &&
 					((PsiReference)element.getParent()).resolve() instanceof PsiClass) {
 					PsiClass aClass = (PsiClass) ((PsiReference) element.getParent()).resolve();
-					inlinedSource.append(convertNameFull(aClass, toInline));
+					inlinedSource.append(convertNameFull(aClass, toInline, multiple));
 				} else {
 					if (element.getFirstChild() == null) {
 						inlinedSource.append(element.getText());
@@ -131,10 +144,10 @@ public class CodeGenerationUtilities {
 			}
 		};
 		toInline.remove(firstToDisplay);
-		addSource(inlinedSource, firstToDisplay, toInline, allToInnerClasses, true, inlineVisitor);
+		addSource(inlinedSource, firstToDisplay, toInline, allToInnerClasses, true, inlineVisitor, multiple);
 		for (PsiElement element : toInline) {
 			if (element instanceof PsiClass && ((PsiClass) element).getContainingClass() == null && !element.equals(firstToDisplay)) {
-				addSource(inlinedSource, (PsiClass) element, toInline, allToInnerClasses, true, inlineVisitor);
+				addSource(inlinedSource, (PsiClass) element, toInline, allToInnerClasses, true, inlineVisitor, multiple);
 			}
 		}
 		StringBuilder imports = new StringBuilder();
@@ -150,7 +163,7 @@ public class CodeGenerationUtilities {
 	}
 
 	private static void addSource(StringBuilder source, PsiClass aClass, Set<PsiElement> toInline,
-			boolean convertToStaticInner, boolean removePublic, PsiElementVisitor visitor) {
+			boolean convertToStaticInner, boolean removePublic, PsiElementVisitor visitor, Set<String> resolveToFull) {
 		PsiModifierList list = aClass.getModifierList();
 		String modifierList = list == null ? "" : list.getText();
 		if (removePublic) {
@@ -168,7 +181,7 @@ public class CodeGenerationUtilities {
 			source.append(" ");
 		}
 		source.append(aClass.isEnum() ? "enum" : aClass.isInterface() ? "interface" : "class").append(' ');
-		String className = convertName(aClass, toInline);
+		String className = convertName(aClass, toInline, resolveToFull);
 		source.append(className);
 		if (aClass.getExtendsList() != null) {
 			source.append(' ');
@@ -205,7 +218,8 @@ public class CodeGenerationUtilities {
 				if (!modifierList.isEmpty()) {
 					source.append(" ");
 				}
-				source.append(convert(field.getType(), toInline)).append(' ');
+				field.getTypeElement().accept(visitor);
+				source.append(' ');
 				source.append(field.getName());
 				PsiExpression initializer = field.getInitializer();
 				if (initializer != null) {
@@ -230,7 +244,7 @@ public class CodeGenerationUtilities {
 				source.append(" ");
 			}
 			if (method.getReturnType() != null) {
-				source.append(convert(method.getReturnType(), toInline));
+				method.getReturnTypeElement().accept(visitor);
 				source.append(' ');
 				source.append(method.getName());
 			} else {
@@ -249,43 +263,43 @@ public class CodeGenerationUtilities {
 			if (!toInline.contains(innerClass)) {
 				continue;
 			}
-			addSource(source, innerClass, toInline, false, false, visitor);
+			addSource(source, innerClass, toInline, false, false, visitor, resolveToFull);
 			source.append("\n");
 		}
 		source.append("}\n");
 	}
 
-	private static String convert(PsiType type, Set<PsiElement> toInline) {
+	private static String convert(PsiType type, Set<PsiElement> toInline, Set<String> resolveToFull) {
 		if (type.getArrayDimensions() != 0) {
 			StringBuilder result = new StringBuilder();
-			result.append(convert(type.getDeepComponentType(), toInline));
+			result.append(convert(type.getDeepComponentType(), toInline, resolveToFull));
 			for (int i = 0; i < type.getArrayDimensions(); i++) {
 				result.append("[]");
 			}
 			return result.toString();
 		}
 		if (type instanceof PsiClassType) {
-			return convertNameFull(((PsiClassType) type).resolve(), toInline);
+			return convertNameFull(((PsiClassType) type).resolve(), toInline, resolveToFull);
 		}
 		return type.getCanonicalText();
 	}
 
-	private static String convertName(PsiClass aClass, Set<PsiElement> toInline) {
+	private static String convertName(PsiClass aClass, Set<PsiElement> toInline, Set<String> resolveToFull) {
 		if (aClass.getContainingClass() == null) {
-			return convertNameFull(aClass, toInline);
+			return convertNameFull(aClass, toInline, resolveToFull);
 		} else {
 			return aClass.getName();
 		}
 	}
 
-	private static String convertNameFull(PsiClass aClass, Set<PsiElement> toInline) {
+	private static String convertNameFull(PsiClass aClass, Set<PsiElement> toInline, Set<String> resolveToFull) {
 		List<String> inner = new ArrayList<String>();
 		while (aClass.getContainingClass() != null) {
 			inner.add(aClass.getName());
 			aClass = aClass.getContainingClass();
 		}
 		StringBuilder result = new StringBuilder();
-		if (toInline.contains(aClass)) {
+		if (toInline.contains(aClass) && resolveToFull.contains(aClass.getName())) {
 			result.append(aClass.getQualifiedName().replace('.', '_'));
 		} else {
 			result.append(aClass.getName());
@@ -392,10 +406,10 @@ public class CodeGenerationUtilities {
 			builder.append("\t\t\tthrow new RuntimeException(e);\n");
 			builder.append("\t\t}\n");
 		}
-		String inputClass = task.inputClass.replace('.', '_');
+		String inputClass = getSimpleName(task.inputClass);
 		builder.append("\t\t").append(inputClass).append(" in = new ").append(inputClass).
 			append("(inputStream);\n");
-		String outputClass = task.outputClass.replace('.', '_');
+		String outputClass = getSimpleName(task.outputClass);
 		builder.append("\t\t").append(outputClass).append(" out = new ").append(outputClass).
 			append("(outputStream);\n");
 		String className = getSimpleName(task.taskClass);

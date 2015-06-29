@@ -3,7 +3,7 @@ package net.egork.chelper.util;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import net.egork.chelper.actions.ArchiveAction;
-import net.egork.chelper.codegeneration.CodeGenerationUtilities;
+import net.egork.chelper.codegeneration.SolutionGenerator;
 import net.egork.chelper.task.Task;
 
 /**
@@ -11,7 +11,7 @@ import net.egork.chelper.task.Task;
  */
 public class TaskUtilities {
     public static void createSourceFile(Task task, Project project) {
-        CodeGenerationUtilities.createSourceFile(task, project);
+        SolutionGenerator.createSourceFile(task, project);
     }
 
     public static VirtualFile getFile(String location, String name, Project project) {

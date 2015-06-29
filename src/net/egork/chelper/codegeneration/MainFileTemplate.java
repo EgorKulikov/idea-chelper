@@ -12,10 +12,27 @@ import java.util.Collection;
  */
 public class MainFileTemplate extends Template {
 	final Collection<PsiElement> entryPoints;
+	final Collection<String> imports;
 
-	public MainFileTemplate(Collection<PsiElement> entryPoint, String template) {
+	public MainFileTemplate(String template, Collection<PsiElement> entryPoint, Collection<String> imports) {
 		super(template);
 		this.entryPoints = entryPoint;
+		this.imports = imports;
+	}
+
+	public String resolve(String source, String className, Collection<String> additionalImports) {
+		StringBuilder imports = new StringBuilder();
+		for (String aImport : this.imports) {
+			if (!aImport.startsWith("java.lang.")) {
+				imports.append("import ").append(aImport).append(";\n");
+			}
+		}
+		for (String aImport : additionalImports) {
+			if (!aImport.startsWith("java.lang.")) {
+				imports.append("import ").append(aImport).append(";\n");
+			}
+		}
+		return apply("IMPORTS", imports.toString(), "INLINED_SOURCE", source, "CLASS_NAME", className);
 	}
 
 	public static PsiClass getClass(Project project, String fqn) {

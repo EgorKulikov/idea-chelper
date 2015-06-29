@@ -12,7 +12,6 @@ import org.apache.commons.lang.StringEscapeUtils;
 import javax.swing.*;
 import java.text.ParseException;
 import java.util.*;
-import java.util.regex.Pattern;
 
 /**
  * @author Egor Kulikov (egor@egork.net)
@@ -140,78 +139,52 @@ public class CodeChefParser implements Parser {
 		else
 			url = "http://www.codechef.com/problems/" + tokens[0];
 		String text = FileUtilities.getWebPageContent(url);
-		if (text == null)
-			return null;
-		StringParser parser = new StringParser(text);
-		Pattern pattern = Pattern.compile(".*<p>.*</p>.*", Pattern.DOTALL);
-		try {
-			parser.advance(false, "<div class=\"prob\">");
-			parser.advance(true, "<h1>");
-			String taskID = getTaskID(parser.advance(false, "<!-- todo -->"));
-			parser.dropTail("<table cellspacing=\"0\" cellpadding=\"0\" align=\"left\">");
-			List<Test> tests = new ArrayList<Test>();
-			int index = 0;
-			while (true) {
-				try {
-					parser.advance(true, "Input", "Sample input", "Sample Input");
-					if (parser.length() != 0 && parser.charAt(0) == ':')
-						parser.advance(1);
-					String input = parser.advance(true, "Output", "Sample output", "Sample Output");
-					if (parser.length() != 0 && parser.charAt(0) == ':')
-						parser.advance(1);
-					String output = parser.advance(false, "Input", "Sample input", "Sample Input", "<b>",
-						"<h", "</div>", "<p>");
-					if (pattern.matcher(input).matches() || input.contains("</p><p>"))
-						continue;
-					input = dropTags(input).replace("<br />\n", "\n").replace("<br />", "\n");
-					output = dropTags(output).replace("<br />\n", "\n").replace("<br />", "\n");
-					if (input.contains("<") || output.contains("<"))
-						continue;
-					tests.add(new Test(StringEscapeUtils.unescapeHtml(input), StringEscapeUtils.unescapeHtml(output),
-						index++));
-				} catch (ParseException e) {
-					break;
-				}
-			}
-            return new Task(description.description, null, StreamConfiguration.STANDARD, StreamConfiguration.STANDARD,
-                    tests.toArray(new Test[tests.size()]), null, "-Xmx64M", "Main", taskID,
-                    TokenChecker.class.getCanonicalName(), "", new String[0], null, null, true, null, null, false, false);
-		} catch (ParseException e) {
+		if (text == null) {
 			return null;
 		}
+		Collection<Task> tasks = parseTaskFromHTML(text);
+		if (tasks.isEmpty()) {
+			return null;
+		}
+		return tasks.iterator().next();
 	}
 
 	public TestType defaultTestType() {
 		return TestType.MULTI_NUMBER;
 	}
 
-	public Collection<Task> parseTaskFromHTML(String html) {
-		throw new UnsupportedOperationException();
-	}
-
-	private String dropTags(String s) {
-		int bracket = 0;
-		while (s.length() != 0) {
-			char c = s.charAt(0);
-			if (c == '<')
-				bracket++;
-			else if (bracket == 0 && c != ' ' && c != '\n')
-				break;
-			else if (c == '>')
-				bracket--;
-			s = s.substring(1);
+	public Collection<Task> parseTaskFromHTML(String text) {
+		StringParser parser = new StringParser(text);
+		try {
+			parser.advance(true, "<!-- /HEADER -->");
+			parser.advance(true, "<div id=\"breadcrumb\">");
+			parser.advance(true, "<a href=\"");
+			parser.advance(true, "<a href=\"");
+			parser.advance(true, "<a href=\"");
+			parser.advance(true, "\">");
+			String contestName = parser.advance(false, "</a>");
+			parser.advance(true, "&nbsp;");
+			parser.advance(true, "&nbsp;");
+			String taskName = parser.advance(false, "</div>");
+			parser.advance(true, "<h3>Example</h3>");
+			parser.advance(true, "<pre>");
+			parser = new StringParser(parser.advance(false, "</pre>") + "<b>");
+			String taskID = getTaskID(taskName);
+			List<Test> tests = new ArrayList<Test>();
+			int index = 0;
+			while (parser.advanceIfPossible(true, "</b>") != null) {
+				String input = StringEscapeUtils.unescapeHtml(parser.advance(false, "<b>")).trim() + "\n";
+				parser.advance(true, "</b>");
+				String output = StringEscapeUtils.unescapeHtml(parser.advance(false, "<b>")).trim() + "\n";
+				tests.add(new Test(input, output, index++));
+			}
+            return Collections.singleton(new Task(taskName, defaultTestType(), StreamConfiguration.STANDARD,
+				StreamConfiguration.STANDARD, tests.toArray(new Test[tests.size()]), null, "-Xmx64M", "Main", taskID,
+				TokenChecker.class.getCanonicalName(), "", new String[0], null, contestName, true, null, null, false,
+				false));
+		} catch (ParseException e) {
+			return Collections.emptySet();
 		}
-		while (s.length() != 0) {
-			char c = s.charAt(s.length() - 1);
-			if (c == '>')
-				bracket++;
-			else if (bracket == 0 && c != ' ' && c != '\n')
-				break;
-			else if (c == '<')
-				bracket--;
-			s = s.substring(0, s.length() - 1);
-		}
-		return s + "\n";
 	}
 
 	public static String getTaskID(String title) {

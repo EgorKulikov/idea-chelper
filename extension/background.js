@@ -6,7 +6,8 @@ function checkForValidUrl(tabId, changeInfo, tab) {
         /^https:\/\/www[.]facebook[.]com\/hackercup\/problems[.]php.+$/.test(tab.url) ||
         /^http:\/\/(www[.])?usaco[.]org\/index[.]php[?]page[=]viewproblem.*$/.test(tab.url) ||
         /^https:\/\/code[.]google[.]com\/codejam\/contest\/\d*\/dashboard.*$/.test(tab.url) ||
-        /^http:\/\/contest[.]bayan[.]ir\/en\/contest\/.*\/problem\/[A-Z]\/$/.test(tab.url))
+        /^http:\/\/contest[.]bayan[.]ir\/en\/contest\/.*\/problem\/[A-Z]\/$/.test(tab.url) ||
+        /^http:\/\/(www[.])?codechef[.]com\/(.*\/)?problems\/.*$/.test(tab.url))
     {
         chrome.pageAction.show(tabId);
     } else {
@@ -33,6 +34,8 @@ function parseTask(tab) {
         chrome.tabs.sendMessage(tab.id, 'bayan');
     } else if (/^https:\/\/open[.]kattis[.]com\/problems\/.*$/.test(tab.url)) {
         chrome.tabs.sendMessage(tab.id, 'kattis');
+    } else if (/^http:\/\/(www[.])?codechef[.]com\/(.*\/)?problems\/.*$/.test(tab.url)) {
+        chrome.tabs.sendMessage(tab.id, 'codechef');
     }
 }
 

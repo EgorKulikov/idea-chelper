@@ -79,9 +79,10 @@ public class Task {
 		}
     }
 
-	private String trim(String s) {
-		if (s == null)
-			return null;
+	private static String trim(String s) {
+		if (s == null) {
+            return null;
+        }
 		return s.trim();
 	}
 

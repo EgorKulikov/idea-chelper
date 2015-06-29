@@ -5,13 +5,12 @@ import net.egork.chelper.task.TestType;
 
 import javax.swing.*;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * @author Egor Kulikov (kulikov@devexperts.com)
  */
 public interface Parser {
-    public static final Parser[] PARSERS = {new CodeforcesParser(), new CodeChefParser(), new TimusParser(),
+    public static final Parser[] PARSERS = {new CodeforcesParser(), new TimusParser(),
 		new EOlimpParser(), new RCCParser(), new GCJParser(), new KattisParser()};
 
 	public Icon getIcon();

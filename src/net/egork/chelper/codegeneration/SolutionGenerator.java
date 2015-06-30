@@ -40,6 +40,9 @@ public class SolutionGenerator {
 				PsiClass aClass = (PsiClass) ((PsiReference) element.getParent()).resolve();
 				source.append(convertNameFull(aClass));
 			} else {
+				if (element instanceof PsiAnnotation) {
+					return;
+				}
 				if (element.getFirstChild() == null) {
 					source.append(element.getText());
 				} else {
@@ -69,11 +72,6 @@ public class SolutionGenerator {
 					PsiElement referenced = reference.resolve();
 					if (referenced instanceof PsiField || referenced instanceof PsiMethod || referenced instanceof PsiClass) {
 						processElement(referenced, toInline);
-					}
-				} else if (element instanceof PsiMethod) {
-					//We should get here only if we find anonymous class method. We need to get its super method if present
-					for (PsiMethod method : ((PsiMethod) element).findSuperMethods()) {
-						processElement(method, toInline);
 					}
 				} else if (element instanceof PsiConstructorCall) {
 					PsiMethod constructor = ((PsiConstructorCall) element).resolveConstructor();
@@ -106,9 +104,6 @@ public class SolutionGenerator {
 						PsiType type = parameter.getType().getDeepComponentType();
 						processType(type);
 					}
-					for (PsiMethod superMethods : method.findSuperMethods()) {
-						processElement(superMethods, toInline);
-					}
 					PsiCodeBlock body = method.getBody();
 					if (body != null) {
 						body.accept(visitor);
@@ -121,6 +116,9 @@ public class SolutionGenerator {
 					}
 					for (PsiClass superClass : ((PsiClass) element).getSupers()) {
 						processElement(superClass, toInline);
+					}
+					for (PsiMethod constructor : ((PsiClass) element).getConstructors()) {
+						processElement(constructor, toInline);
 					}
 				}
 			}
@@ -184,7 +182,11 @@ public class SolutionGenerator {
 		}
 		source.append(aClass.isEnum() ? "enum" : aClass.isInterface() ? "interface" : "class").append(' ');
 		String className = convertName(aClass);
-		source.append(className);
+		aClass.getNameIdentifier().accept(visitor);
+		PsiTypeParameterList parameterList = aClass.getTypeParameterList();
+		if (parameterList != null) {
+			parameterList.accept(visitor);
+		}
 		if (aClass.getExtendsList() != null) {
 			source.append(' ');
 			aClass.getExtendsList().accept(visitor);
@@ -241,9 +243,14 @@ public class SolutionGenerator {
 			}
 			PsiModifierList fieldModifierList = method.getModifierList();
 			modifierList = fieldModifierList.getText();
+			modifierList = modifierList.replace("@Override", "");
 			source.append(modifierList);
 			if (!modifierList.isEmpty()) {
 				source.append(" ");
+			}
+			PsiTypeParameterList pList = method.getTypeParameterList();
+			if (pList != null) {
+				pList.accept(visitor);
 			}
 			if (method.getReturnType() != null) {
 				method.getReturnTypeElement().accept(visitor);
@@ -300,7 +307,10 @@ public class SolutionGenerator {
 	private void processElement(PsiElement element, Set<PsiElement> toInline) {
 		boolean shouldAdd = shouldAddElement(element);
 		if (element instanceof PsiClass && !shouldAdd) {
-			classesToImport.add(((PsiClass) element).getQualifiedName());
+			String qualifiedName = ((PsiClass) element).getQualifiedName();
+			if (qualifiedName != null) {
+				classesToImport.add(qualifiedName);
+			}
 		} else if (!toInline.contains(element) && shouldAdd) {
 			queue.add(element);
 			toInline.add(element);

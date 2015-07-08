@@ -11,7 +11,7 @@ import java.util.Collection;
  */
 public interface Parser {
     public static final Parser[] PARSERS = {new CodeforcesParser(), new TimusParser(),
-		new EOlimpParser(), new RCCParser(), new GCJParser(), new KattisParser()};
+		new RCCParser(), new GCJParser(), new KattisParser()};
 
 	public Icon getIcon();
 	public String getName();

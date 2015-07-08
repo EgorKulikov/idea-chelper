@@ -120,6 +120,9 @@ public class SolutionGenerator {
 					for (PsiMethod constructor : ((PsiClass) element).getConstructors()) {
 						processElement(constructor, toInline);
 					}
+					for (PsiElement initializer : ((PsiClass) element).getInitializers()) {
+						initializer.accept(visitor);
+					}
 				}
 			}
 			Set<PsiElement> addOnStep = new HashSet<PsiElement>();
@@ -233,6 +236,9 @@ public class SolutionGenerator {
 				source.append(";\n");
 				fieldAdded = true;
 			}
+		}
+		for (PsiElement element : aClass.getInitializers()) {
+			element.accept(visitor);
 		}
 		if (fieldAdded) {
 			source.append("\n");

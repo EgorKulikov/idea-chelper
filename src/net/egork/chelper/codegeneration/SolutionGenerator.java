@@ -308,7 +308,7 @@ public class SolutionGenerator {
 		boolean shouldAdd = shouldAddElement(element);
 		if (element instanceof PsiClass && !shouldAdd) {
 			String qualifiedName = ((PsiClass) element).getQualifiedName();
-			if (qualifiedName != null) {
+			if (qualifiedName != null && !qualifiedName.startsWith("_")) {
 				classesToImport.add(qualifiedName);
 			}
 		} else if (!toInline.contains(element) && shouldAdd) {

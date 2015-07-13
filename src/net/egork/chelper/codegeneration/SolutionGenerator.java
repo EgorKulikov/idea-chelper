@@ -34,11 +34,15 @@ public class SolutionGenerator {
 	private PsiElementVisitor visitor = new PsiElementVisitor() {
 		@Override
 		public void visitElement(PsiElement element) {
-			if (element instanceof PsiIdentifier &&
-				element.getParent() instanceof PsiReference &&
-				((PsiReference) element.getParent()).resolve() instanceof PsiClass) {
-				PsiClass aClass = (PsiClass) ((PsiReference) element.getParent()).resolve();
+			if (element instanceof PsiReference &&
+				((PsiReference) element).resolve() instanceof PsiClass) {
+				PsiClass aClass = (PsiClass) ((PsiReference) element).resolve();
 				source.append(convertNameFull(aClass));
+				for (PsiElement child : element.getChildren()) {
+					if (child instanceof PsiReferenceParameterList) {
+						child.accept(this);
+					}
+				}
 			} else {
 				if (element instanceof PsiAnnotation) {
 					return;
@@ -185,7 +189,7 @@ public class SolutionGenerator {
 		}
 		source.append(aClass.isEnum() ? "enum" : aClass.isInterface() ? "interface" : "class").append(' ');
 		String className = convertName(aClass);
-		aClass.getNameIdentifier().accept(visitor);
+		source.append(className);
 		PsiTypeParameterList parameterList = aClass.getTypeParameterList();
 		if (parameterList != null) {
 			parameterList.accept(visitor);

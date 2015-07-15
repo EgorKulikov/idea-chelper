@@ -1,6 +1,7 @@
 package net.egork.chelper.codegeneration;
 
 import com.intellij.codeInsight.actions.ReformatCodeProcessor;
+import com.intellij.notification.NotificationType;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
@@ -11,6 +12,7 @@ import net.egork.chelper.task.Task;
 import net.egork.chelper.task.TestType;
 import net.egork.chelper.task.TopCoderTask;
 import net.egork.chelper.util.FileUtilities;
+import net.egork.chelper.util.Messenger;
 import net.egork.chelper.util.Utilities;
 
 import java.io.File;
@@ -37,6 +39,14 @@ public class SolutionGenerator {
 			if (element instanceof PsiReference &&
 				((PsiReference) element).resolve() instanceof PsiClass) {
 				PsiClass aClass = (PsiClass) ((PsiReference) element).resolve();
+				if (!toInline.contains(aClass)) {
+					if (element.getFirstChild() == null) {
+						source.append(element.getText());
+					} else {
+						element.acceptChildren(this);
+					}
+					return;
+				}
 				source.append(convertNameFull(aClass));
 				for (PsiElement child : element.getChildren()) {
 					if (child instanceof PsiReferenceParameterList) {
@@ -66,7 +76,12 @@ public class SolutionGenerator {
 	public String createInlinedSource() {
 		processElement(entryPoint, toInline);
 		for (PsiElement element : template.entryPoints) {
-			processElement(element, toInline);
+			if (element == null) {
+				Messenger.publishMessage("Not all mandatory methods in input and output classes are defined." +
+					"Generated file will likely result in compilation error", NotificationType.ERROR);
+			} else {
+				processElement(element, toInline);
+			}
 		}
 		final PsiElementVisitor visitor = new PsiElementVisitor() {
 			@Override
@@ -485,7 +500,7 @@ public class SolutionGenerator {
 					}
 				}
 				SolutionGenerator generator = new SolutionGenerator(new HashSet<String>(Arrays.asList(Utilities.getData(project).excludedPackages)),
-					createMainClassTemplate(task, project), true, MainFileTemplate.getMethod(project, task.taskClass, "solve", "void", "int", Utilities.getData(project).inputClass, Utilities.getData(project).outputClass));
+					createMainClassTemplate(task, project), true, MainFileTemplate.getMethod(project, task.taskClass, "solve", "void", "int", task.inputClass, task.outputClass));
 				String source = generator.createInlinedSource();
 				final VirtualFile file = FileUtilities.writeTextFile(directory, task.mainClass + ".java", source);
 				FileUtilities.synchronizeFile(file);

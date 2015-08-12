@@ -367,7 +367,7 @@ public class CodeGenerationUtilities {
 
 	public static String createTopCoderTestStub(Project project, String aPackage, String name) {
 		String template = createTopCoderTestCaseClassTemplateIfNeeded(project);
-		return new Template(template).apply("package", aPackage, "TaskClass", name);
+		return new Template(template).apply("package", aPackage, "TestCaseClass", name);
 	}
 
 	static String getSimpleName(String className) {

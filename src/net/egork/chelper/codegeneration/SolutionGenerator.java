@@ -39,7 +39,7 @@ public class SolutionGenerator {
 			if (element instanceof PsiReference &&
 				((PsiReference) element).resolve() instanceof PsiClass) {
 				PsiClass aClass = (PsiClass) ((PsiReference) element).resolve();
-				if (!toInline.contains(aClass)) {
+				if (!toInline.contains(aClass) || aClass.getContainingClass() != null) {
 					if (element.getFirstChild() == null) {
 						source.append(element.getText());
 					} else {
@@ -123,6 +123,7 @@ public class SolutionGenerator {
 						PsiType type = parameter.getType().getDeepComponentType();
 						processType(type);
 					}
+					processType(method.getReturnType());
 					PsiCodeBlock body = method.getBody();
 					if (body != null) {
 						body.accept(visitor);
@@ -166,7 +167,7 @@ public class SolutionGenerator {
 		PsiClass entryClass = entryPoint.getContainingClass();
 		single.add(entryClass.getName());
 		for (PsiElement element : toInline) {
-			if (element instanceof PsiClass) {
+			if (element instanceof PsiClass && ((PsiClass) element).getContainingClass() == null) {
 				String name = ((PsiClass) element).getName();
 				if (single.contains(name)) {
 					resolveToFull.add(name);

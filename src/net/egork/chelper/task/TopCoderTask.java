@@ -156,8 +156,8 @@ public class TopCoderTask {
     public PsiMethod getMethod(Project project) {
         String[] arguments = new String[signature.arguments.length];
         for (int i = 0; i < arguments.length; i++) {
-            arguments[i] = signature.arguments[i].getSimpleName();
+            arguments[i] = signature.arguments[i].getCanonicalName();
         }
-        return MainFileTemplate.getMethod(project, fqn, signature.name, signature.result.getSimpleName(), arguments);
+        return MainFileTemplate.getMethod(project, fqn, signature.name, signature.result.getCanonicalName(), arguments);
     }
 }

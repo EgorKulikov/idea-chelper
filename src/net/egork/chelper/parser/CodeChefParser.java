@@ -157,10 +157,10 @@ public class CodeChefParser implements Parser {
 		StringParser parser = new StringParser(text);
 		try {
 			parser.advance(true, "<!-- /HEADER -->");
-			parser.advance(true, "<div id=\"breadcrumb\">");
+			parser.advance(true, "<div id=\"breadcrumbs\">");
 			parser.advance(true, "<a href=\"");
 			parser.advance(true, "<a href=\"");
-			parser.advance(true, "<a href=\"");
+			parser.advance(true, "<a id");
 			parser.advance(true, "\">");
 			String contestName = parser.advance(false, "</a>");
 			parser.advance(true, "&nbsp;");
@@ -173,10 +173,16 @@ public class CodeChefParser implements Parser {
 			List<Test> tests = new ArrayList<Test>();
 			int index = 0;
 			while (parser.advanceIfPossible(true, "</b>") != null) {
-				String input = StringEscapeUtils.unescapeHtml(parser.advance(false, "<b>")).trim() + "\n";
+				String input = StringEscapeUtils.unescapeHtml(parser.advance(false, "<b>")).trim();
 				parser.advance(true, "</b>");
-				String output = StringEscapeUtils.unescapeHtml(parser.advance(false, "<b>")).trim() + "\n";
-				tests.add(new Test(input, output, index++));
+				if (input.startsWith("<tt>") && input.endsWith("</tt>")) {
+					input = input.substring(4, input.length() - 5);
+				}
+				String output = StringEscapeUtils.unescapeHtml(parser.advance(false, "<b>")).trim();
+				if (output.startsWith("<tt>") && output.endsWith("</tt>")) {
+					output = output.substring(4, output.length() - 5);
+				}
+				tests.add(new Test(input + "\n", output + "\n", index++));
 			}
             return Collections.singleton(new Task(taskName, defaultTestType(), StreamConfiguration.STANDARD,
 				StreamConfiguration.STANDARD, tests.toArray(new Test[tests.size()]), null, "-Xmx64M", "Main", taskID,

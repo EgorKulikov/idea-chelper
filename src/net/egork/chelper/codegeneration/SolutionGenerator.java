@@ -34,34 +34,66 @@ public class SolutionGenerator {
 	private Set<String> resolveToFull = new HashSet<String>();
 	private StringBuilder source = new StringBuilder();
 	private PsiElementVisitor visitor = new PsiElementVisitor() {
+		private boolean insideResolve;
+
 		@Override
 		public void visitElement(PsiElement element) {
-			if (element instanceof PsiReference &&
-				((PsiReference) element).resolve() instanceof PsiClass) {
-				PsiClass aClass = (PsiClass) ((PsiReference) element).resolve();
-				if (!toInline.contains(aClass) || aClass.getContainingClass() != null) {
-					if (element.getFirstChild() == null) {
-						source.append(element.getText());
-					} else {
-						element.acceptChildren(this);
+			if (element instanceof PsiReference) {
+				PsiElement target = ((PsiReference) element).resolve();
+				if (target instanceof PsiClass) {
+					PsiClass aClass = (PsiClass) target;
+					if (!toInline.contains(aClass) || aClass.getContainingClass() != null) {
+						processDirectly(element);
+						return;
+					}
+					source.append(convertNameFull(aClass));
+					for (PsiElement child : element.getChildren()) {
+						if (child instanceof PsiReferenceParameterList) {
+							child.accept(this);
+						}
+					}
+					return;
+				} else if (!insideResolve && target instanceof PsiMember && ((PsiMember) target).hasModifierProperty(PsiModifier.STATIC)) {
+					insideResolve = true;
+					int start = source.length();
+					processDirectly(element);
+					insideResolve = false;
+					String result = source.substring(start);
+					PsiClass containingClass = ((PsiMember) target).getContainingClass();
+					if (containingClass == null || isParent(containingClass, element)) {
+						return;
+					}
+					String prefix = convertNameFull(containingClass) + ".";
+					for (int i = Math.min(prefix.length(), result.length()); i >= 0; i--) {
+						if (prefix.endsWith(result.substring(0, i))) {
+							source.insert(start, prefix.substring(0, prefix.length() - i));
+							return;
+						}
 					}
 					return;
 				}
-				source.append(convertNameFull(aClass));
-				for (PsiElement child : element.getChildren()) {
-					if (child instanceof PsiReferenceParameterList) {
-						child.accept(this);
-					}
+			}
+			if (element instanceof PsiAnnotation) {
+				return;
+			}
+			processDirectly(element);
+		}
+
+		private boolean isParent(PsiClass aClass, PsiElement element) {
+			while (element != null) {
+				if (element == aClass) {
+					return true;
 				}
+				element = element.getParent();
+			}
+			return false;
+		}
+
+		private void processDirectly(PsiElement element) {
+			if (element.getFirstChild() == null) {
+				source.append(element.getText());
 			} else {
-				if (element instanceof PsiAnnotation) {
-					return;
-				}
-				if (element.getFirstChild() == null) {
-					source.append(element.getText());
-				} else {
-					element.acceptChildren(this);
-				}
+				element.acceptChildren(this);
 			}
 		}
 	};
@@ -106,11 +138,7 @@ public class SolutionGenerator {
 				PsiElement element = queue.poll();
 				if (element instanceof PsiField) {
 					PsiField field = (PsiField) element;
-					processType(field.getType().getDeepComponentType());
-					PsiExpression initializer = field.getInitializer();
-					if (initializer != null) {
-						initializer.accept(visitor);
-					}
+					element.accept(visitor);
 					processElement(field.getContainingClass(), toInline);
 					if (field instanceof PsiEnumConstant) {
 						if (((PsiEnumConstant) field).resolveConstructor() != null) {
@@ -119,23 +147,24 @@ public class SolutionGenerator {
 					}
 				} else if (element instanceof PsiMethod) {
 					PsiMethod method = (PsiMethod) element;
-					for (PsiParameter parameter : method.getParameterList().getParameters()) {
-						PsiType type = parameter.getType().getDeepComponentType();
-						processType(type);
-					}
-					processType(method.getReturnType());
-					PsiCodeBlock body = method.getBody();
-					if (body != null) {
-						body.accept(visitor);
-					}
+					element.accept(visitor);
 					processElement(method.getContainingClass(), toInline);
 				} else if (element instanceof PsiClass) {
 					PsiClass parent = ((PsiClass) element).getContainingClass();
 					if (parent != null) {
 						processElement(parent, toInline);
 					}
-					for (PsiClass superClass : ((PsiClass) element).getSupers()) {
-						processElement(superClass, toInline);
+					PsiReferenceList implementsList = ((PsiClass) element).getImplementsList();
+					if (implementsList != null) {
+						implementsList.accept(visitor);
+					}
+					PsiReferenceList extendsList = ((PsiClass) element).getExtendsList();
+					if (extendsList != null) {
+						extendsList.accept(visitor);
+					}
+					PsiTypeParameterList parameterList = ((PsiClass) element).getTypeParameterList();
+					if (parameterList != null) {
+						parameterList.accept(visitor);
 					}
 					for (PsiMethod constructor : ((PsiClass) element).getConstructors()) {
 						processElement(constructor, toInline);
@@ -286,6 +315,7 @@ public class SolutionGenerator {
 				source.append(className);
 			}
 			method.getParameterList().accept(visitor);
+			method.getThrowsList().accept(visitor);
 			if (method.getBody() != null) {
 				source.append(' ');
 				method.getBody().accept(visitor);
@@ -340,17 +370,6 @@ public class SolutionGenerator {
 		} else if (!toInline.contains(element) && shouldAdd) {
 			queue.add(element);
 			toInline.add(element);
-		}
-	}
-
-	private void processType(PsiType type) {
-		if (type instanceof PsiClassType) {
-			PsiClass aClass = ((PsiClassType) type).resolve();
-			if (aClass == null) {
-				//TODO
-				return;
-			}
-			processElement(aClass, toInline);
 		}
 	}
 

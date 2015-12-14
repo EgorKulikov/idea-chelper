@@ -46,16 +46,16 @@ public class UsacoParser implements Parser {
 			String contestName = parser.advance(false, "</h2>").trim();
 			parser.advance(true, "<h2>");
 			String taskName = parser.advance(false, "</h2>").trim();
-			parser.advance(true, "INPUT FORMAT: (");
+			parser.advance(true, "INPUT FORMAT (file ");
 			String taskId = parser.advance(false, ".in").trim();
 			String taskClass = Character.toUpperCase(taskId.charAt(0)) + taskId.substring(1);
 			StreamConfiguration	input = new StreamConfiguration(StreamConfiguration.StreamType.CUSTOM, taskId + ".in");
 			StreamConfiguration output = new StreamConfiguration(StreamConfiguration.StreamType.CUSTOM, taskId + ".out");
 			parser.advance(true, "SAMPLE INPUT");
-			parser.advance(true, "<pre>");
+			parser.advance(true, "<pre class=\"in\">");
 			String testInput = parser.advance(false, "</pre>").trim() + "\n";
 			parser.advance(true, "SAMPLE OUTPUT");
-			parser.advance(true, "<pre>");
+			parser.advance(true, "<pre class=\"out\">");
 			String testOutput = parser.advance(false, "</pre>").trim() + "\n";
 			return Collections.singleton(new Task(taskName, defaultTestType(), input, output, new Test[]{new Test(testInput, testOutput)},
 				null, "-Xmx1024M", "Main", taskClass, TokenChecker.class.getCanonicalName(), "",

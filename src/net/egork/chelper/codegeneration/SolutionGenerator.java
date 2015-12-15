@@ -63,7 +63,13 @@ public class SolutionGenerator {
 					if (containingClass == null || isParent(containingClass, element)) {
 						return;
 					}
-					String prefix = convertNameFull(containingClass) + ".";
+					String separator = ".";
+					int indexOf = result.indexOf("::");
+					int parentheses = result.indexOf("(");
+					if (indexOf != -1 && (parentheses == -1 || indexOf < parentheses)) {
+						separator = "::";
+					}
+					String prefix = convertNameFull(containingClass) + separator;
 					for (int i = Math.min(prefix.length(), result.length()); i >= 0; i--) {
 						if (prefix.endsWith(result.substring(0, i))) {
 							source.insert(start, prefix.substring(0, prefix.length() - i));

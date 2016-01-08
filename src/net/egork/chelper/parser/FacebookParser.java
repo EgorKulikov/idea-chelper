@@ -43,10 +43,10 @@ public class FacebookParser implements Parser {
 	public Collection<Task> parseTaskFromHTML(String html) {
 		StringParser parser = new StringParser(html);
 		try {
-			parser.advance(true, "<div id=\"headerArea\">");
-			parser.advance(true, "<h2 class=\"accessible_elem\">");
+			parser.advance(true, "<h2 class=\"uiHeaderTitle\"");
+			parser.advance(true, ">");
 			String contestName = parser.advance(false, "</h2>");
-			parser.advance(true, "<div class=\"pam problem_statement\" id=\"statement\">");
+			parser.advance(true, "<div class=\"clearfix\">");
 			parser.advance(true, "<span class");
 			parser.advance(true, ">");
 			String taskName = parser.advance(false, "</span>");
@@ -64,9 +64,11 @@ public class FacebookParser implements Parser {
 			StreamConfiguration output = new StreamConfiguration(StreamConfiguration.StreamType.CUSTOM,
 				taskName.toLowerCase().replaceAll(" ", "") + ".out");
 			parser.advance(true, "<span class=\"fsm\">Example input</span>");
-			parser.advance(true, "<pre>");
+			parser.advance(true, "<pre");
+			parser.advance(true, ">");
 			String testInput = StringEscapeUtils.unescapeHtml(parser.advance(false, "</pre>"));
-			parser.advance(true, "<pre>");
+			parser.advance(true, "<pre");
+			parser.advance(true, ">");
 			String testOutput = StringEscapeUtils.unescapeHtml(parser.advance(false, "</pre>"));
 			return Collections.singleton(new Task(taskName, defaultTestType(), input, output, new Test[]{new Test(testInput, testOutput)},
 				null, "-Xmx1024M", "Main", taskClass, TokenChecker.class.getCanonicalName(), "",

@@ -44,14 +44,6 @@ public class YandexParser implements Parser {
 	public Collection<Task> parseTaskFromHTML(String html) {
 		StringParser parser = new StringParser(html);
 		try {
-			parser.advance(true, "<input type=\"hidden\" name=\"retpath\" value=\"");
-			String url = parser.advance(false, "\"");
-			String letter;
-			if (url.endsWith("problems/")) {
-				letter = "A";
-			} else {
-				letter = url.substring(url.substring(0, url.length() - 1).lastIndexOf('/') + 1, url.length() - 1);
-			}
 			parser.advance(true, "<div class=\"contest-head__item contest-head__item_role_title\">");
 			String contestName = parser.advance(false, "</div>");
 			if (contestName.startsWith("<a"))
@@ -76,6 +68,11 @@ public class YandexParser implements Parser {
 				String testOutput = parser.advance(false, "</pre></td>");
 				tests.add(new Test(testInput, testOutput, tests.size()));
 			}
+			parser.advance(true, "tabs-menu_role_problems");
+			parser.advance(true, "tabs-menu__tab_active_yes");
+			parser.advance(true, "href=");
+			parser.advance(true, "/problems/");
+			String letter = parser.advance(false, "/");
 			return Collections.singleton(new Task(letter + " - " + taskName, defaultTestType(), input, output, tests.toArray(new Test[tests.size()]), null,
 				"-Xmx" + memoryLimit, "Main", "Task" + letter, TokenChecker.class.getCanonicalName(), "",
 				new String[0], null, contestName, true, null, null, false, false));

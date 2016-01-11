@@ -7,7 +7,8 @@ function checkForValidUrl(tabId, changeInfo, tab) {
         /^http:\/\/(www[.])?usaco[.]org\/(current\/)?index[.]php[?]page[=]viewproblem.*$/.test(tab.url) ||
         /^https:\/\/code[.]google[.]com\/codejam\/contest\/\d*\/dashboard.*$/.test(tab.url) ||
         /^http:\/\/contest[.]bayan[.]ir\/en\/contest\/.*\/problem\/[A-Z]\/$/.test(tab.url) ||
-        /^https?:\/\/(www[.])?codechef[.]com\/(.*\/)?problems\/.*$/.test(tab.url))
+        /^https?:\/\/(www[.])?codechef[.]com\/(.*\/)?problems\/.*$/.test(tab.url) ||
+        /^https?:\/\/(www[.])?hackerearth[.]com\/(.*\/)?algorithm\/.*$/.test(tab.url))
     {
         chrome.pageAction.show(tabId);
     } else {
@@ -36,6 +37,8 @@ function parseTask(tab) {
         chrome.tabs.sendMessage(tab.id, 'kattis');
     } else if (/^https?:\/\/(www[.])?codechef[.]com\/(.*\/)?problems\/.*$/.test(tab.url)) {
         chrome.tabs.sendMessage(tab.id, 'codechef');
+    } else if (/^https?:\/\/(www[.])?hackerearth[.]com\/(.*\/)?algorithm\/.*$/.test(tab.url)) {
+        chrome.tabs.sendMessage(tab.id, 'hackerearth');
     }
 }
 

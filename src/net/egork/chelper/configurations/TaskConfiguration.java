@@ -77,8 +77,8 @@ public class TaskConfiguration extends ModuleBasedConfiguration<JavaRunConfigura
                 for (String parameter : vmParameters)
                     parameters.getVMParametersList().add(parameter);
                 if (configuration.failOnOverflow) {
-                    String path = TopCoderAction.getJarPathForClass(ch.eiafr.cojac.Cojac.class);
-                    parameters.getVMParametersList().add("-javaagent:" + path + "=-e -ints -longs -casts -maths");
+                    String path = TopCoderAction.getJarPathForClass(com.github.cojac.CojacAgent.class);
+                    parameters.getVMParametersList().add("-javaagent:" + path + "=-Cints -Clongs -Ccasts -Cmath");
                 }
 				String taskFileName = TaskUtilities.getTaskFileName(configuration.location, configuration.name);
 				parameters.getProgramParametersList().add(taskFileName);

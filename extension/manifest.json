@@ -27,7 +27,7 @@
                 "http://www.usaco.org/*",
                 "https://code.google.com/codejam/contest/*",
                 "http://contest.bayan.ir/*",
-                "https://open.kattis.com/problems/*",
+                "https://*.kattis.com/problems/*",
                 "http://www.codechef.com/*",
         		"https://www.codechef.com/*",
                 "https://www.hackerearth.com/*"

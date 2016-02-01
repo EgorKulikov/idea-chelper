@@ -41,7 +41,7 @@ public class KattisParser implements Parser {
 				StringParser currentPart = new StringParser(parser.advance(true, "</tbody>"));
 				while (currentPart.advanceIfPossible(true, "<a href=\"/contests/") != null) {
 					String id = currentPart.advance(true, "\">");
-					String name = currentPart.advance(false, "</a>");
+					String name = StringEscapeUtils.unescapeHtml(currentPart.advance(false, "</a>"));
 					contests.add(new Description(id, name));
 				}
 				if (!receiver.isStopped()) {
@@ -94,20 +94,22 @@ public class KattisParser implements Parser {
 
 	public void parseContest(String id, DescriptionReceiver receiver) {
 		if (id.indexOf(' ') == -1) {
-			String mainPage = FileUtilities.getWebPageContent("https://open.kattis.com/contests/" + id);
+			String mainPage = FileUtilities.getWebPageContent("https://open.kattis.com/contests/" + id + "/problems");
 			if (mainPage == null) {
 				return;
 			}
 			List<Description> ids = new ArrayList<Description>();
 			StringParser parser = new StringParser(mainPage);
 			try {
-				parser.advance(true, "<table id=\"standings\"");
-				parser = new StringParser(parser.advance(false, "</tr>"));
-				while (parser.advanceIfPossible(true, "<th class=\"problemcolheader\"><a href=\"/problems/") != null) {
-					String taskID = parser.advance(true, "\">");
-					String letter = parser.advance(false, "</a>");
-					String title = "Problem " + letter;
-					ids.add(new Description(taskID + " " + letter, title));
+				parser.advance(true, "<table id=\"contest_problem_list\"");
+				parser.advance(true, "<tbody>");
+				parser = new StringParser(parser.advance(false, "</tbody>"));
+				while (parser.advanceIfPossible(true, "<th class=\"problem_letter\">") != null) {
+					String letter = parser.advance(false, "</th>");
+					parser.advance(true, "<a href=\"");
+					String taskId = parser.advance(true, "\">");
+					String title = StringEscapeUtils.unescapeHtml(parser.advance(false, "</a>"));
+					ids.add(new Description(taskId + " " + letter, title));
 				}
 			} catch (ParseException ignored) {
 			}
@@ -124,9 +126,9 @@ public class KattisParser implements Parser {
 			StringParser parser = new StringParser(mainPage);
 			try {
 				parser.advance(true, "<tbody>");
-				while (parser.advanceIfPossible(true, "<td class=\"name_column\"><a href=\"/problems/") != null) {
+				while (parser.advanceIfPossible(true, "<td class=\"name_column\"><a href=\"") != null) {
 					String taskID = parser.advance(true, "\">");
-					String title = parser.advance(false, "</a>");
+					String title = StringEscapeUtils.unescapeHtml(parser.advance(false, "</a>"));
 					ids.add(new Description(taskID, title));
 				}
 			} catch (ParseException ignored) {
@@ -141,7 +143,7 @@ public class KattisParser implements Parser {
 		int space = description.id.indexOf(' ');
 		String id = space == -1 ?
 			description.id : description.id.substring(0, space);
-		String text = FileUtilities.getWebPageContent("https://open.kattis.com/problems/" + id);
+		String text = FileUtilities.getWebPageContent("https://open.kattis.com" + id);
 		if (text == null) {
 			return null;
 		}
@@ -150,7 +152,7 @@ public class KattisParser implements Parser {
 			Task task = tasks.iterator().next();
 			if (space != -1) {
 				String letter = description.id.substring(space + 1);
-				task = task.setTaskClass("Task" + letter).setName(letter + " - " + task.name);
+				task = task.setTaskClass("Task" + letter);
 			}
 			return task;
 		}
@@ -166,7 +168,7 @@ public class KattisParser implements Parser {
 		try {
 			String contestName = "Kattis Archive";
 			parser.advance(true, "<div class=\"headline-wrapper\"><h1>");
-			String taskName = parser.advance(false, "</h1>");
+			String taskName = StringEscapeUtils.unescapeHtml(parser.advance(false, "</h1>")).replace("<br/>", " - ");
 			parser.advance(true, "<span>Memory limit: ");
 			String heapMemory = parser.advance(false, " ") + "M";
 			List<Test> tests = new ArrayList<Test>();

@@ -135,11 +135,12 @@ public class TimusParser implements Parser {
 			Integer heapMemory = Integer.parseInt(parser.advance(false, " "));
 			List<Test> tests = new ArrayList<Test>();
 			parser.advance(false, "<TABLE CLASS=\"sample\">");
+			parser = new StringParser(parser.advance(false, "</TABLE>"));
 			while (true) {
 				try {
-					parser.advance(true, "<PRE CLASS=\"intable\">");
+					parser.advance(true, "<PRE>");
 					String input = parser.advance(false, "</PRE>");
-					parser.advance(true, "<PRE CLASS=\"intable\">");
+					parser.advance(true, "<PRE>");
 					String output = parser.advance(false, "</PRE>");
 					tests.add(new Test(StringEscapeUtils.unescapeHtml(input),
 						StringEscapeUtils.unescapeHtml(output), tests.size()));

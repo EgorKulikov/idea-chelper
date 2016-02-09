@@ -73,8 +73,8 @@ public class TopCoderConfiguration extends ModuleBasedConfiguration<JavaRunConfi
 				parameters.setMainClass("net.egork.chelper.tester.NewTopCoderTester");
 				parameters.getVMParametersList().add("-Xmx" + configuration.memoryLimit);
                 if (configuration.failOnOverflow) {
-                    String path = TopCoderAction.getJarPathForClass(ch.eiafr.cojac.Cojac.class);
-                    parameters.getVMParametersList().add("-javaagent:" + path + "=-e -ints -longs -casts -maths");
+                    String path = TopCoderAction.getJarPathForClass(com.github.cojac.CojacAgent.class);
+                    parameters.getVMParametersList().add("-javaagent:" + path + "=-Cints -Clongs -Ccasts -Cmath");
                 }
                 parameters.setWorkingDirectory(getProject().getBaseDir().getPath());
 				String taskFileName = TaskUtilities.getTopCoderTaskFileName(Utilities.getData(getProject()).defaultDirectory, configuration.name);

@@ -1,7 +1,7 @@
 <idea-plugin version="2">
   <name>CHelper</name>
   <description>Inlines library code and provides testing framework</description>
-  <version>4.1.2</version>
+  <version>4.1.3</version>
   <vendor>Egor Kulikov</vendor>
   <idea-version since-build="139.0"/>
 

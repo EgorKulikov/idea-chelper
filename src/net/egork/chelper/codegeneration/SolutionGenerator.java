@@ -40,9 +40,9 @@ public class SolutionGenerator {
 		public void visitElement(PsiElement element) {
 			if (element instanceof PsiReference) {
 				PsiElement target = ((PsiReference) element).resolve();
-				if (target instanceof PsiClass) {
+				if (!(element instanceof PsiMethodReferenceExpression) && target instanceof PsiClass) {
 					PsiClass aClass = (PsiClass) target;
-					if (!toInline.contains(aClass) || aClass.getContainingClass() != null) {
+					if (!toInline.contains(aClass) || (aClass.getContainingClass() != null && !aClass.hasModifierProperty(PsiModifier.STATIC))) {
 						processDirectly(element);
 						return;
 					}
@@ -70,9 +70,10 @@ public class SolutionGenerator {
 						separator = "::";
 					}
 					String prefix = convertNameFull(containingClass) + separator;
-					for (int i = Math.min(prefix.length(), result.length()); i >= 0; i--) {
-						if (prefix.endsWith(result.substring(0, i))) {
-							source.insert(start, prefix.substring(0, prefix.length() - i));
+					for (int i = result.length(); i >= 0; i--) {
+						int toInsert = endsWith(prefix, result.substring(0, i));
+						if (toInsert != -1) {
+							source.insert(start, prefix.substring(0, toInsert));
 							return;
 						}
 					}
@@ -83,6 +84,20 @@ public class SolutionGenerator {
 				return;
 			}
 			processDirectly(element);
+		}
+
+		private int endsWith(String s, String t) {
+			int at = s.length() - 1;
+			for (int i = t.length() - 1; i >= 0; i--) {
+				if (Character.isWhitespace(t.charAt(i))) {
+					continue;
+				}
+				if (at < 0 || s.charAt(at) != t.charAt(i)) {
+					return -1;
+				}
+				at--;
+			}
+			return at + 1;
 		}
 
 		private boolean isParent(PsiClass aClass, PsiElement element) {
@@ -201,6 +216,9 @@ public class SolutionGenerator {
 		Set<String> single = new HashSet<String>();
 		PsiClass entryClass = entryPoint.getContainingClass();
 		single.add(entryClass.getName());
+		for (String fqn : classesToImport) {
+			single.add(fqn.substring(fqn.lastIndexOf('.') + 1));
+		}
 		for (PsiElement element : toInline) {
 			if (element instanceof PsiClass && ((PsiClass) element).getContainingClass() == null) {
 				String name = ((PsiClass) element).getName();
@@ -368,12 +386,16 @@ public class SolutionGenerator {
 
 	private void processElement(PsiElement element, Set<PsiElement> toInline) {
 		boolean shouldAdd = shouldAddElement(element);
-		if (element instanceof PsiClass && !shouldAdd) {
-			String qualifiedName = ((PsiClass) element).getQualifiedName();
+		if (!shouldAdd) {
+			PsiClass aClass = element instanceof PsiClass ? (PsiClass) element : ((PsiMember) element).getContainingClass();
+			if (aClass == null) {
+				return;
+			}
+			String qualifiedName = aClass.getQualifiedName();
 			if (qualifiedName != null && !qualifiedName.startsWith("_")) {
 				classesToImport.add(qualifiedName);
 			}
-		} else if (!toInline.contains(element) && shouldAdd) {
+		} else if (!toInline.contains(element)) {
 			queue.add(element);
 			toInline.add(element);
 		}

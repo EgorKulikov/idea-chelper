@@ -23,12 +23,12 @@ public class MainFileTemplate extends Template {
 	public String resolve(String source, String className, Collection<String> additionalImports) {
 		StringBuilder imports = new StringBuilder();
 		for (String aImport : this.imports) {
-			if (!aImport.startsWith("java.lang.")) {
+			if (!aImport.matches("java[.]lang[.][^.]*")) {
 				imports.append("import ").append(aImport).append(";\n");
 			}
 		}
 		for (String aImport : additionalImports) {
-			if (!aImport.startsWith("java.lang.")) {
+			if (!aImport.matches("java[.]lang[.][^.]*")) {
 				imports.append("import ").append(aImport).append(";\n");
 			}
 		}

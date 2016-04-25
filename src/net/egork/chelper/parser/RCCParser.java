@@ -30,23 +30,23 @@ public class RCCParser implements Parser {
 
 	public void getContests(DescriptionReceiver receiver) {
 		int currentRound = -1;
-		String currentPage = FileUtilities.getWebPageContent("http://russiancodecup.ru/championship/", "UTF-8");
+		String currentPage = FileUtilities.getWebPageContent("http://russiancodecup.ru/en/championship/", "UTF-8");
 		StringParser parser = new StringParser(currentPage);
 		List<Integer> championshipIDs = new ArrayList<Integer>();
 		try {
 			parser.advance(true, "<div class=\"subMenu fontLarge\">");
 			while (parser.advanceIfPossible(true, "<li><a href=\"/championship/round/") != null)
 				championshipIDs.add(Integer.parseInt(parser.advance(false, "/")));
-			parser.advance(true, "<a href=\"/championship/round/");
-			String id = parser.advance(false, "/");
-			currentRound = Integer.parseInt(id);
+			parser.advance(true, "var cur_round_id =");
+			String id = parser.advance(false, ";");
+			currentRound = Integer.parseInt(id.trim());
 			processChampionshipPage(receiver, currentRound, currentPage);
 		} catch (ParseException ignored) {
 		} catch (NumberFormatException ignored) {
 		}
 		for (int id : championshipIDs)
-			processChampionshipPage(receiver, id, FileUtilities.getWebPageContent("http://russiancodecup.ru/championship/round/" + id + "/problem/A/", "UTF-8"));
-		for (int i = 26; i > 0; i--) {
+			processChampionshipPage(receiver, id, FileUtilities.getWebPageContent("http://russiancodecup.ru/en/championship/round/" + id + "/problem/A/", "UTF-8"));
+		for (int i = 40; i > 0; i--) {
 			processArchivePage(receiver, i);
 		}
 	}
@@ -65,7 +65,7 @@ public class RCCParser implements Parser {
 
 	private void processArchivePage(DescriptionReceiver receiver, int id) {
 		String page;
-		page = FileUtilities.getWebPageContent("http://russiancodecup.ru/tasks/round/" + id, "UTF-8");
+		page = FileUtilities.getWebPageContent("http://russiancodecup.ru/ru/tasks/round/" + id, "UTF-8");
 		if (page == null || page.contains("<title>RCC | 404</title>")) {
 			return;
 		}

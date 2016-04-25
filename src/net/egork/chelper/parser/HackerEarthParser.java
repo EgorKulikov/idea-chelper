@@ -47,7 +47,7 @@ public class HackerEarthParser implements Parser {
 		try {
 			String contestName = "";
 			if (parser.advanceIfPossible(true, "<div class=\"cover\">") != null) {
-				parser.advance(true, "<div class=\"title-container\">");
+				parser.advance(true, "<div class=\"title");
 				parser.advance(true, "<a href");
 				parser.advance(true, ">");
 				contestName = StringEscapeUtils.unescapeHtml(parser.advance(false, "</a>").trim().replace('/', '-'));
@@ -59,14 +59,14 @@ public class HackerEarthParser implements Parser {
 			StreamConfiguration	input = StreamConfiguration.STANDARD;
 			StreamConfiguration output = StreamConfiguration.STANDARD;
 			List<Test> tests = new ArrayList<Test>();
-			parser.advance(true, "Sample Input</div>");
+			parser.advance(true, "SAMPLE INPUT</div>");
 			parser.advance(true, "<pre>");
 			String testInput = StringEscapeUtils.unescapeHtml(parser.advance(false, "</pre>"));
-			parser.advance(true, "Sample Output</div>");
+			parser.advance(true, "SAMPLE OUTPUT</div>");
 			parser.advance(true, "<pre>");
 			String testOutput = StringEscapeUtils.unescapeHtml(parser.advance(false, "</pre>"));
 			tests.add(new Test(testInput, testOutput, tests.size()));
-			parser.advance(true, "<span>Memory Limit:");
+			parser.advance(true, ">Memory Limit: </span>");
 			parser.advance(true, "<span>");
 			String ml = parser.advance(false, " ");
 			return Collections.singleton(new Task(taskName, defaultTestType(), input, output, tests.toArray(new Test[tests.size()]), null,

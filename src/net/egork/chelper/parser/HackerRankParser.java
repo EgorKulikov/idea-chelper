@@ -45,21 +45,17 @@ public class HackerRankParser implements Parser {
 	public Collection<Task> parseTaskFromHTML(String html) {
 		StringParser parser = new StringParser(html);
 		try {
-			parser.advance(true, ">All Contests</a>");
-			parser.advance(true, "class=\"backbone\"");
-			parser.advance(true, ">");
-			String contestName = parser.advance(false, "</a>").trim().replace('/', '-');
-			parser.advance(true, "class=\"backbone\"");
-			parser.advance(true, ">");
-			String taskName = parser.advance(false, "</a>");
+			parser.advance(true, "data-attr1=\"All Contests\"");
+			parser.advance(true, "data-attr1=\"");
+			String contestName = parser.advance(false, "\"").trim().replace('/', '-');
+			parser.advance(true, "data-attr1=\"");
+			String taskName = parser.advance(false, "\"");
 			String taskClass = CodeChefParser.getTaskID(taskName);
 			StreamConfiguration	input = StreamConfiguration.STANDARD;
 			StreamConfiguration output = StreamConfiguration.STANDARD;
 			List<Test> tests = new ArrayList<Test>();
-			while (parser.advanceIfPossible(true, "<strong>Sample input", "<strong>Sample Input") != null) {
-				parser.advance(true, "<pre><code>");
+			while (parser.advanceIfPossible(true, "<pre><code>") != null) {
 				String testInput = StringEscapeUtils.unescapeHtml(parser.advance(false, "</code></pre>"));
-				parser.advance(true, "<strong>Sample output", "<strong>Sample Output", "<strong>Example Output");
 				parser.advance(true, "<pre><code>");
 				String testOutput = StringEscapeUtils.unescapeHtml(parser.advance(false, "</code></pre>"));
 				tests.add(new Test(testInput, testOutput, tests.size()));

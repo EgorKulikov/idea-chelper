@@ -4,7 +4,7 @@
     "name": "CHelper extension",
     "description": "Allows to parse tasks directly from browser.",
     "background": { "scripts": ["background.js"] },
-    "version": "4.1.4.1",
+    "version": "4.1.5.1",
 
     "permissions": [
         "tabs",
@@ -30,7 +30,9 @@
                 "https://*.kattis.com/problems/*",
                 "http://www.codechef.com/*",
         		"https://www.codechef.com/*",
-                "https://www.hackerearth.com/*"
+                "https://www.hackerearth.com/*",
+                "http://*.contest.atcoder.jp/*",
+                "https://csacademy.com/*"
             ],
             "js": ["contentscript.js"],
             "run_at": "document_idle",

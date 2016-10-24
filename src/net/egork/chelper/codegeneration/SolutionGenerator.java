@@ -54,6 +54,10 @@ public class SolutionGenerator {
 					}
 					return;
 				} else if (!insideResolve && target instanceof PsiMember && ((PsiMember) target).hasModifierProperty(PsiModifier.STATIC)) {
+					if (target instanceof PsiEnumConstant && element.getParent() instanceof PsiSwitchLabelStatement) {
+						source.append(element.getText());
+						return;
+					}
 					insideResolve = true;
 					int start = source.length();
 					processDirectly(element);

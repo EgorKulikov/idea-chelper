@@ -5,7 +5,6 @@ import net.egork.chelper.task.StreamConfiguration;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.Test;
 import net.egork.chelper.task.TestType;
-import org.apache.commons.lang.StringEscapeUtils;
 
 import javax.swing.*;
 import java.text.ParseException;
@@ -17,13 +16,13 @@ import java.util.List;
 /**
  * @author egorku@yandex-team.ru
  */
-public class HackerEarthParser implements Parser {
+public class CSAcademyParser implements Parser {
 	public Icon getIcon() {
 		throw new UnsupportedOperationException();
 	}
 
 	public String getName() {
-		return "HackerEarth";
+		return "CS Academy";
 	}
 
 	public void getContests(DescriptionReceiver receiver) {
@@ -39,41 +38,49 @@ public class HackerEarthParser implements Parser {
 	}
 
 	public TestType defaultTestType() {
-		return TestType.MULTI_NUMBER;
+		return TestType.SINGLE;
 	}
 
 	public Collection<Task> parseTaskFromHTML(String html) {
 		StringParser parser = new StringParser(html);
 		try {
-			String contestName = "";
-			if (parser.advanceIfPossible(true, "<div class=\"cover\">") != null) {
-				parser.advance(true, "<div class=\"title");
-				parser.advance(true, "<a href");
-				parser.advance(true, ">");
-				contestName = StringEscapeUtils.unescapeHtml(parser.advance(false, "</a>").trim().replace('/', '-'));
-			}
-			parser.advance(true, "<div class=\"programming\"");
-			parser.advance(true, "<span class=\"dark\">");
-			String taskName = StringEscapeUtils.unescapeHtml(parser.advance(false, "</span>")).trim();
-			String taskClass = CodeChefParser.getTaskID(taskName);
-			StreamConfiguration	input = StreamConfiguration.STANDARD;
+			parser.advance(true, "#task/");
+			String probId = parser.advance(false, "/");
+			parser.advance(true, "<div class=\"text-center\"><h1>");
+			String taskName = parser.advance(false, "</h1>");
+			parser.advance(true, "<br>Memory limit: <em>");
+			String memoryLimit = parser.advance(false, " ");
+			memoryLimit += "M";
+			StreamConfiguration input = StreamConfiguration.STANDARD;
 			StreamConfiguration output = StreamConfiguration.STANDARD;
 			List<Test> tests = new ArrayList<Test>();
-			parser.advance(true, "SAMPLE INPUT</div>");
-			parser.advance(true, "<pre>");
-			String testInput = StringEscapeUtils.unescapeHtml(parser.advance(false, "</pre>"));
-			parser.advance(true, "SAMPLE OUTPUT</div>");
-			parser.advance(true, "<pre>");
-			String testOutput = StringEscapeUtils.unescapeHtml(parser.advance(false, "</pre>"));
-			tests.add(new Test(testInput, testOutput, tests.size()));
-			parser.advance(true, ">Memory Limit: </span>");
-			parser.advance(true, "<span>");
-			String ml = parser.advance(false, " ");
+			while (parser.advanceIfPossible(true, "<td><pre>") != null) {
+				String testInput = parser.advance(false, "</pre></td>");
+				parser.advance(true, "<td><pre>");
+				String testOutput = parser.advance(false, "</pre></td>");
+				tests.add(new Test(testInput, testOutput, tests.size()));
+			}
+			String prefix = parser.advance(true, "\"name\": \"" + probId);
+			parser.advance(true, "\"contestId\": ");
+			String contId = parser.advance(false, ",").trim();
+			parser = new StringParser(prefix);
+			parser.advance(true, "\"contest\": ");
+			String contestName = null;
+			while (true) {
+				parser.advance(true, "\"longName\": \"");
+				contestName = parser.advance(false, "\"");
+				parser.advance(true, "\"id\": ");
+				String curId = parser.advance(false, ",").trim();
+				if (contId.equals(curId)) {
+					break;
+				}
+			}
 			return Collections.singleton(new Task(taskName, defaultTestType(), input, output, tests.toArray(new Test[tests.size()]), null,
-				"-Xmx" + ml + "M", "Main", taskClass, TokenChecker.class.getCanonicalName(), "",
+				"-Xmx" + memoryLimit, "Main", CodeChefParser.getTaskID(taskName), TokenChecker.class.getCanonicalName(), "",
 				new String[0], null, contestName, true, null, null, false, false));
 		} catch (ParseException e) {
 			return Collections.emptyList();
 		}
 	}
+
 }

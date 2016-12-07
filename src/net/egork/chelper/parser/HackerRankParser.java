@@ -54,10 +54,10 @@ public class HackerRankParser implements Parser {
 			StreamConfiguration	input = StreamConfiguration.STANDARD;
 			StreamConfiguration output = StreamConfiguration.STANDARD;
 			List<Test> tests = new ArrayList<Test>();
-			while (parser.advanceIfPossible(true, "<pre><code>") != null) {
-				String testInput = StringEscapeUtils.unescapeHtml(parser.advance(false, "</code></pre>"));
-				parser.advance(true, "<pre><code>");
-				String testOutput = StringEscapeUtils.unescapeHtml(parser.advance(false, "</code></pre>"));
+			while (parser.advanceIfPossible(true, "<pre><span class=\"err\">") != null) {
+				String testInput = StringEscapeUtils.unescapeHtml(parser.advance(false, "</span>"));
+				parser.advance(true, "<pre><span class=\"err\">");
+				String testOutput = StringEscapeUtils.unescapeHtml(parser.advance(false, "</span>"));
 				tests.add(new Test(testInput, testOutput, tests.size()));
 			}
 			return Collections.singleton(new Task(taskName, defaultTestType(), input, output, tests.toArray(new Test[tests.size()]), null,

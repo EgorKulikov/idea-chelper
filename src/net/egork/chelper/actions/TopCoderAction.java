@@ -4,15 +4,16 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.PathManager;
+import com.intellij.openapi.application.TransactionGuard;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.*;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.search.GlobalSearchScope;
+import net.egork.chelper.codegeneration.CodeGenerationUtilities;
 import net.egork.chelper.task.TopCoderTask;
 import net.egork.chelper.topcoder.CHelperArenaPlugin;
 import net.egork.chelper.topcoder.Message;
-import net.egork.chelper.codegeneration.CodeGenerationUtilities;
 import net.egork.chelper.util.FileUtilities;
 import net.egork.chelper.util.InputReader;
 import net.egork.chelper.util.Utilities;
@@ -108,7 +109,7 @@ public class TopCoderAction extends AnAction {
                                             message.out.printString(Message.ALREADY_DEFINED);
                                         else {
                                             message.out.printString(Message.OK);
-                                            SwingUtilities.invokeLater(new Runnable() {
+                                            TransactionGuard.getInstance().submitTransactionAndWait(new Runnable() {
                                                 public void run() {
                                                     ApplicationManager.getApplication().runWriteAction(new Runnable() {
                                                         public void run() {

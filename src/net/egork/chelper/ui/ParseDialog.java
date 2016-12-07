@@ -1,6 +1,7 @@
 package net.egork.chelper.ui;
 
 import com.intellij.notification.NotificationType;
+import com.intellij.openapi.application.TransactionGuard;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.VerticalFlowLayout;
 import com.intellij.openapi.util.IconLoader;
@@ -148,7 +149,7 @@ public class ParseDialog extends JDialog {
 									protected void processNewDescriptions(final Collection<Description> descriptions) {
 										final Receiver receiver = this;
 										final boolean shouldMark = firstTime;
-										SwingUtilities.invokeLater(new Runnable() {
+										TransactionGuard.getInstance().submitTransactionAndWait(new Runnable() {
 											public void run() {
 												if (taskReceiver != receiver)
 													return;
@@ -248,7 +249,7 @@ public class ParseDialog extends JDialog {
 					@Override
 					protected void processNewDescriptions(final Collection<Description> descriptions) {
 						final Receiver receiver = this;
-						SwingUtilities.invokeLater(new Runnable() {
+						TransactionGuard.getInstance().submitTransactionAndWait(new Runnable() {
 							public void run() {
 								if (contestReceiver != receiver)
 									return;

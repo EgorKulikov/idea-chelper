@@ -45,11 +45,16 @@ public class HackerRankParser implements Parser {
 	public Collection<Task> parseTaskFromHTML(String html) {
 		StringParser parser = new StringParser(html);
 		try {
-			parser.advance(true, "data-attr1=\"All Contests\"");
-			parser.advance(true, "data-attr1=\"");
-			String contestName = parser.advance(false, "\"").trim().replace('/', '-');
-			parser.advance(true, "data-attr1=\"");
-			String taskName = parser.advance(false, "\"");
+			parser.advance(true, "data-analytics=\"Breadcrumb\"");
+			List<String> breadCrumbs = new ArrayList<>();
+			while (parser.advanceIfPossible(true, "data-analytics=\"Breadcrumb\"") != null){
+				if(parser.advanceIfPossible(true,"data-attr1=\"")!=null) {
+					breadCrumbs.add(parser.advance(true, "\""));
+				}
+
+			}
+			String contestName = breadCrumbs.get(breadCrumbs.size()-2);
+			String taskName  = breadCrumbs.get(breadCrumbs.size()-1);
 			String taskClass = CodeChefParser.getTaskID(taskName);
 			StreamConfiguration	input = StreamConfiguration.STANDARD;
 			StreamConfiguration output = StreamConfiguration.STANDARD;

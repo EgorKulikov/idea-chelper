@@ -167,10 +167,13 @@ public class KattisParser implements Parser {
 		StringParser parser = new StringParser(html);
 		try {
 			String contestName = "Kattis Archive";
+			if (parser.advanceIfPossible(true, "<div id=\"contest_time\">") != null) {
+				parser.advance(true, "<h2 class=\"title\">");
+				contestName = parser.advance(false, "</h2>");
+			}
 			parser.advance(true, "<div class=\"headline-wrapper\"><h1>");
-			String taskName = StringEscapeUtils.unescapeHtml(parser.advance(false, "</h1>")).replace("<br/>", " - ");
-			parser.advance(true, "<span>Memory limit: ");
-			String heapMemory = parser.advance(false, " ") + "M";
+			String taskName = StringEscapeUtils.unescapeHtml(parser.advance(false, "</h1>")).
+				replace("<br/>", " - ").replace("<br>", " - ");
 			List<Test> tests = new ArrayList<Test>();
 			while (parser.advanceIfPossible(true, "<table class=\"sample\" summary=\"sample data\">") != null) {
 				parser.advance(true, "<pre>");
@@ -180,6 +183,8 @@ public class KattisParser implements Parser {
 				tests.add(new Test(StringEscapeUtils.unescapeHtml(testInput),
 					StringEscapeUtils.unescapeHtml(testOutput), tests.size()));
 			}
+			parser.advance(true, "<p><strong>Memory limit: </strong>");
+			String heapMemory = parser.advance(false, " ") + "M";
 			String taskClass = CodeChefParser.getTaskID(taskName);
 			return Collections.singleton(new Task(taskName, defaultTestType(), StreamConfiguration.STANDARD,
 				StreamConfiguration.STANDARD, tests.toArray(new Test[tests.size()]), null,

@@ -46,7 +46,7 @@ public class RCCParser implements Parser {
 		}
 		for (int id : championshipIDs)
 			processChampionshipPage(receiver, id, FileUtilities.getWebPageContent("http://russiancodecup.ru/en/championship/round/" + id + "/problem/A/", "UTF-8"));
-		for (int i = 40; i > 0; i--) {
+		for (int i = 70; i > 0; i--) {
 			processArchivePage(receiver, i);
 		}
 	}

@@ -46,15 +46,9 @@ public class HackerEarthParser implements Parser {
 		StringParser parser = new StringParser(html);
 		try {
 			String contestName = "";
-			if (parser.advanceIfPossible(true, "<div class=\"cover\">") != null) {
-				parser.advance(true, "<div class=\"title");
-				parser.advance(true, "<a href");
-				parser.advance(true, ">");
-				contestName = StringEscapeUtils.unescapeHtml(parser.advance(false, "</a>").trim().replace('/', '-'));
-			}
-			parser.advance(true, "<div class=\"programming\"");
-			parser.advance(true, "<span class=\"dark\">");
-			String taskName = StringEscapeUtils.unescapeHtml(parser.advance(false, "</span>")).trim();
+			parser.advance(true, "<div class=\"problem-desc details-div\">");
+			parser.advance(true, "hidden\">");
+			String taskName = StringEscapeUtils.unescapeHtml(parser.advance(false, "</div>")).trim();
 			String taskClass = CodeChefParser.getTaskID(taskName);
 			StreamConfiguration	input = StreamConfiguration.STANDARD;
 			StreamConfiguration output = StreamConfiguration.STANDARD;
@@ -69,6 +63,9 @@ public class HackerEarthParser implements Parser {
 			parser.advance(true, ">Memory Limit: </span>");
 			parser.advance(true, "<span>");
 			String ml = parser.advance(false, " ");
+			if (parser.advanceIfPossible(true, "<p class=\"small light challenge-name-text\" style=\"display: none;\">") != null) {
+				contestName = StringEscapeUtils.unescapeHtml(parser.advance(false, "</p>").trim().replace('/', '-'));
+			}
 			return Collections.singleton(new Task(taskName, defaultTestType(), input, output, tests.toArray(new Test[tests.size()]), null,
 				"-Xmx" + ml + "M", "Main", taskClass, TokenChecker.class.getCanonicalName(), "",
 				new String[0], null, contestName, true, null, null, false, false));

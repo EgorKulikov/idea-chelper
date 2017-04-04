@@ -44,8 +44,12 @@ public class GCJParser implements Parser {
 		}
 		if (receiver.isStopped())
 			return;
-		String historyPage = FileUtilities.getWebPageContent("https://code.google.com/codejam/contests.html");
+		String historyPage = FileUtilities.getWebPageContent("https://code.google.com/codejam/past-contests/past-contests-page.html");
 		if (historyPage != null) {
+			System.err.println(historyPage);
+			if (true) {
+				return;
+			}
 			StringParser parser = new StringParser(historyPage);
 			try {
 				while (parser.advanceIfPossible(true, "<div class=\"year_row narrow_year_row\">") != null) {

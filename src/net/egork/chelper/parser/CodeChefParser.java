@@ -156,8 +156,7 @@ public class CodeChefParser implements Parser {
 	public Collection<Task> parseTaskFromHTML(String text) {
 		StringParser parser = new StringParser(text);
 		try {
-			parser.advance(true, "<!-- /HEADER -->");
-			parser.advance(true, "<div id=\"breadcrumbs\">");
+			parser.advance(true, "<aside class=\"breadcrumbs\">");
 			parser.advance(true, "<a href=\"");
 			parser.advance(true, "<a href=\"");
 			parser.advance(true, "<a id");
@@ -165,7 +164,7 @@ public class CodeChefParser implements Parser {
 			String contestName = parser.advance(false, "</a>");
 			parser.advance(true, "&nbsp;");
 			parser.advance(true, "&nbsp;");
-			String taskName = parser.advance(false, "</div>");
+			String taskName = parser.advance(false, "</aside>");
 			parser.advance(true, "<h3>Example</h3>");
 			parser.advance(true, "<pre>");
 			parser = new StringParser(parser.advance(false, "</pre>") + "<b>");

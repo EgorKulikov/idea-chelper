@@ -168,12 +168,20 @@ public class CodeChefParser implements Parser {
 			String taskID = getTaskID(taskName);
 			List<Test> tests = new ArrayList<Test>();
 			int index = 0;
-			while (parser.advanceIfPossible(true, "<h3>Sample Input", "<h3>Sample input") != null) {
-				parser.advance(true, "<pre>");
-				String input = StringEscapeUtils.unescapeHtml(parser.advance(false, "</pre>"));
-				parser.advance(true, "<pre>");
-				String output = StringEscapeUtils.unescapeHtml(parser.advance(false, "</pre>"));
-				tests.add(new Test(input + "\n", output + "\n", index++));
+			if (parser.advanceIfPossible(true, "<h3>Example</h3>") != null) {
+				parser.advance(true, "</b>");
+				String input = StringEscapeUtils.unescapeHtml(parser.advance(false, "<b>")).trim();
+				parser.advance(true, "</b>");
+				String output = StringEscapeUtils.unescapeHtml(parser.advance(false, "</pre>")).trim();
+				tests.add(new Test(input + "\n", output + "\n", 0));
+			} else {
+				while (parser.advanceIfPossible(true, "<h3>Sample Input", "<h3>Sample input") != null) {
+					parser.advance(true, "<pre>");
+					String input = StringEscapeUtils.unescapeHtml(parser.advance(false, "</pre>"));
+					parser.advance(true, "<pre>");
+					String output = StringEscapeUtils.unescapeHtml(parser.advance(false, "</pre>"));
+					tests.add(new Test(input + "\n", output + "\n", index++));
+				}
 			}
             return Collections.singleton(new Task(taskName, defaultTestType(), StreamConfiguration.STANDARD,
 				StreamConfiguration.STANDARD, tests.toArray(new Test[tests.size()]), null, "-Xmx64M", "Main", taskID,

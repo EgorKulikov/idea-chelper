@@ -63,7 +63,8 @@ public class HackerEarthParser implements Parser {
 			parser.advance(true, ">Memory Limit: </span>");
 			parser.advance(true, "<span>");
 			String ml = parser.advance(false, " ");
-			if (parser.advanceIfPossible(true, "<p class=\"small light challenge-name-text\" style=\"display: none;\">") != null) {
+			if (parser.advanceIfPossible(true, "<p class=\"small light challenge-name-text\"") != null) {
+				parser.advance(true, ">");
 				contestName = StringEscapeUtils.unescapeHtml(parser.advance(false, "</p>").trim().replace('/', '-'));
 			}
 			return Collections.singleton(new Task(taskName, defaultTestType(), input, output, tests.toArray(new Test[tests.size()]), null,

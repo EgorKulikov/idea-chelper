@@ -44,7 +44,7 @@ public class CSAcademyParser implements Parser {
 	public Collection<Task> parseTaskFromHTML(String html) {
 		StringParser parser = new StringParser(html);
 		try {
-			parser.advance(true, "<div class=\"text-center\"><h1>");
+			String prefix = parser.advance(true, "<div class=\"text-center\"><h1>");
 			String taskName = parser.advance(false, "</h1>");
 			parser.advance(true, "<br>Memory limit: <em>");
 			String memoryLimit = parser.advance(false, " ");
@@ -58,10 +58,17 @@ public class CSAcademyParser implements Parser {
 				String testOutput = parser.advance(false, "</pre></td>");
 				tests.add(new Test(testInput, testOutput, tests.size()));
 			}
-			parser.advance(true, "\"contest\":");
-			String contestName = null;
-			parser.advance(true, "\"longName\":\"");
-			contestName = parser.advance(false, "\"");
+			parser = new StringParser(prefix);
+			parser.advance(true, "<a href=\"/contest/archive/\"");
+			parser.advance(true, "<a href=\"/contest/");
+			String contestName = parser.advance(false, "/");
+			contestName = contestName.replace('-', ' ');
+			for (int i = 0; i < contestName.length(); i++) {
+				if (i == 0 || contestName.charAt(i - 1) == ' ') {
+					contestName = contestName.substring(0, i) + Character.toUpperCase(contestName.charAt(i)) +
+						contestName.substring(i + 1);
+				}
+			}
 			return Collections.singleton(new Task(taskName, defaultTestType(), input, output, tests.toArray(new Test[tests.size()]), null,
 				"-Xmx" + memoryLimit, "Main", CodeChefParser.getTaskID(taskName), TokenChecker.class.getCanonicalName(), "",
 				new String[0], null, contestName, true, null, null, false, false));

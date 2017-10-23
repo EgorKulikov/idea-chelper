@@ -4,7 +4,7 @@
     "name": "CHelper extension",
     "description": "Allows to parse tasks directly from browser.",
     "background": { "scripts": ["background.js"] },
-    "version": "4.1.8.1",
+    "version": "4.1.11.1",
 
     "permissions": [
         "tabs",

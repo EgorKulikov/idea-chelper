@@ -1,5 +1,5 @@
 <idea-plugin>
-  <name>CHelper</name>
+  <name>CHelper Beta</name>
   <description>Inlines library code and provides testing framework</description>
   <version>4.1.11</version>
   <vendor>Egor Kulikov</vendor>

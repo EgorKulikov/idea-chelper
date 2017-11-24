@@ -32,7 +32,7 @@
                 "http://www.codechef.com/*",
                 "https://www.codechef.com/*",
                 "https://www.hackerearth.com/*",
-                "http://*.contest.atcoder.jp/*",
+                "https://*.contest.atcoder.jp/*",
                 "https://csacademy.com/*"
             ],
             "js": ["contentscript.js"],

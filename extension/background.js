@@ -10,7 +10,7 @@ function checkForValidUrl(tabId, changeInfo, tab) {
         /^https?:\/\/(www[.])?codechef[.]com\/(.*\/)?problems\/.*$/.test(tab.url) ||
         /^https?:\/\/(www[.])?hackerearth[.]com\/(.*\/)?(algorithm|approximate)\/.*$/.test(tab.url) ||
         /^https:\/\/csacademy[.]com\/contest\/.*\/task\/.*$/.test(tab.url) ||
-        /^http:\/\/.*[.]contest[.]atcoder[.]jp\/tasks\/.*$/.test(tab.url))
+        /^https:\/\/.*[.]contest[.]atcoder[.]jp\/tasks\/.*$/.test(tab.url))
     {
         chrome.pageAction.show(tabId);
     } else {
@@ -41,7 +41,7 @@ function parseTask(tab) {
         chrome.tabs.sendMessage(tab.id, 'codechef');
     } else if (/^https?:\/\/(www[.])?hackerearth[.]com\/(.*\/)?(algorithm|approximate)\/.*$/.test(tab.url)) {
         chrome.tabs.sendMessage(tab.id, 'hackerearth');
-    } else if (/^http:\/\/.*[.]contest[.]atcoder[.]jp\/tasks\/.*$/.test(tab.url)) {
+    } else if (/^https:\/\/.*[.]contest[.]atcoder[.]jp\/tasks\/.*$/.test(tab.url)) {
         chrome.tabs.sendMessage(tab.id, 'atcoder');
     } else if (/^https:\/\/csacademy[.]com\/contest\/.*\/task\/.*$/.test(tab.url)) {
         chrome.tabs.sendMessage(tab.id, 'csacademy');

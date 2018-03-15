@@ -164,10 +164,10 @@ public class CodeforcesParser implements Parser {
 			while (true) {
 				try {
 					parser.advance(false, "<div class=\"input\">", "<DIV class=\"input\">");
-					skipPreMaybeWithId(parser);
+					parser.advanceRegex(true, "<pre [^>]+>", "<PRE [^>]+>");
 					String testInput = parser.advance(false, "</pre>", "</PRE>").replace("<br />", "\n").replace("<br>", "\n").replace("<BR/>", "\n");
 					parser.advance(false, "<div class=\"output\">", "<DIV class=\"output\">");
-					skipPreMaybeWithId(parser);
+					parser.advanceRegex(true, "<pre [^>]+>", "<PRE [^>]+>");
 					String testOutput = parser.advance(false, "</pre>", "</PRE>").replace("<br />", "\n").replace("<br>", "\n").replace("<BR/>", "\n");
 					tests.add(new Test(StringEscapeUtils.unescapeHtml(testInput),
 						StringEscapeUtils.unescapeHtml(testOutput), tests.size()));
@@ -185,12 +185,4 @@ public class CodeforcesParser implements Parser {
 		}
 	}
 
-	private void skipPreMaybeWithId(StringParser parser) throws ParseException {
-		parser.advance(true, "<pre", "<PRE");
-		if (parser.startsWith(" id=\"") || parser.startsWith(" ID=\"")) {
-			parser.advance(true, "\"");
-			parser.advance(true, "\"");
-		}
-		parser.advance(true, ">");
-	}
 }

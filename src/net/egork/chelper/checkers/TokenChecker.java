@@ -22,7 +22,7 @@ public class TokenChecker implements Checker {
 				if (tokens[0].toLowerCase().indexOf('a') != -1)
 					allowAbsolute = true;
 				if (tokens[0].toLowerCase().indexOf('r') != -1)
-					allowAbsolute = true;
+					allowRelative = true;
 				certainty = Double.parseDouble(tokens[1]);
 			}
 		}

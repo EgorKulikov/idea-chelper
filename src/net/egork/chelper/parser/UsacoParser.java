@@ -5,6 +5,7 @@ import net.egork.chelper.task.StreamConfiguration;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.Test;
 import net.egork.chelper.task.TestType;
+import org.apache.commons.lang.StringEscapeUtils;
 
 import javax.swing.*;
 import java.text.ParseException;
@@ -53,10 +54,10 @@ public class UsacoParser implements Parser {
 			StreamConfiguration output = new StreamConfiguration(StreamConfiguration.StreamType.CUSTOM, taskId + ".out");
 			parser.advance(true, "SAMPLE INPUT");
 			parser.advance(true, "<pre class=\"in\">");
-			String testInput = parser.advance(false, "</pre>").trim() + "\n";
+			String testInput = StringEscapeUtils.unescapeHtml(parser.advance(false, "</pre>").trim()) + "\n";
 			parser.advance(true, "SAMPLE OUTPUT");
 			parser.advance(true, "<pre class=\"out\">");
-			String testOutput = parser.advance(false, "</pre>").trim() + "\n";
+			String testOutput = StringEscapeUtils.unescapeHtml(parser.advance(false, "</pre>").trim()) + "\n";
 			return Collections.singleton(new Task(taskName, defaultTestType(), input, output, new Test[]{new Test(testInput, testOutput)},
 				null, "-Xmx1024M", "Main", taskClass, TokenChecker.class.getCanonicalName(), "",
 				new String[0], null, contestName, true, null, null, false, false));

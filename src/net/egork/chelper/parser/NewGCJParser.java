@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * @author egorku@yandex-team.ru
  */
-public class CSAcademyParser implements Parser {
+public class NewGCJParser implements Parser {
 	public Icon getIcon() {
 		throw new UnsupportedOperationException();
 	}
@@ -39,36 +39,27 @@ public class CSAcademyParser implements Parser {
 	}
 
 	public TestType defaultTestType() {
-		return TestType.SINGLE;
+		return TestType.MULTI_NUMBER;
 	}
 
 	public Collection<Task> parseTaskFromHTML(String html) {
 		StringParser parser = new StringParser(html);
 		try {
-			String prefix = parser.advance(true, "<div class=\"text-center\"><h1>");
-			String taskName = parser.advance(false, "</h1>");
-			parser.advance(true, "<br>Memory limit: <em>");
-			String memoryLimit = parser.advance(false, " ");
-			memoryLimit += "M";
+			parser.advance(true, "<div class=\"challenge__title\"><h4>");
+			String contestName = parser.advance(false, "</h4>");
+			parser.advance(true, "class=\"collection-item router-link-exact-active active\">");
+			String taskName = parser.advance(false, "</a>");
+			parser.advance(true, "<h3>Limits</h3>");
+			parser.advance(true, "Memory limit: ");
+			String memoryLimit = parser.advance(false, "B");
 			StreamConfiguration input = StreamConfiguration.STANDARD;
 			StreamConfiguration output = StreamConfiguration.STANDARD;
 			List<Test> tests = new ArrayList<Test>();
-			while (parser.advanceIfPossible(true, "<td><pre>") != null) {
+			if (parser.advanceIfPossible(true, "<pre class=\"io-content\">") != null) {
 				String testInput = StringEscapeUtils.unescapeHtml(parser.advance(false, "</pre></td>"));
-				parser.advance(true, "<td><pre>");
+				parser.advance(true, "<pre class=\"io-content\">");
 				String testOutput = StringEscapeUtils.unescapeHtml(parser.advance(false, "</pre></td>"));
 				tests.add(new Test(testInput, testOutput, tests.size()));
-			}
-			parser = new StringParser(prefix);
-			parser.advance(true, "<a href=\"/contest/archive/\"");
-			parser.advance(true, "<a href=\"/contest/");
-			String contestName = parser.advance(false, "/");
-			contestName = contestName.replace('-', ' ');
-			for (int i = 0; i < contestName.length(); i++) {
-				if (i == 0 || contestName.charAt(i - 1) == ' ') {
-					contestName = contestName.substring(0, i) + Character.toUpperCase(contestName.charAt(i)) +
-						contestName.substring(i + 1);
-				}
 			}
 			return Collections.singleton(new Task(taskName, defaultTestType(), input, output, tests.toArray(new Test[tests.size()]), null,
 				"-Xmx" + memoryLimit, "Main", CodeChefParser.getTaskID(taskName), TokenChecker.class.getCanonicalName(), "",

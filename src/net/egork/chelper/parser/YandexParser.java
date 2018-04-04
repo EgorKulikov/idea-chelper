@@ -5,6 +5,7 @@ import net.egork.chelper.task.StreamConfiguration;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.Test;
 import net.egork.chelper.task.TestType;
+import org.apache.commons.lang.StringEscapeUtils;
 
 import javax.swing.*;
 import java.text.ParseException;
@@ -63,9 +64,9 @@ public class YandexParser implements Parser {
 			while (parser.advanceIfPossible(true, "<table class=\"sample-tests\">") != null) {
 				parser.advance(true, "<tbody>");
 				parser.advance(true, "<td><pre>");
-				String testInput = parser.advance(false, "</pre></td>");
+				String testInput = StringEscapeUtils.unescapeHtml(parser.advance(false, "</pre></td>"));
 				parser.advance(true, "<td><pre>");
-				String testOutput = parser.advance(false, "</pre></td>");
+				String testOutput = StringEscapeUtils.unescapeHtml(parser.advance(false, "</pre></td>"));
 				tests.add(new Test(testInput, testOutput, tests.size()));
 			}
 			parser.advance(true, "tabs-menu_role_problems");

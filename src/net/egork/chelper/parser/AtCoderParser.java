@@ -5,6 +5,7 @@ import net.egork.chelper.task.StreamConfiguration;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.Test;
 import net.egork.chelper.task.TestType;
+import org.apache.commons.lang.StringEscapeUtils;
 
 import javax.swing.*;
 import java.text.ParseException;
@@ -57,9 +58,9 @@ public class AtCoderParser implements Parser {
 			List<Test> tests = new ArrayList<Test>();
 			while (parser.advanceIfPossible(true, "<h3>Sample Input") != null) {
 				parser.advance(true, "<pre>");
-				String testInput = parser.advance(false, "</pre>");
+				String testInput = StringEscapeUtils.unescapeHtml(parser.advance(false, "</pre>"));
 				parser.advance(true, "<pre>");
-				String testOutput = parser.advance(false, "</pre>");
+				String testOutput = StringEscapeUtils.unescapeHtml(parser.advance(false, "</pre>"));
 				tests.add(new Test(testInput, testOutput, tests.size()));
 			}
 			String letter = Character.toString(taskName.charAt(0));

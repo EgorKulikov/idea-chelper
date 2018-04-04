@@ -57,9 +57,9 @@ public class BayanParser implements Parser {
 				"\\\\d*[.]in");
 			List<Test> tests = new ArrayList<Test>();
 			parser.advance(true, "<pre class=\"input-output\">");
-			String testInput = parser.advance(false, "</pre>").trim() + "\n";
+			String testInput = StringEscapeUtils.unescapeHtml(parser.advance(false, "</pre>").trim()) + "\n";
 			parser.advance(true, "<pre class=\"input-output\">");
-			String testOutput = parser.advance(false, "</pre>").trim() + "\n";
+			String testOutput = StringEscapeUtils.unescapeHtml(parser.advance(false, "</pre>").trim()) + "\n";
 			tests.add(new Test(testInput, testOutput, tests.size()));
 			parser.advance(true, "<form id=\"submit-form\"");
 			parser.advance(true, "problem/");

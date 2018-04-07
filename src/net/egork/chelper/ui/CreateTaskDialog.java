@@ -73,9 +73,12 @@ public class CreateTaskDialog extends JDialog {
 		Project project = directory.getProject();
 		String location = FileUtilities.getRelativePath(project.getBaseDir(), directory.getVirtualFile());
 		ProjectData data = Utilities.getData(project);
-		if (template == null) {
+		if (defaultTask.inputClass == null) {
 			defaultTask = defaultTask.setInputOutputClasses(data.inputClass, data.outputClass).
-				setFailOnIntegerOverflow(data.failOnIntegerOverflowForNewTasks).setDate(Task.getDateString());
+				setFailOnIntegerOverflow(data.failOnIntegerOverflowForNewTasks);
+		}
+		if (defaultTask.date == null) {
+			defaultTask = defaultTask.setDate(Task.getDateString());
 		}
 		Task task = new Task(name, defaultTask.testType, defaultTask.input, defaultTask.output, defaultTask.tests, location,
 			defaultTask.vmArgs, defaultTask.mainClass, defaultTask.taskClass == null ? name : defaultTask.taskClass,

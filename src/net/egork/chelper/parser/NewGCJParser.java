@@ -51,7 +51,7 @@ public class NewGCJParser implements Parser {
 			String taskName = parser.advance(false, "</a>");
 			parser.advance(true, "<h3>Limits</h3>");
 			parser.advance(true, "Memory limit: ");
-			String memoryLimit = parser.advance(false, "B");
+			String memoryLimit = parser.advance(false, "B").replace(" ", "");
 			StreamConfiguration input = StreamConfiguration.STANDARD;
 			StreamConfiguration output = StreamConfiguration.STANDARD;
 			List<Test> tests = new ArrayList<Test>();

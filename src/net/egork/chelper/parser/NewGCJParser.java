@@ -62,7 +62,7 @@ public class NewGCJParser implements Parser {
 				tests.add(new Test(testInput, testOutput, tests.size()));
 			}
 			return Collections.singleton(new Task(taskName, defaultTestType(), input, output, tests.toArray(new Test[tests.size()]), null,
-				"-Xmx" + memoryLimit, "Main", CodeChefParser.getTaskID(taskName), TokenChecker.class.getCanonicalName(), "",
+				"-Xmx" + memoryLimit, "Solution", CodeChefParser.getTaskID(taskName), TokenChecker.class.getCanonicalName(), "",
 				new String[0], null, contestName, true, null, null, false, false));
 		} catch (ParseException e) {
 			return Collections.emptyList();

@@ -50,6 +50,7 @@ public class ChromeParser implements ProjectComponent {
 		taskParsers.put("atcoder", new AtCoderParser());
 		taskParsers.put("csacademy", new CSAcademyParser());
 		taskParsers.put("new-gcj", new NewGCJParser());
+		taskParsers.put("json", new JSONParser());
 		TASK_PARSERS = Collections.unmodifiableMap(taskParsers);
 	}
 

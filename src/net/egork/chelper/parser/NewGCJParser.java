@@ -48,7 +48,7 @@ public class NewGCJParser implements Parser {
 			parser.advance(true, "<div class=\"challenge__title\"><h4>");
 			String contestName = parser.advance(false, "</h4>");
 			parser.advance(true, "class=\"collection-item router-link-exact-active active\">");
-			String taskName = parser.advance(false, "</a>");
+			String taskName = parser.advance(false, "</a>", "<br");
 			parser.advance(true, "<h3>Limits</h3>");
 			parser.advance(true, "Memory limit: ");
 			String memoryLimit = parser.advance(false, "B").replace(" ", "");

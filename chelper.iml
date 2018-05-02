@@ -18,6 +18,5 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="JSON" level="project" />
   </component>
 </module>

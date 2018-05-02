@@ -13,7 +13,6 @@ import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.WriteExternalException;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDirectory;
-import net.egork.chelper.actions.ArchiveAction;
 import net.egork.chelper.actions.TopCoderAction;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.ui.TaskConfigurationEditor;
@@ -80,7 +79,7 @@ public class TaskConfiguration extends ModuleBasedConfiguration<JavaRunConfigura
                     String path = TopCoderAction.getJarPathForClass(com.github.cojac.CojacAgent.class);
                     parameters.getVMParametersList().add("-javaagent:" + path + "=-Cints -Clongs -Ccasts -Cmath");
                 }
-				String taskFileName = TaskUtilities.getTaskFileName(configuration.location, configuration.name);
+				String taskFileName = TaskUtilities.getTaskFileLocation(configuration.location, configuration.name);
 				parameters.getProgramParametersList().add(taskFileName);
 				if (Utilities.getData(getProject()).smartTesting) {
 					VirtualFile report = FileUtilities.getFile(getProject(), "CHelperReport.txt");
@@ -117,7 +116,7 @@ public class TaskConfiguration extends ModuleBasedConfiguration<JavaRunConfigura
 
 	private void saveConfiguration(Task configuration) {
 		if (configuration != null && configuration.location != null && configuration.name != null && configuration.name.length() != 0)
-			FileUtilities.saveConfiguration(configuration.location, ArchiveAction.canonize(configuration.name) + ".task", configuration, getProject());
+			FileUtilities.saveConfiguration(configuration.location, TaskUtilities.getTaskFileName(configuration.name), configuration, getProject());
 	}
 
 	@Override
@@ -126,7 +125,13 @@ public class TaskConfiguration extends ModuleBasedConfiguration<JavaRunConfigura
 		String fileName = element.getChildText("taskConf");
 		if (fileName != null && fileName.trim().length() != 0) {
 			try {
-				configuration = FileUtilities.readTask(fileName, getProject());
+				if (fileName.endsWith(".task")) {
+					configuration = FileUtilities.readLegacyTask(fileName, getProject());
+					saveConfiguration(configuration);
+					FileUtilities.removeFile(fileName, getProject());
+				} else {
+					configuration = FileUtilities.readTask(fileName, getProject());
+				}
 			} catch (NullPointerException ignored) {}
 		}
 	}
@@ -136,7 +141,7 @@ public class TaskConfiguration extends ModuleBasedConfiguration<JavaRunConfigura
 		super.writeExternal(element);
 		Element configurationElement = new Element("taskConf");
 		element.addContent(configurationElement);
-		String configurationFile = TaskUtilities.getTaskFileName(configuration.location, configuration.name);
+		String configurationFile = TaskUtilities.getTaskFileLocation(configuration.location, configuration.name);
 		if (configurationFile != null)
 			configurationElement.setText(configurationFile);
 	}

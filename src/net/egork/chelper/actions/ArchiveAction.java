@@ -21,6 +21,7 @@ import net.egork.chelper.task.TopCoderTask;
 import net.egork.chelper.codegeneration.CodeGenerationUtilities;
 import net.egork.chelper.util.FileUtilities;
 import net.egork.chelper.util.Messenger;
+import net.egork.chelper.util.TaskUtilities;
 import net.egork.chelper.util.Utilities;
 
 import java.io.IOException;
@@ -74,7 +75,7 @@ public class ArchiveAction extends AnAction {
                                 testFile.delete(this);
                             }
                         }
-                        VirtualFile taskFile = FileUtilities.getFile(project, task.location + "/" + canonize(task.name) + ".task");
+                        VirtualFile taskFile = FileUtilities.getFile(project, task.location + "/" + TaskUtilities.canonize(task.name) + ".task");
                         if (taskFile != null) {
                             VfsUtil.copyFile(this, taskFile, directory);
                             taskFile.delete(this);
@@ -140,7 +141,7 @@ public class ArchiveAction extends AnAction {
 			position = yearAndMonth.indexOf('.', position + 1);
 		if (position != -1)
 			yearAndMonth = yearAndMonth.substring(0, position);
-		return canonize(yearAndMonth) + "/" + canonize(task.date + " - " + (task.contestName.length() == 0 ? "unsorted" : task.contestName));
+		return TaskUtilities.canonize(yearAndMonth) + "/" + TaskUtilities.canonize(task.date + " - " + (task.contestName.length() == 0 ? "unsorted" : task.contestName));
 	}
 
 	private String getDateAndContest(Task task) {
@@ -151,18 +152,11 @@ public class ArchiveAction extends AnAction {
         if (position != -1)
             yearAndMonth = yearAndMonth.substring(0, position);
 		if (yearAndMonth.length() == 0)
-			return canonize(task.contestName.length() == 0 ? "unsorted" : task.contestName);
-        return canonize(yearAndMonth) + "/" + canonize(task.date + " - " + (task.contestName.length() == 0 ? "unsorted" : task.contestName));
+			return TaskUtilities.canonize(task.contestName.length() == 0 ? "unsorted" : task.contestName);
+        return TaskUtilities.canonize(yearAndMonth) + "/" + TaskUtilities.canonize(task.date + " - " + (task.contestName.length() == 0 ? "unsorted" : task.contestName));
     }
 
-    public static String canonize(String filename) {
-        filename = filename.replaceAll("[\\\\?%*:|\"<>/]", "-");
-		while (filename.endsWith("."))
-			filename = filename.substring(0, filename.length() - 1);
-		return filename;
-    }
-
-    public static void setOtherConfiguration(RunManagerImpl manager, Task task) {
+	public static void setOtherConfiguration(RunManagerImpl manager, Task task) {
 		RunConfiguration[] allConfigurations = manager.getAllConfigurations();
         for (RunConfiguration configuration : allConfigurations) {
             if (configuration instanceof TaskConfiguration) {

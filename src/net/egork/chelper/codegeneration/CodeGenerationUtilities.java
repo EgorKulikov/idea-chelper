@@ -5,10 +5,10 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
-import net.egork.chelper.actions.ArchiveAction;
 import net.egork.chelper.task.*;
 import net.egork.chelper.util.FileUtilities;
 import net.egork.chelper.util.OutputWriter;
+import net.egork.chelper.util.TaskUtilities;
 import net.egork.chelper.util.Utilities;
 
 import javax.swing.*;
@@ -203,7 +203,7 @@ public class CodeGenerationUtilities {
             public void run() {
                 String taskFilePath;
                 try {
-                    VirtualFile taskFile = directory.findOrCreateChildData(null, ArchiveAction.canonize(finalTask.name) + ".task");
+                    VirtualFile taskFile = directory.findOrCreateChildData(null, TaskUtilities.canonize(finalTask.name) + ".task");
                     OutputStream outputStream = taskFile.getOutputStream(null);
                     finalTask.saveTask(new OutputWriter(outputStream));
                     outputStream.close();

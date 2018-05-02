@@ -77,7 +77,7 @@ public class TopCoderConfiguration extends ModuleBasedConfiguration<JavaRunConfi
                     parameters.getVMParametersList().add("-javaagent:" + path + "=-Cints -Clongs -Ccasts -Cmath");
                 }
                 parameters.setWorkingDirectory(getProject().getBaseDir().getPath());
-				String taskFileName = TaskUtilities.getTopCoderTaskFileName(Utilities.getData(getProject()).defaultDirectory, configuration.name);
+				String taskFileName = TaskUtilities.getTaskFileLocation(Utilities.getData(getProject()).defaultDirectory, configuration.name);
 				parameters.getProgramParametersList().add(taskFileName);
 				if (Utilities.getData(getProject()).smartTesting) {
 					VirtualFile report = FileUtilities.getFile(getProject(), "CHelperReport.txt");
@@ -118,7 +118,13 @@ public class TopCoderConfiguration extends ModuleBasedConfiguration<JavaRunConfi
         String fileName = element.getChildText("taskConf");
         if (fileName != null && fileName.trim().length() != 0) {
             try {
-                configuration = FileUtilities.readTopCoderTask(fileName, getProject());
+				if (fileName.endsWith(".task")) {
+					configuration = FileUtilities.readLegacyTopCoderTask(fileName, getProject());
+					saveConfiguration(configuration);
+					FileUtilities.removeFile(fileName, getProject());
+				} else {
+					configuration = FileUtilities.readTopCoderTask(fileName, getProject());
+				}
             } catch (NullPointerException ignored) {}
         }
     }
@@ -128,7 +134,7 @@ public class TopCoderConfiguration extends ModuleBasedConfiguration<JavaRunConfi
         super.writeExternal(element);
         Element configurationElement = new Element("taskConf");
         element.addContent(configurationElement);
-        String configurationFile = TaskUtilities.getTopCoderTaskFileName(Utilities.getData(getProject()).defaultDirectory, configuration.name);
+        String configurationFile = TaskUtilities.getTaskFileLocation(Utilities.getData(getProject()).defaultDirectory, configuration.name);
         if (configurationFile != null && configuration.tests != null)
             configurationElement.setText(configurationFile);
     }
@@ -138,7 +144,7 @@ public class TopCoderConfiguration extends ModuleBasedConfiguration<JavaRunConfi
             return;
         String location = Utilities.getData(getProject()).defaultDirectory;
         if (configuration != null && location != null && configuration.name != null && configuration.name.length() != 0 && configuration.tests != null)
-            FileUtilities.saveConfiguration(location, configuration.name + ".tctask", configuration, getProject());
+            FileUtilities.saveConfiguration(location, TaskUtilities.getTaskFileName(configuration.name), configuration, getProject());
     }
 
 

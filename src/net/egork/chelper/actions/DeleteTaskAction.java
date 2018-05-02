@@ -17,6 +17,7 @@ import net.egork.chelper.configurations.TopCoderConfiguration;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.TopCoderTask;
 import net.egork.chelper.util.FileUtilities;
+import net.egork.chelper.util.TaskUtilities;
 import net.egork.chelper.util.Utilities;
 
 import javax.swing.*;
@@ -59,7 +60,7 @@ public class DeleteTaskAction extends AnAction {
                             if (testFile != null)
                                 testFile.delete(this);
                         }
-                        VirtualFile taskFile = FileUtilities.getFile(project, task.location + "/" + ArchiveAction.canonize(task.name) + ".task");
+                        VirtualFile taskFile = FileUtilities.getFile(project, task.location + "/" + TaskUtilities.canonize(task.name) + ".task");
                         if (taskFile != null)
                             taskFile.delete(this);
                         manager.removeConfiguration(manager.getSelectedConfiguration());

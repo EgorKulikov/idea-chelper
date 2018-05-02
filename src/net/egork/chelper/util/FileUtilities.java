@@ -42,7 +42,7 @@ public class FileUtilities {
 		}
 	}
 
-	private static InputStream getInputStream(VirtualFile file) {
+	public static InputStream getInputStream(VirtualFile file) {
 		try {
 			return file.getInputStream();
 		} catch (IOException e) {
@@ -210,10 +210,26 @@ public class FileUtilities {
 	}
 
 	public static Task readTask(String fileName, Project project) {
+		try {
+			return TaskUtilities.mapper.readValue(getInputStream(getFile(project, fileName)), Task.class);
+		} catch (IOException e) {
+			return null;
+		}
+	}
+
+	public static Task readLegacyTask(String fileName, Project project) {
 		return Task.loadTask(new InputReader(getInputStream(getFile(project, fileName))));
 	}
 
 	public static TopCoderTask readTopCoderTask(String fileName, Project project) {
+		try {
+			return TaskUtilities.mapper.readValue(getInputStream(getFile(project, fileName)), TopCoderTask.class);
+		} catch (IOException e) {
+			return null;
+		}
+	}
+
+	public static TopCoderTask readLegacyTopCoderTask(String fileName, Project project) {
 		return TopCoderTask.load(new InputReader(getInputStream(getFile(project, fileName))));
 	}
 
@@ -231,7 +247,7 @@ public class FileUtilities {
 				try {
 					VirtualFile file = location.findOrCreateChildData(null, fileName);
 					stream = file.getOutputStream(null);
-					configuration.saveTask(new OutputWriter(stream));
+					TaskUtilities.mapper.writeValue(stream, configuration);
 				} catch (IOException ignored) {
 				} finally {
 					if (stream != null) {
@@ -259,7 +275,7 @@ public class FileUtilities {
 				try {
 					VirtualFile file = location.findOrCreateChildData(null, fileName);
 					stream = file.getOutputStream(null);
-					configuration.saveTask(new OutputWriter(stream));
+					TaskUtilities.mapper.writeValue(stream, configuration);
 				} catch (IOException ignored) {
 				} finally {
 					if (stream != null) {
@@ -348,5 +364,12 @@ public class FileUtilities {
 			return null;
 		PsiElement main = JavaPsiFacade.getInstance(project).findClass(fqn, GlobalSearchScope.allScope(project));
 		return main == null ? null : main.getContainingFile() == null ? null : main.getContainingFile().getVirtualFile();
+	}
+
+	public static void removeFile(String fileName, Project project) {
+		try {
+			getFile(project, fileName).delete(null);
+		} catch (IOException ignored) {
+		}
 	}
 }

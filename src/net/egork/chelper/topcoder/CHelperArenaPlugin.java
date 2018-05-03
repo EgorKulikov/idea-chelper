@@ -1,5 +1,8 @@
 package net.egork.chelper.topcoder;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.topcoder.client.contestant.ProblemComponentModel;
 import com.topcoder.shared.language.JavaLanguage;
 import com.topcoder.shared.language.Language;
@@ -10,7 +13,6 @@ import net.egork.chelper.task.MethodSignature;
 import net.egork.chelper.task.NewTopCoderTest;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.TopCoderTask;
-import net.egork.chelper.util.OutputWriter;
 
 import javax.swing.*;
 import java.io.*;
@@ -20,6 +22,9 @@ import java.util.Arrays;
  * @author Egor Kulikov (egorku@yandex-team.ru)
  */
 public class CHelperArenaPlugin implements ArenaPlugin {
+    private static ObjectMapper mapper = new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL)
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
     private MessagePanel messagePanel;
     public static final int PORT = 4242;
     private ProblemComponentModel last = null;
@@ -29,8 +34,9 @@ public class CHelperArenaPlugin implements ArenaPlugin {
     }
 
     public String getSource() {
-        if (last == null)
+        if (last == null) {
             return "";
+        }
         try {
             Message message = new Message(PORT);
             message.out.printString(Message.GET_SOURCE);
@@ -43,19 +49,19 @@ public class CHelperArenaPlugin implements ArenaPlugin {
             return message.in.readString();
         } catch (IOException e) {
             messagePanel.showInfoMessage("Probably socket was not opened, trying file method");
-			StringBuilder source = new StringBuilder();
-			try {
-				File file = new File(System.getProperty("user.home") + File.separator + ".java");
-				Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-				int next;
-				while ((next = reader.read()) != -1)
-					source.append((char)next);
-				reader.close();
-				return source.toString();
-			} catch (IOException e1) {
-				messagePanel.showErrorMessage("Both socket and file methods failed to retrieve source");
-				return "";
-			}
+            StringBuilder source = new StringBuilder();
+            try {
+                File file = new File(System.getProperty("user.home") + File.separator + ".java");
+                Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+                int next;
+                while ((next = reader.read()) != -1)
+                    source.append((char) next);
+                reader.close();
+                return source.toString();
+            } catch (IOException e1) {
+                messagePanel.showErrorMessage("Both socket and file methods failed to retrieve source");
+                return "";
+            }
         }
     }
 
@@ -72,12 +78,14 @@ public class CHelperArenaPlugin implements ArenaPlugin {
         String name = componentModel.getClassName();
         String methodName = componentModel.getMethodName();
         Class result = getClass(componentModel.getReturnType());
-        if (result == null)
+        if (result == null) {
             return;
+        }
         Class[] arguments = new Class[componentModel.getParamTypes().length];
         for (int i = 0; i < arguments.length; i++) {
-            if ((arguments[i] = getClass(componentModel.getParamTypes()[i])) == null)
+            if ((arguments[i] = getClass(componentModel.getParamTypes()[i])) == null) {
                 return;
+            }
         }
         MethodSignature signature = new MethodSignature(methodName, result, arguments, componentModel.getParamNames());
         String date = Task.getDateString();
@@ -95,12 +103,13 @@ public class CHelperArenaPlugin implements ArenaPlugin {
         }
         // NOTE: we set failOnOverflow to false here, but it will be overridden on the receiving end.
         TopCoderTask task = new TopCoderTask(name, signature, tests, date, contestName, new String[0], null, false,
-			componentModel.getComponent().getMemLimitMB() + "M");
-        try {
+                componentModel.getComponent().getMemLimitMB() + "M");
+        /*try {
             Message message = new Message(PORT);
             message.out.printString(Message.NEW_TASK);
             message.out.flush();
-            task.saveTask(message.out);
+
+            mapper.writeValue(message.out.out, task);
             message.out.flush();
             String response = message.in.readString();
             if (Message.OK.equals(response)) {
@@ -109,46 +118,57 @@ public class CHelperArenaPlugin implements ArenaPlugin {
                 messagePanel.showErrorMessage("Something went wrong :(");
             }
         } catch (IOException e) {
-            messagePanel.showInfoMessage("Probably socket was not opened, trying file method");
-			try {
-				String path = new BufferedReader(new InputStreamReader(new FileInputStream(System.getProperty("user.home") + File.separator + ".chelper"))).readLine();
-				File file = new File(path + File.separator + ".tctask");
-				file.deleteOnExit();
-				FileOutputStream outputStream = new FileOutputStream(file);
-				task.saveTask(new OutputWriter(outputStream));
-				outputStream.close();
-			} catch (IOException e1) {
-				messagePanel.showErrorMessage("File method also failed");
-			}
-		}
+            messagePanel.showInfoMessage("Probably socket was not opened, trying file method");*/
+        try {
+            String path = new BufferedReader(new InputStreamReader(new FileInputStream(System.getProperty("user.home") + File.separator + ".chelper"))).readLine();
+            File file = new File(path + File.separator + ".tcjson");
+            mapper.writeValue(file, task);
+            file.deleteOnExit();
+//                    FileOutputStream outputStream = new FileOutputStream(file);
+//                    task.saveTask(new OutputWriter(outputStream));
+//                    outputStream.close();
+        } catch (IOException e1) {
+            messagePanel.showErrorMessage("File method also failed");
+        }
+//        }
     }
 
-	private String getFullContestName(String contestName) {
-		if (contestName.startsWith("SRM") && contestName.split(" ").length >= 2)
-			return "TopCoder SRM #" + contestName.split(" ")[1];
-		if (contestName.startsWith("TCO") && contestName.split(" ").length >= 4)
-			return "TopCoder Open Round #" + contestName.split(" ")[3];
-		return contestName.replace("TCO", "TopCoder Open");
-	}
+    private String getFullContestName(String contestName) {
+        if (contestName.startsWith("SRM") && contestName.split(" ").length >= 2) {
+            return "TopCoder SRM #" + contestName.split(" ")[1];
+        }
+        if (contestName.startsWith("TCO") && contestName.split(" ").length >= 4) {
+            return "TopCoder Open Round #" + contestName.split(" ")[3];
+        }
+        return contestName.replace("TCO", "TopCoder Open");
+    }
 
-	private Class getClass(DataType type) {
+    private Class getClass(DataType type) {
         String description = type.getDescriptor(JavaLanguage.JAVA_LANGUAGE);
-        if ("int".equals(description))
+        if ("int".equals(description)) {
             return int.class;
-        if ("long".equals(description))
+        }
+        if ("long".equals(description)) {
             return long.class;
-        if ("double".equals(description))
+        }
+        if ("double".equals(description)) {
             return double.class;
-        if ("String".equals(description))
+        }
+        if ("String".equals(description)) {
             return String.class;
-        if ("int[]".equals(description))
+        }
+        if ("int[]".equals(description)) {
             return int[].class;
-        if ("long[]".equals(description))
+        }
+        if ("long[]".equals(description)) {
             return long[].class;
-        if ("double[]".equals(description))
+        }
+        if ("double[]".equals(description)) {
             return double[].class;
-        if ("String[]".equals(description))
+        }
+        if ("String[]".equals(description)) {
             return String[].class;
+        }
         messagePanel.showErrorMessage("Unknown type " + description);
         return null;
     }

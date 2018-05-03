@@ -4,8 +4,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.VerticalFlowLayout;
 import com.intellij.openapi.util.IconLoader;
 import net.egork.chelper.util.FileCreator;
-import net.egork.chelper.util.Utilities;
 import net.egork.chelper.util.Provider;
+import net.egork.chelper.util.Utilities;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,12 +22,12 @@ public class TestClassesDialog extends JDialog {
     private boolean isOk = false;
     private List<TestClassPanel> panels = new ArrayList<TestClassPanel>();
     private JPanel classesPanel;
-	private FileCreator fileCreator;
-	private final int width = new JTextField(20).getPreferredSize().width;
+    private FileCreator fileCreator;
+    private final int width = new JTextField(20).getPreferredSize().width;
 
-	public TestClassesDialog(String[] testClasses, final Project project, final String location, FileCreator fileCreator, final String baseName) {
+    public TestClassesDialog(String[] testClasses, final Project project, final String location, FileCreator fileCreator, final String baseName) {
         super(null, "Test classes", ModalityType.APPLICATION_MODAL);
-		this.fileCreator = fileCreator;
+        this.fileCreator = fileCreator;
         setIconImage(Utilities.iconToImage(IconLoader.getIcon("/icons/check.png")));
         setAlwaysOnTop(true);
         setResizable(false);
@@ -46,13 +46,13 @@ public class TestClassesDialog extends JDialog {
                 TestClassesDialog.this.setVisible(false);
             }
 
-			@Override
-			public Dimension getPreferredSize() {
-				Dimension dimension = super.getPreferredSize();
-				dimension.width = width;
-				return dimension;
-			}
-		};
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension dimension = super.getPreferredSize();
+                dimension.width = width;
+                return dimension;
+            }
+        };
         buttonPanel.add(main.getOkButton());
         buttonPanel.add(main.getCancelButton());
         classesPanel = new JPanel(new VerticalFlowLayout());

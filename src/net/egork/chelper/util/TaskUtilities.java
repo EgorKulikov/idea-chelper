@@ -13,7 +13,7 @@ import net.egork.chelper.task.Task;
  */
 public class TaskUtilities {
     public static ObjectMapper mapper = new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL)
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     public static void createSourceFile(Task task, Project project) {
         SolutionGenerator.createSourceFile(task, project);
@@ -24,8 +24,9 @@ public class TaskUtilities {
     }
 
     public static String getTaskFileLocation(String location, String name) {
-        if (location != null && name != null)
+        if (location != null && name != null) {
             return location + "/" + getTaskFileName(name);
+        }
         return null;
     }
 
@@ -244,9 +245,13 @@ public class TaskUtilities {
 
     public static String canonize(String filename) {
         filename = filename.replaceAll("[\\\\?%*:|\"<>/]", "-");
-		while (filename.endsWith("."))
-			filename = filename.substring(0, filename.length() - 1);
-		filename = replaceCyrillics(filename);
-		return filename;
+        while (filename.endsWith("."))
+            filename = filename.substring(0, filename.length() - 1);
+        filename = replaceCyrillics(filename);
+        return filename;
+    }
+
+    public static String createClassName(String name) {
+        return canonize(name).replace(" ", "");
     }
 }

@@ -7,5 +7,6 @@ import com.intellij.openapi.project.Project;
  */
 public interface FileCreator {
     public String createFile(Project project, String path, String name);
+
     public boolean isValid(String name);
 }

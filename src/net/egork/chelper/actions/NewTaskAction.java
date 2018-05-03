@@ -16,54 +16,58 @@ import org.jetbrains.annotations.NotNull;
  * @author Egor Kulikov (kulikov@devexperts.com)
  */
 public class NewTaskAction extends CreateElementActionBase {
-	@NotNull
-	@Override
-	protected PsiElement[] invokeDialog(Project project, PsiDirectory psiDirectory) {
-		return create(null, psiDirectory);
-	}
+    @NotNull
+    @Override
+    protected PsiElement[] invokeDialog(Project project, PsiDirectory psiDirectory) {
+        return create(null, psiDirectory);
+    }
 
-	protected void checkBeforeCreate(String s, PsiDirectory psiDirectory) throws IncorrectOperationException {
-	}
+    protected void checkBeforeCreate(String s, PsiDirectory psiDirectory) throws IncorrectOperationException {
+    }
 
-	@NotNull
-	@Override
-	protected PsiElement[] create(String s, PsiDirectory psiDirectory) {
-		return createTask(s, psiDirectory, null, true);
-	}
+    @NotNull
+    @Override
+    protected PsiElement[] create(String s, PsiDirectory psiDirectory) {
+        return createTask(s, psiDirectory, null, true);
+    }
 
-	public static PsiElement[] createTask(String s, PsiDirectory psiDirectory, Task template, boolean allowNameChange) {
-		if (!FileUtilities.isJavaDirectory(psiDirectory))
-			return PsiElement.EMPTY_ARRAY;
-		Task task = CreateTaskDialog.showDialog(psiDirectory, s, template, allowNameChange);
-		if (task == null)
-			return PsiElement.EMPTY_ARRAY;
-		PsiElement main = Utilities.getPsiElement(psiDirectory.getProject(), task.taskClass);
-		if (main == null)
-			return PsiElement.EMPTY_ARRAY;
-		Utilities.createConfiguration(task, true, psiDirectory.getProject());
-		return new PsiElement[]{main};
-	}
+    public static PsiElement[] createTask(String s, PsiDirectory psiDirectory, Task template, boolean allowNameChange) {
+        if (!FileUtilities.isJavaDirectory(psiDirectory)) {
+            return PsiElement.EMPTY_ARRAY;
+        }
+        Task task = CreateTaskDialog.showDialog(psiDirectory, s, template, allowNameChange);
+        if (task == null) {
+            return PsiElement.EMPTY_ARRAY;
+        }
+        PsiElement main = Utilities.getPsiElement(psiDirectory.getProject(), task.taskClass);
+        if (main == null) {
+            return PsiElement.EMPTY_ARRAY;
+        }
+        Utilities.createConfiguration(task, true, psiDirectory.getProject());
+        return new PsiElement[]{main};
+    }
 
-	@Override
-	protected String getErrorTitle() {
-		return "Error";
-	}
+    @Override
+    protected String getErrorTitle() {
+        return "Error";
+    }
 
-	@Override
-	protected String getCommandName() {
-		return "Task";
-	}
+    @Override
+    protected String getCommandName() {
+        return "Task";
+    }
 
-	@Override
-	protected String getActionName(PsiDirectory psiDirectory, String s) {
-		return "New task " + s;
-	}
+    @Override
+    protected String getActionName(PsiDirectory psiDirectory, String s) {
+        return "New task " + s;
+    }
 
-	@Override
-	protected boolean isAvailable(DataContext dataContext) {
-		if (!Utilities.isEligible(dataContext))
-			return false;
-		PsiDirectory directory = FileUtilities.getDirectory(dataContext);
-		return FileUtilities.isJavaDirectory(directory);
-	}
+    @Override
+    protected boolean isAvailable(DataContext dataContext) {
+        if (!Utilities.isEligible(dataContext)) {
+            return false;
+        }
+        PsiDirectory directory = FileUtilities.getDirectory(dataContext);
+        return FileUtilities.isJavaDirectory(directory);
+    }
 }

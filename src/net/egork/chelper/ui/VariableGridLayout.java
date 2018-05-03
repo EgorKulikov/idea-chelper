@@ -52,6 +52,7 @@ public class VariableGridLayout extends GridLayout {
 
     /**
      * Creates a grid layout with the specified rows and specified columns.
+     *
      * @param rows the rows
      * @param cols the columns
      */
@@ -72,11 +73,12 @@ public class VariableGridLayout extends GridLayout {
     /**
      * Creates a grid layout with the specified rows, columns,
      * horizontal gap, and vertical gap.
+     *
      * @param rows the rows
      * @param cols the columns
      * @param hgap the horizontal gap variable
      * @param vgap the vertical gap variable
-     * @exception IllegalArgumentException If the rows and columns are invalid.
+     * @throws IllegalArgumentException If the rows and columns are invalid.
      */
     public VariableGridLayout(int rows, int cols, int hgap, int vgap) {
         super(rows, cols, hgap, vgap);
@@ -162,6 +164,7 @@ public class VariableGridLayout extends GridLayout {
 
     /**
      * Lays out the container in the specified panel.
+     *
      * @param parent the specified component being laid out
      * @see Container
      */
@@ -193,11 +196,11 @@ public class VariableGridLayout extends GridLayout {
 
         allocateExtraSpace();
 
-        for (int c = 0, x = insets.left ; c < ncols ; c++) {
-            int colWidth = (int)(getColFraction(c) * w);
-            for (int r = 0, y = insets.top ; r < nrows ; r++) {
+        for (int c = 0, x = insets.left; c < ncols; c++) {
+            int colWidth = (int) (getColFraction(c) * w);
+            for (int r = 0, y = insets.top; r < nrows; r++) {
                 int i = r * ncols + c;
-                int rowHeight = (int)(getRowFraction(r) * h);
+                int rowHeight = (int) (getRowFraction(r) * h);
 
                 if (i < ncomponents) {
                     parent.getComponent(i).reshape(x, y, colWidth, rowHeight);
@@ -209,10 +212,10 @@ public class VariableGridLayout extends GridLayout {
     }
 
     static String fracsToString(double array[]) {
-        String result = "["+array.length+"]";
+        String result = "[" + array.length + "]";
 
         for (int i = 0; i < array.length; i++) {
-            result += "<"+array[i]+">";
+            result += "<" + array[i] + ">";
         }
         return result;
     }
@@ -222,10 +225,10 @@ public class VariableGridLayout extends GridLayout {
      */
     public String toString() {
         return getClass().getName() + "[hgap=" + hgap + ",vgap=" + vgap +
-                                       ",rows=" + rows + ",cols=" + cols +
-                                       ",rowFracs=" +
-                                       fracsToString(rowFractions) +
-                                       ",colFracs=" +
-                                       fracsToString(colFractions) + "]";
+                ",rows=" + rows + ",cols=" + cols +
+                ",rowFracs=" +
+                fracsToString(rowFractions) +
+                ",colFracs=" +
+                fracsToString(colFractions) + "]";
     }
 }

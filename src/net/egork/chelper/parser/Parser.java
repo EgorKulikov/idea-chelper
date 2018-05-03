@@ -11,13 +11,19 @@ import java.util.Collection;
  */
 public interface Parser {
     public static final Parser[] PARSERS = {new CodeforcesParser(), new TimusParser(),
-		new RCCParser()};
+            new RCCParser()};
 
-	public Icon getIcon();
-	public String getName();
+    public Icon getIcon();
+
+    public String getName();
+
     public void getContests(DescriptionReceiver receiver);
+
     public void parseContest(String id, DescriptionReceiver receiver);
+
     public Task parseTask(Description description);
-	public TestType defaultTestType();
-	public Collection<Task> parseTaskFromHTML(String html);
+
+    public TestType defaultTestType();
+
+    public Collection<Task> parseTaskFromHTML(String html);
 }

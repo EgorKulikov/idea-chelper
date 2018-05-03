@@ -11,7 +11,8 @@ public interface ArenaPlugin {
 
     String getSource();
 
-    @SuppressWarnings({"UnusedDeclaration"}) // Required by TopCoder Editor Plugin API
+    @SuppressWarnings({"UnusedDeclaration"})
+        // Required by TopCoder Editor Plugin API
     void setSource(String source);
 
     void setProblemComponent(ProblemComponentModel componentModel, Language language, Renderer renderer);

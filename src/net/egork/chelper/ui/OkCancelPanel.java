@@ -44,7 +44,7 @@ public abstract class OkCancelPanel extends JPanel {
 
     private void initialize(Component comp) {
         if (comp instanceof JComponent) {
-            JComponent component = (JComponent)comp;
+            JComponent component = (JComponent) comp;
             component.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "ok");
             component.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "cancel");
             component.getActionMap().put("ok", okAction);
@@ -55,6 +55,7 @@ public abstract class OkCancelPanel extends JPanel {
     }
 
     public abstract void onOk();
+
     public abstract void onCancel();
 
     public JButton getOkButton() {

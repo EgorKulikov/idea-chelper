@@ -8,17 +8,18 @@ import java.io.UnsupportedEncodingException;
  * @author Egor Kulikov (egor@egork.net)
  */
 public class OutputWriter {
-    private final OutputStream out;
+    public final OutputStream out;
 
     public OutputWriter(OutputStream outputStream) {
         out = outputStream;
     }
 
-    public void print(Object...objects) {
+    public void print(Object... objects) {
         try {
             for (int i = 0; i < objects.length; i++) {
-                if (i != 0)
+                if (i != 0) {
                     out.write(' ');
+                }
                 out.write(objects[i].toString().getBytes("UTF-8"));
             }
         } catch (IOException e) {
@@ -26,7 +27,7 @@ public class OutputWriter {
         }
     }
 
-    public void printLine(Object...objects) {
+    public void printLine(Object... objects) {
         print(objects);
         try {
             out.write('\n');
@@ -52,15 +53,16 @@ public class OutputWriter {
     }
 
     public void printString(String s) {
-        if (s == null)
+        if (s == null) {
             printLine(-1);
-        else
-			try {
-				printLine(s.getBytes("UTF-8").length, s);
-			} catch (UnsupportedEncodingException e) {
-				throw new RuntimeException(e);
-			}
-	}
+        } else {
+            try {
+                printLine(s.getBytes("UTF-8").length, s);
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
 
     public void printBoolean(boolean b) {
         printLine(b ? 1 : 0);
@@ -71,32 +73,32 @@ public class OutputWriter {
     }
 
     public void printTopCoder(Object o) {
-        if (o == null)
+        if (o == null) {
             printString(null);
-        else if (o instanceof Integer)
+        } else if (o instanceof Integer) {
             printLine("int", o);
-        else if (o instanceof Long)
+        } else if (o instanceof Long) {
             printLine("long", o);
-        else if (o instanceof Double)
+        } else if (o instanceof Double) {
             printLine("double", o);
-        else if (o instanceof String) {
+        } else if (o instanceof String) {
             printLine("String");
             printString((String) o);
         } else if (o instanceof int[]) {
             printLine("int[]", ((int[]) o).length);
-            for (int i : (int[])o)
+            for (int i : (int[]) o)
                 printLine(i);
         } else if (o instanceof long[]) {
             printLine("long[]", ((long[]) o).length);
-            for (long i : (long[])o)
+            for (long i : (long[]) o)
                 printLine(i);
         } else if (o instanceof double[]) {
             printLine("double[]", ((double[]) o).length);
-            for (double i : (double[])o)
+            for (double i : (double[]) o)
                 printLine(i);
         } else if (o instanceof String[]) {
             printLine("String[]", ((String[]) o).length);
-            for (String i : (String[])o)
+            for (String i : (String[]) o)
                 printString(i);
         }
     }

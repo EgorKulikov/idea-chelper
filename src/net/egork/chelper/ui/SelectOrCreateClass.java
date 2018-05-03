@@ -19,8 +19,7 @@ public class SelectOrCreateClass extends JPanel {
     private final JButton create;
 
     public SelectOrCreateClass(String initialValue, final Project project, final Provider<String> locationProvider,
-        final FileCreator fileCreator)
-    {
+                               final FileCreator fileCreator) {
         super(new BorderLayout());
         classSelector = new ClassSelector(initialValue, project);
         create = new JButton("Create");
@@ -46,9 +45,9 @@ public class SelectOrCreateClass extends JPanel {
         return classSelector.getText();
     }
 
-	public void setText(String text) {
-		classSelector.setText(text);
-	}
+    public void setText(String text) {
+        classSelector.setText(text);
+    }
 
     @Override
     public void setEnabled(boolean enabled) {

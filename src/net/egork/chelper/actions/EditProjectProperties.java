@@ -1,5 +1,8 @@
 package net.egork.chelper.actions;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.cojac.CojacAgent;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
@@ -31,28 +34,30 @@ public class EditProjectProperties extends AnAction {
         if (result != null) {
             result.save(project);
             Utilities.addProjectData(project, result);
-			ApplicationManager.getApplication().runWriteAction(new Runnable() {
-				public void run() {
-					LibraryTable table = ProjectLibraryTable.getInstance(project);
-					String path = TopCoderAction.getJarPathForClass(NewTester.class);
-					VirtualFile jar = VirtualFileManager.getInstance().findFileByUrl(VirtualFileManager.constructUrl(JarFileSystem.PROTOCOL, path) + JarFileSystem.JAR_SEPARATOR);
-					Library library = table.getLibraryByName("CHelper");
-					if (library == null) {
-						library = table.createLibrary("CHelper");
-						Library.ModifiableModel libraryModel = library.getModifiableModel();
-						libraryModel.addRoot(jar, OrderRootType.CLASSES);
-						libraryModel.commit();
-					} else
-						return;
-					for (Module module : ModuleManager.getInstance(project).getModules()) {
-						ModifiableRootModel model = ModuleRootManager.getInstance(module).getModifiableModel();
-						if (model.getModuleLibraryTable().getLibraryByName("CHelper") == null) {
-							model.addLibraryEntry(library);
-							model.commit();
-						}
-					}
-				}
-			});
+            ApplicationManager.getApplication().runWriteAction(new Runnable() {
+                public void run() {
+                    Class[] neededClasses = {NewTester.class, CojacAgent.class, JsonCreator.class, ObjectMapper.class, com.fasterxml.jackson.core.JsonParser.class};
+                    LibraryTable table = ProjectLibraryTable.getInstance(project);
+                    Library library = table.getLibraryByName("CHelper");
+                    if (library == null) {
+                        library = table.createLibrary("CHelper");
+                    }
+                    for (Class aClass : neededClasses) {
+                        String path = TopCoderAction.getJarPathForClass(aClass);
+                        VirtualFile jar = VirtualFileManager.getInstance().findFileByUrl(VirtualFileManager.constructUrl(JarFileSystem.PROTOCOL, path) + JarFileSystem.JAR_SEPARATOR);
+                        Library.ModifiableModel libraryModel = library.getModifiableModel();
+                        libraryModel.addRoot(jar, OrderRootType.CLASSES);
+                        libraryModel.commit();
+                    }
+                    for (Module module : ModuleManager.getInstance(project).getModules()) {
+                        ModifiableRootModel model = ModuleRootManager.getInstance(module).getModifiableModel();
+                        if (model.getModuleLibraryTable().getLibraryByName("CHelper") == null) {
+                            model.addLibraryEntry(library);
+                            model.commit();
+                        }
+                    }
+                }
+            });
         }
     }
 }

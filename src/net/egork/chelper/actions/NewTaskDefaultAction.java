@@ -18,33 +18,34 @@ import net.egork.chelper.util.Utilities;
  * @author Egor Kulikov (egor@egork.net)
  */
 public class NewTaskDefaultAction extends AnAction {
-	public void actionPerformed(AnActionEvent e) {
-		if (!Utilities.isEligible(e.getDataContext()))
-			return;
-		Project project = Utilities.getProject(e.getDataContext());
-		createTaskInDefaultDirectory(project, null);
-	}
+    public void actionPerformed(AnActionEvent e) {
+        if (!Utilities.isEligible(e.getDataContext())) {
+            return;
+        }
+        Project project = Utilities.getProject(e.getDataContext());
+        createTaskInDefaultDirectory(project, null);
+    }
 
-	public static void createTaskInDefaultDirectory(Project project, Task task) {
-		ProjectData data = Utilities.getData(project);
-		PsiDirectory directory = FileUtilities.getPsiDirectory(project, data.defaultDirectory);
-		if (directory == null) {
-			FileUtilities.createDirectoryIfMissing(project, data.defaultDirectory);
-			directory = FileUtilities.getPsiDirectory(project, data.defaultDirectory);
-			if (directory == null) {
-				Messenger.publishMessage("Unable to create default directory", NotificationType.ERROR);
-				return;
-			}
-		}
-		PsiPackage aPackage = JavaDirectoryService.getInstance().getPackage(directory);
-		if (aPackage == null || aPackage.getName() == null || "".equals(aPackage.getName())) {
-			Messenger.publishMessage("defaultDirectory should be under source and in non-default package", NotificationType.WARNING);
-			return;
-		}
-		PsiElement[] result = NewTaskAction.createTask(task == null ? null : task.name, directory, task, true);
-		for (PsiElement element : result) {
-			Utilities.openElement(project, element);
-		}
-	}
+    public static void createTaskInDefaultDirectory(Project project, Task task) {
+        ProjectData data = Utilities.getData(project);
+        PsiDirectory directory = FileUtilities.getPsiDirectory(project, data.defaultDirectory);
+        if (directory == null) {
+            FileUtilities.createDirectoryIfMissing(project, data.defaultDirectory);
+            directory = FileUtilities.getPsiDirectory(project, data.defaultDirectory);
+            if (directory == null) {
+                Messenger.publishMessage("Unable to create default directory", NotificationType.ERROR);
+                return;
+            }
+        }
+        PsiPackage aPackage = JavaDirectoryService.getInstance().getPackage(directory);
+        if (aPackage == null || aPackage.getName() == null || "".equals(aPackage.getName())) {
+            Messenger.publishMessage("defaultDirectory should be under source and in non-default package", NotificationType.WARNING);
+            return;
+        }
+        PsiElement[] result = NewTaskAction.createTask(task == null ? null : task.name, directory, task, true);
+        for (PsiElement element : result) {
+            Utilities.openElement(project, element);
+        }
+    }
 
 }

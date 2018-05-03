@@ -7,5 +7,6 @@ import java.util.Collection;
  */
 public interface DescriptionReceiver {
     public void receiveDescriptions(Collection<Description> descriptions);
-	public boolean isStopped();
+
+    public boolean isStopped();
 }

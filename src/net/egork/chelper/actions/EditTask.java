@@ -19,27 +19,30 @@ import net.egork.chelper.util.Utilities;
  * @author egorku@yandex-team.ru
  */
 public class EditTask extends AnAction {
-	public void actionPerformed(AnActionEvent e) {
-		if (!Utilities.isEligible(e.getDataContext()))
-			return;
-		Project project = Utilities.getProject(e.getDataContext());
-		RunnerAndConfigurationSettings selectedConfiguration =
-			RunManagerImpl.getInstanceImpl(project).getSelectedConfiguration();
-		if (selectedConfiguration == null)
-			return;
-		RunConfiguration configuration = selectedConfiguration.getConfiguration();
-		if (configuration instanceof TaskConfiguration) {
-			TaskConfiguration taskConfiguration = (TaskConfiguration) configuration;
-			Task task = taskConfiguration.getConfiguration();
-			task = CreateTaskDialog.showDialog(
-				FileUtilities.getPsiDirectory(project, task.location), task.name, task, false);
-			if (task != null)
-				taskConfiguration.setConfiguration(task);
-		}
-		if (configuration instanceof TopCoderConfiguration) {
-			TopCoderConfiguration taskConfiguration = (TopCoderConfiguration) configuration;
-			TopCoderTask task = taskConfiguration.getConfiguration();
-			taskConfiguration.setConfiguration(EditTCDialog.show(project, task));
-		}
-	}
+    public void actionPerformed(AnActionEvent e) {
+        if (!Utilities.isEligible(e.getDataContext())) {
+            return;
+        }
+        Project project = Utilities.getProject(e.getDataContext());
+        RunnerAndConfigurationSettings selectedConfiguration =
+                RunManagerImpl.getInstanceImpl(project).getSelectedConfiguration();
+        if (selectedConfiguration == null) {
+            return;
+        }
+        RunConfiguration configuration = selectedConfiguration.getConfiguration();
+        if (configuration instanceof TaskConfiguration) {
+            TaskConfiguration taskConfiguration = (TaskConfiguration) configuration;
+            Task task = taskConfiguration.getConfiguration();
+            task = CreateTaskDialog.showDialog(
+                    FileUtilities.getPsiDirectory(project, task.location), task.name, task, false);
+            if (task != null) {
+                taskConfiguration.setConfiguration(task);
+            }
+        }
+        if (configuration instanceof TopCoderConfiguration) {
+            TopCoderConfiguration taskConfiguration = (TopCoderConfiguration) configuration;
+            TopCoderTask task = taskConfiguration.getConfiguration();
+            taskConfiguration.setConfiguration(EditTCDialog.show(project, task));
+        }
+    }
 }

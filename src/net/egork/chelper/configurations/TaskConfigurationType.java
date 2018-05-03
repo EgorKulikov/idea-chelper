@@ -8,44 +8,44 @@ import com.intellij.openapi.util.IconLoader;
 import net.egork.chelper.util.Utilities;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.Icon;
+import javax.swing.*;
 
 /**
  * @author Egor Kulikov (kulikov@devexperts.com)
  */
 public class TaskConfigurationType implements ConfigurationType {
-	private static final Icon ICON = IconLoader.getIcon("/icons/taskIcon.png");
-	private final ConfigurationFactory factory;
-	public static TaskConfigurationType INSTANCE;
+    private static final Icon ICON = IconLoader.getIcon("/icons/taskIcon.png");
+    private final ConfigurationFactory factory;
+    public static TaskConfigurationType INSTANCE;
 
-	public TaskConfigurationType() {
-		factory = new ConfigurationFactory(this) {
-			@Override
-			public RunConfiguration createTemplateConfiguration(Project project) {
-				return new TaskConfiguration("Task", project, Utilities.getDefaultTask(), factory);
-			}
-		};
-		INSTANCE = this;
-	}
+    public TaskConfigurationType() {
+        factory = new ConfigurationFactory(this) {
+            @Override
+            public RunConfiguration createTemplateConfiguration(Project project) {
+                return new TaskConfiguration("Task", project, Utilities.getDefaultTask(), factory);
+            }
+        };
+        INSTANCE = this;
+    }
 
-	public String getDisplayName() {
-		return "Task";
-	}
+    public String getDisplayName() {
+        return "Task";
+    }
 
-	public String getConfigurationTypeDescription() {
-		return "CHelper Task";
-	}
+    public String getConfigurationTypeDescription() {
+        return "CHelper Task";
+    }
 
-	public Icon getIcon() {
-		return ICON;
-	}
+    public Icon getIcon() {
+        return ICON;
+    }
 
-	@NotNull
-	public String getId() {
-		return "Task";
-	}
+    @NotNull
+    public String getId() {
+        return "Task";
+    }
 
-	public ConfigurationFactory[] getConfigurationFactories() {
-		return new ConfigurationFactory[]{factory};
-	}
+    public ConfigurationFactory[] getConfigurationFactories() {
+        return new ConfigurationFactory[]{factory};
+    }
 }

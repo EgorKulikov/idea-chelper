@@ -4,7 +4,7 @@ package net.egork.chelper.task;
  * @author Egor Kulikov (kulikov@devexperts.com)
  */
 public enum TestType {
-	SINGLE("Single test"),
+    SINGLE("Single test"),
     MULTI_NUMBER("Number of tests known"),
     MULTI_EOF("Number of tests unknown");
 

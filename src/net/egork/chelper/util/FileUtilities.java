@@ -377,9 +377,14 @@ public class FileUtilities {
     }
 
     public static void removeFile(String fileName, Project project) {
-        try {
-            getFile(project, fileName).delete(null);
-        } catch (IOException ignored) {
-        }
+        ApplicationManager.getApplication().runWriteAction(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    getFile(project, fileName).delete(null);
+                } catch (IOException ignored) {
+                }
+            }
+        });
     }
 }

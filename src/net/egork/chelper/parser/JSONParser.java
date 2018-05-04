@@ -5,6 +5,7 @@ import net.egork.chelper.task.StreamConfiguration;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.Test;
 import net.egork.chelper.task.TestType;
+import net.egork.chelper.util.TaskUtilities;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -56,7 +57,7 @@ public class JSONParser implements Parser {
             JSONObject java = languages.getJSONObject("java");
 
             String mainClass = java.getString("mainClass");
-            String taskClass = java.getString("taskClass");
+            String taskClass = TaskUtilities.replaceCyrillics(java.getString("taskClass"));
 
             int memoryLimit = obj.getInt("memoryLimit");
 

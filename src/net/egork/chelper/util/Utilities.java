@@ -97,6 +97,11 @@ public class Utilities {
         if (data.libraryVersion == ProjectData.CURRENT_LIBRARY_VERSION) {
             return;
         }
+        fixLibrary(project);
+        data.completeMigration(project);
+    }
+
+    public static void fixLibrary(Project project) {
         ApplicationManager.getApplication().runWriteAction(new Runnable() {
             public void run() {
                 Class[] neededClasses = {NewTester.class, CojacAgent.class, JsonCreator.class, ObjectMapper.class, com.fasterxml.jackson.core.JsonParser.class};
@@ -119,7 +124,6 @@ public class Utilities {
                         model.commit();
                     }
                 }
-                data.completeMigration(project);
             }
         });
     }

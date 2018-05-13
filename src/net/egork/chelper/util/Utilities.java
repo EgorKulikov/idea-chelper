@@ -119,7 +119,7 @@ public class Utilities {
                 }
                 for (Module module : ModuleManager.getInstance(project).getModules()) {
                     ModifiableRootModel model = ModuleRootManager.getInstance(module).getModifiableModel();
-                    if (model.getModuleLibraryTable().getLibraryByName("CHelper") == null) {
+                    if (model.findLibraryOrderEntry(library) == null) {
                         model.addLibraryEntry(library);
                         model.commit();
                     }

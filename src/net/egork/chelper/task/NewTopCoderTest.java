@@ -118,7 +118,7 @@ public class NewTopCoderTest {
                 if (value.isEmpty()) {
                     return new int[0];
                 }
-                String[] tokens = value.split(" ");
+                String[] tokens = value.split(" ", -1);
                 int[] result = new int[tokens.length];
                 for (int i = 0; i < result.length; i++) {
                     result[i] = Integer.parseInt(tokens[i]);
@@ -128,7 +128,7 @@ public class NewTopCoderTest {
                 if (value.isEmpty()) {
                     return new long[0];
                 }
-                tokens = value.split(" ");
+                tokens = value.split(" ", -1);
                 long[] resultLong = new long[tokens.length];
                 for (int i = 0; i < resultLong.length; i++) {
                     resultLong[i] = Long.parseLong(tokens[i]);
@@ -138,17 +138,14 @@ public class NewTopCoderTest {
                 if (value.isEmpty()) {
                     return new double[0];
                 }
-                tokens = value.split(" ");
+                tokens = value.split(" ", -1);
                 double[] resultDouble = new double[tokens.length];
                 for (int i = 0; i < resultDouble.length; i++) {
                     resultDouble[i] = Double.parseDouble(tokens[i]);
                 }
                 return resultDouble;
             case "String[]":
-                if (value.isEmpty()) {
-                    return new String[0];
-                }
-                return value.split("ф");
+                return value.split("ф", -1);
             default:
                 return null;
         }
@@ -270,7 +267,7 @@ public class NewTopCoderTest {
             if (builder.length() != 0) {
                 builder.append(" ");
             }
-            builder.append(argument);
+            builder.append(argument.replace('ф', ' '));
         }
         String representation = builder.toString();
         if (representation.length() > 15) {

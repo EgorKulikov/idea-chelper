@@ -267,7 +267,9 @@ public class NewTopCoderTest {
             if (builder.length() != 0) {
                 builder.append(" ");
             }
-            builder.append(argument.replace('ф', ' '));
+            if (argument != null) {
+                builder.append(argument.replace('ф', ' '));
+            }
         }
         String representation = builder.toString();
         if (representation.length() > 15) {

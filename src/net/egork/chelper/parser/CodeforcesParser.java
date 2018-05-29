@@ -29,7 +29,7 @@ public class CodeforcesParser implements Parser {
     }
 
     public void getContests(DescriptionReceiver receiver) {
-        String contestsPage = FileUtilities.getWebPageContent("http://codeforces.com/contests?complete=true");
+        String contestsPage = FileUtilities.getWebPageContent("https://codeforces.com/contests?complete=true");
         if (contestsPage == null) {
             return;
         }
@@ -64,7 +64,7 @@ public class CodeforcesParser implements Parser {
             return;
         }
         for (int i = 2; i <= additionalPagesCount; i++) {
-            String page = FileUtilities.getWebPageContent("http://codeforces.com/contests/page/" + i);
+            String page = FileUtilities.getWebPageContent("https://codeforces.com/contests/page/" + i);
             if (page == null) {
                 continue;
             }
@@ -90,7 +90,7 @@ public class CodeforcesParser implements Parser {
     }
 
     public void parseContest(String id, DescriptionReceiver receiver) {
-        String mainPage = FileUtilities.getWebPageContent("http://codeforces.com/contest/" + id);
+        String mainPage = FileUtilities.getWebPageContent("https://codeforces.com/contest/" + id);
         if (mainPage == null) {
             return;
         }
@@ -125,7 +125,7 @@ public class CodeforcesParser implements Parser {
         }
         String contestId = tokens[0];
         id = tokens[1];
-        String text = FileUtilities.getWebPageContent("http://codeforces.com/contest/" + contestId + "/problem/" + id);
+        String text = FileUtilities.getWebPageContent("https://codeforces.com/contest/" + contestId + "/problem/" + id);
         if (text == null) {
             return null;
         }

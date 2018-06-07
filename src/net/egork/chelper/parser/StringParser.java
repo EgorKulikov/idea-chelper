@@ -48,32 +48,32 @@ public class StringParser implements CharSequence {
         return result;
     }
 
-    public String advanceRegex(boolean toEnd, String...samples) throws ParseException {
-   		int position = -1;
-   		int targetSampleLength = 0;
-   		for (String sample : samples) {
-   			int candidate = -1;
-   			Pattern ptr=Pattern.compile(sample);
-   			Matcher mtc=ptr.matcher(underlying);
-   			int last_index=candidate;
-   			if(mtc.find()) {
-   				candidate=mtc.start();
-   				last_index=mtc.end();
-   			}
-   			if (position == -1 || candidate != -1 && candidate < position) {
-   				position = candidate;
-   				targetSampleLength = last_index-candidate;
-   			}
-   		}
-   		if (position == -1)
-   			throw new ParseException(underlying, -1);
-   		String result = underlying.substring(0, position);
-   		if (toEnd)
-   			underlying = underlying.substring(position + targetSampleLength);
-   		else
-   			underlying = underlying.substring(position);
-   		return result;
-   	}
+    public String advanceRegex(boolean toEnd, String... samples) throws ParseException {
+        int position = -1;
+        int targetSampleLength = 0;
+        for (String sample : samples) {
+            int candidate = -1;
+            Pattern ptr = Pattern.compile(sample);
+            Matcher mtc = ptr.matcher(underlying);
+            int last_index = candidate;
+            if (mtc.find()) {
+                candidate = mtc.start();
+                last_index = mtc.end();
+            }
+            if (position == -1 || candidate != -1 && candidate < position) {
+                position = candidate;
+                targetSampleLength = last_index - candidate;
+            }
+        }
+        if (position == -1)
+            throw new ParseException(underlying, -1);
+        String result = underlying.substring(0, position);
+        if (toEnd)
+            underlying = underlying.substring(position + targetSampleLength);
+        else
+            underlying = underlying.substring(position);
+        return result;
+    }
 
     public String advanceIfPossible(boolean toEnd, String... samples) {
         try {
@@ -83,13 +83,13 @@ public class StringParser implements CharSequence {
         }
     }
 
-    public String advanceRegexIfPossible(boolean toEnd, String...samples) {
-   		try {
-   			return advanceRegex(toEnd, samples);
-   		} catch (ParseException e) {
-   			return null;
-   		}
-   	}
+    public String advanceRegexIfPossible(boolean toEnd, String... samples) {
+        try {
+            return advanceRegex(toEnd, samples);
+        } catch (ParseException e) {
+            return null;
+        }
+    }
 
     public void dropTail(String sample) throws ParseException {
         int position = underlying.indexOf(sample);

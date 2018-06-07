@@ -195,7 +195,7 @@ public class CodeChefParser implements Parser {
                 }
             }
             return Collections.singleton(new Task(taskName, defaultTestType(), StreamConfiguration.STANDARD,
-                    StreamConfiguration.STANDARD, tests.toArray(new Test[tests.size()]), null, "-Xmx64M", "Main", taskID,
+                    StreamConfiguration.STANDARD, tests.toArray(new Test[tests.size()]), null, "-Xmx1536M", "Main", taskID,
                     TokenChecker.class.getCanonicalName(), "", new String[0], null, contestName, true, null, null, false,
                     false));
         } catch (ParseException e) {

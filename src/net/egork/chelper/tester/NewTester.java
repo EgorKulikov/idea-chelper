@@ -3,6 +3,7 @@ package net.egork.chelper.tester;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import net.egork.chelper.checkers.Checker;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.Test;
@@ -21,7 +22,8 @@ import java.util.*;
  */
 public class NewTester {
     private static ObjectMapper mapper = new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL)
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .enable(SerializationFeature.INDENT_OUTPUT);
 
     public static void main(String[] args) throws InterruptedException, InvocationTargetException,
             ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {

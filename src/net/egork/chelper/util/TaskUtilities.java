@@ -3,6 +3,7 @@ package net.egork.chelper.util;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import net.egork.chelper.codegeneration.SolutionGenerator;
@@ -12,8 +13,9 @@ import net.egork.chelper.task.Task;
  * @author Egor Kulikov (egorku@yandex-team.ru)
  */
 public class TaskUtilities {
-    public static ObjectMapper mapper = new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL)
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    private static ObjectMapper mapper = new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL)
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .enable(SerializationFeature.INDENT_OUTPUT);
 
     public static void createSourceFile(Task task, Project project) {
         SolutionGenerator.createSourceFile(task, project);

@@ -3,6 +3,7 @@ package net.egork.chelper.topcoder;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.topcoder.client.contestant.ProblemComponentModel;
 import com.topcoder.shared.language.JavaLanguage;
 import com.topcoder.shared.language.Language;
@@ -23,7 +24,8 @@ import java.util.Arrays;
  */
 public class CHelperArenaPlugin implements ArenaPlugin {
     private static ObjectMapper mapper = new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL)
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .enable(SerializationFeature.INDENT_OUTPUT);
 
     private MessagePanel messagePanel;
     public static final int PORT = 4242;

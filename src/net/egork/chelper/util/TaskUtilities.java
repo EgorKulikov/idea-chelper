@@ -13,7 +13,7 @@ import net.egork.chelper.task.Task;
  * @author Egor Kulikov (egorku@yandex-team.ru)
  */
 public class TaskUtilities {
-    private static ObjectMapper mapper = new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL)
+    public static ObjectMapper mapper = new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL)
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .enable(SerializationFeature.INDENT_OUTPUT);
 

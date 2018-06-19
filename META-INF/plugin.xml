@@ -1,66 +1,91 @@
 <idea-plugin>
-  <name>CHelper</name>
-  <description>Inlines library code and provides testing framework</description>
-  <version>4.3.2b1</version>
-  <vendor>Egor Kulikov</vendor>
-  <idea-version since-build="139.0"/>
+    <name>CHelper</name>
+    <description>Inlines library code and provides testing framework</description>
+    <version>4.3.2b1</version>
+    <vendor>Egor Kulikov</vendor>
+    <idea-version since-build="139.0"/>
 
-  <application-components>
-    <!-- Add your application components here -->
-      <component>
-          <implementation-class>net.egork.chelper.CHelperMain</implementation-class>
-      </component>
-  </application-components>
+    <application-components>
+        <!-- Add your application components here -->
+        <component>
+            <implementation-class>net.egork.chelper.CHelperMain</implementation-class>
+        </component>
+    </application-components>
 
-  <project-components>
-    <!-- Add your project components here -->
-      <component>
-          <implementation-class>net.egork.chelper.AutoSwitcher</implementation-class>
-      </component>
-      <component>
-          <implementation-class>net.egork.chelper.ChromeParser</implementation-class>
-      </component>
-  </project-components>
+    <project-components>
+        <!-- Add your project components here -->
+        <component>
+            <implementation-class>net.egork.chelper.AutoSwitcher</implementation-class>
+        </component>
+        <component>
+            <implementation-class>net.egork.chelper.ChromeParser</implementation-class>
+        </component>
+    </project-components>
 
-  <actions>
-    <!-- Add your actions here -->
-      <action id="newTaskCustom" class="net.egork.chelper.actions.NewTaskAction" text="Task" icon="/icons/taskIcon.png" description="New task creation">
-          <add-to-group group-id="NewGroup" anchor="first"/>
-      </action>
-      <action id="editTests" class="net.egork.chelper.actions.EditTestsAction" text="Edit Tests"
-              description="Edit tests for current task" icon="/icons/editTests.png">
-          <add-to-group group-id="RunMenu" anchor="first"/>
-          <keyboard-shortcut keymap="$default" first-keystroke="alt F5"/>
-      </action>
-      <action id="archiveTask" class="net.egork.chelper.actions.ArchiveAction" text="Archive Task"
-              description="Archives current task"  icon="/icons/archive.png">
-          <keyboard-shortcut keymap="$default" first-keystroke="alt F6"/>
-      </action>
-      <action id="deleteTask" class="net.egork.chelper.actions.DeleteTaskAction" text="Delete Task" icon="/icons/delete.png"
-              description="Deletes current task and all associated files"/>
-      <action id="newTask" class="net.egork.chelper.actions.NewTaskDefaultAction" text="New Task"
-              icon="/icons/newTask.png" description="Creating new task in default directory">
-          <keyboard-shortcut keymap="$default" first-keystroke="alt F2"/>
-      </action>
-      <action id="codeforces" class="net.egork.chelper.actions.ParseContestAction" text="Parse Contest" icon="/icons/parseContest.png"
-              description="Parse contest"/>
-      <action id="copySource" class="net.egork.chelper.actions.CopyAction" text="Copy Source"
-              icon="/icons/copy.png" description="Copies source to clipboard">
-          <keyboard-shortcut keymap="$default" first-keystroke="alt F8"/>
-      </action>
-      <action id="editProjectProperties" class="net.egork.chelper.actions.EditProjectProperties" icon="/icons/settings.png"
-              text="Edit Project Settings"/>
-      <action id="unarchiveTask" class="net.egork.chelper.actions.UnarchiveTaskAction" text="Restore Task" icon="/icons/unarchive.png"
-              description="Restores previously archived task"/>
-      <action id="launchArena" class="net.egork.chelper.actions.TopCoderAction" text="Launch TopCoder Arena" icon="/icons/topcoder.png"
-              description="Launches TopCoder Arena with integrated plugin to interact with idea"/>
-      <action id="editTask" class="net.egork.chelper.actions.EditTask" text="Edit Task" icon="/icons/check.png"
-              description="Edit current task"/>
-      <action id="bulkAdd" class="net.egork.chelper.actions.BulkAddTests" text="Bulk Add Tests" icon="/icons/editTests.png"/>
-  </actions>
+    <actions>
+        <!-- Add your actions here -->
+        <action id="newTaskCustom" class="net.egork.chelper.actions.NewTaskAction" text="Task"
+                icon="/icons/taskIcon.png" description="New task creation">
+            <add-to-group group-id="NewGroup" anchor="first"/>
+        </action>
+        <action id="editTests" class="net.egork.chelper.actions.EditTestsAction" text="Edit Tests"
+                description="Edit tests for current task" icon="/icons/editTests.png">
+            <add-to-group group-id="RunMenu" anchor="first"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="alt F5"/>
+        </action>
+        <action id="archiveTask" class="net.egork.chelper.actions.ArchiveAction" text="Archive Task"
+                description="Archives current task" icon="/icons/archive.png">
+            <keyboard-shortcut keymap="$default" first-keystroke="alt F6"/>
+        </action>
+        <action id="deleteTask" class="net.egork.chelper.actions.DeleteTaskAction" text="Delete Task"
+                icon="/icons/delete.png"
+                description="Deletes current task and all associated files"/>
+        <action id="newTask" class="net.egork.chelper.actions.NewTaskDefaultAction" text="New Task"
+                icon="/icons/newTask.png" description="Creating new task in default directory">
+            <keyboard-shortcut keymap="$default" first-keystroke="alt F2"/>
+        </action>
+        <action id="codeforces" class="net.egork.chelper.actions.ParseContestAction" text="Parse Contest"
+                icon="/icons/parseContest.png"
+                description="Parse contest"/>
+        <action id="copySource" class="net.egork.chelper.actions.CopyAction" text="Copy Source"
+                icon="/icons/copy.png" description="Copies source to clipboard">
+            <keyboard-shortcut keymap="$default" first-keystroke="alt F8"/>
+        </action>
+        <action id="editProjectProperties" class="net.egork.chelper.actions.EditProjectProperties"
+                icon="/icons/settings.png"
+                text="Edit Project Settings"/>
+        <action id="unarchiveTask" class="net.egork.chelper.actions.UnarchiveTaskAction" text="Restore Task"
+                icon="/icons/unarchive.png"
+                description="Restores previously archived task"/>
+        <action id="launchArena" class="net.egork.chelper.actions.TopCoderAction" text="Launch TopCoder Arena"
+                icon="/icons/topcoder.png"
+                description="Launches TopCoder Arena with integrated plugin to interact with idea"/>
+        <action id="editTask" class="net.egork.chelper.actions.EditTask" text="Edit Task" icon="/icons/check.png"
+                description="Edit current task"/>
+        <action id="bulkAdd" class="net.egork.chelper.actions.BulkAddTests" text="Bulk Add Tests"
+                icon="/icons/editTests.png"/>
 
-  <extensions defaultExtensionNs="com.intellij">
-      <configurationType implementation="net.egork.chelper.configurations.TaskConfigurationType"/>
-      <configurationType implementation="net.egork.chelper.configurations.TopCoderConfigurationType"/>
-  </extensions>
+        <group id="CHelper.Group" text="CHelper"
+               class="com.intellij.openapi.actionSystem.DefaultActionGroup">
+            <separator/>
+            <reference ref="editProjectProperties"/>
+            <reference ref="newTaskCustom"/>
+            <reference ref="deleteTask"/>
+            <reference ref="editTask"/>
+            <reference ref="editTests"/>
+            <reference ref="copySource"/>
+            <reference ref="archiveTask"/>
+            <reference ref="unarchiveTask"/>
+            <reference ref="codeforces"/>
+            <reference ref="launchArena"/>
+            <reference ref="bulkAdd"/>
+            <add-to-group group-id="MainToolBar" anchor="after" relative-to-action="ToolbarRunGroup"/>
+
+        </group>
+    </actions>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <configurationType implementation="net.egork.chelper.configurations.TaskConfigurationType"/>
+        <configurationType implementation="net.egork.chelper.configurations.TopCoderConfigurationType"/>
+    </extensions>
 </idea-plugin>

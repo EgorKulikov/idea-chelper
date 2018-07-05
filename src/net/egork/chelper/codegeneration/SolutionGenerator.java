@@ -194,6 +194,13 @@ public class SolutionGenerator {
                     for (PsiElement initializer : ((PsiClass) element).getInitializers()) {
                         initializer.accept(visitor);
                     }
+                    if (((PsiClass) element).isEnum()) {
+                        for (PsiField field : ((PsiClass) element).getFields()) {
+                            if (field instanceof PsiEnumConstant) {
+                                processElement(field, toInline);
+                            }
+                        }
+                    }
                 }
             }
             Set<PsiElement> addOnStep = new HashSet<PsiElement>();
@@ -212,7 +219,6 @@ public class SolutionGenerator {
                 }
             }
             toInline.addAll(addOnStep);
-            queue.addAll(addOnStep);
         }
         Set<String> single = new HashSet<String>();
         PsiClass entryClass = entryPoint.getContainingClass();

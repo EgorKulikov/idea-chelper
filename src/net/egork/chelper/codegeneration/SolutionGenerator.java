@@ -242,7 +242,7 @@ public class SolutionGenerator {
 
     private void addSource(PsiClass aClass, boolean convertToStaticInner, boolean removePublic) {
         PsiModifierList list = aClass.getModifierList();
-        String modifierList = list == null ? "" : list.getText();
+        String modifierList = processModifierList(list);
         if (removePublic) {
             modifierList = modifierList.replace("public ", "").replace(" public", "").replace("public", "");
         }
@@ -294,7 +294,7 @@ public class SolutionGenerator {
             }
             if (!(field instanceof PsiEnumConstant)) {
                 PsiModifierList fieldModifierList = field.getModifierList();
-                modifierList = fieldModifierList == null ? "" : fieldModifierList.getText();
+                modifierList = processModifierList(fieldModifierList);
                 source.append(modifierList);
                 if (!modifierList.isEmpty()) {
                     source.append(" ");
@@ -322,8 +322,7 @@ public class SolutionGenerator {
                 continue;
             }
             PsiModifierList fieldModifierList = method.getModifierList();
-            modifierList = fieldModifierList.getText();
-            modifierList = modifierList.replace("@Override", "");
+            modifierList = processModifierList(fieldModifierList);
             source.append(modifierList);
             if (!modifierList.isEmpty()) {
                 source.append(" ");
@@ -359,6 +358,17 @@ public class SolutionGenerator {
         source.append("}\n");
     }
 
+    private String processModifierList(PsiModifierList list) {
+        StringBuilder result = new StringBuilder();
+        for (PsiElement element = list.getFirstChild(); element != null; element = element.getNextSibling()) {
+            if (!(element instanceof PsiAnnotation)) {
+                result.append(element.getText());
+            }
+            result.append(' ');
+        }
+        return result.toString().trim();
+    }
+
     private String convertName(PsiClass aClass) {
         if (aClass.getContainingClass() == null) {
             return convertNameFull(aClass);
@@ -373,6 +383,7 @@ public class SolutionGenerator {
             inner.add(aClass.getName());
             aClass = aClass.getContainingClass();
         }
+        Collections.reverse(inner);
         StringBuilder result = new StringBuilder();
         if (toInline.contains(aClass) && resolveToFull.contains(aClass.getName())) {
             result.append(aClass.getQualifiedName().replace('.', '_'));

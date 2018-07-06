@@ -15,7 +15,7 @@ public class Interactor {
                     solutionInput.write(System.in.read());
                 }
                 while (solutionOutput.available() > 0) {
-                    System.out.write((char)solutionOutput.read());
+                    solutionOutput.read();
                 }
             }
         } catch (Throwable e) {

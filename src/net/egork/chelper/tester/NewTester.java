@@ -141,9 +141,37 @@ public class NewTester {
                                            Class taskClass, Class interactorClass, Test test, boolean truncate) throws IOException,
             NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         PipedInputStream interactorToSolutionInputStream = new PipedInputStream();
-        PipedOutputStream interactorToSolutionOutputStream = new PipedOutputStream(interactorToSolutionInputStream);
+        PipedOutputStream interactorToSolutionOutputStream = new PipedOutputStream(interactorToSolutionInputStream) {
+            @Override
+            public void write(int b) throws IOException {
+                if (!interactorClass.equals(Interactor.class)) {
+                    System.err.write(b);
+                }
+                super.write(b);
+            }
+
+            @Override
+            public void write(byte[] b, int off, int len) throws IOException {
+                if (!interactorClass.equals(Interactor.class)) {
+                    System.err.write(b, off, len);
+                }
+                super.write(b, off, len);
+            }
+        };
         PipedInputStream solutionToInteractorInputStream = new PipedInputStream();
-        PipedOutputStream solutionToInteractorOutputStream = new PipedOutputStream(solutionToInteractorInputStream);
+        PipedOutputStream solutionToInteractorOutputStream = new PipedOutputStream(solutionToInteractorInputStream) {
+            @Override
+            public void write(int b) throws IOException {
+                System.out.write(b);
+                super.write(b);
+            }
+
+            @Override
+            public void write(byte[] b, int off, int len) throws IOException {
+                System.out.write(b, off, len);
+                super.write(b, off, len);
+            }
+        };
         Object in = readerClass.getConstructor(InputStream.class).newInstance(interactorToSolutionInputStream);
         Object out = writerClass.getConstructor(OutputStream.class).newInstance(solutionToInteractorOutputStream);
         Object interactor = interactorClass.newInstance();

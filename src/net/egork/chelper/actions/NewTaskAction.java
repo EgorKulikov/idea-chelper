@@ -28,14 +28,14 @@ public class NewTaskAction extends CreateElementActionBase {
     @NotNull
     @Override
     protected PsiElement[] create(String s, PsiDirectory psiDirectory) {
-        return createTask(s, psiDirectory, null, true);
+        return createTask(s, psiDirectory, null);
     }
 
-    public static PsiElement[] createTask(String s, PsiDirectory psiDirectory, Task template, boolean allowNameChange) {
+    public static PsiElement[] createTask(String s, PsiDirectory psiDirectory, Task template) {
         if (!FileUtilities.isJavaDirectory(psiDirectory)) {
             return PsiElement.EMPTY_ARRAY;
         }
-        Task task = CreateTaskDialog.showDialog(psiDirectory, s, template, allowNameChange);
+        Task task = CreateTaskDialog.showDialog(psiDirectory, s, template, true);
         if (task == null) {
             return PsiElement.EMPTY_ARRAY;
         }

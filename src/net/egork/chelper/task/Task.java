@@ -39,6 +39,8 @@ public class Task {
     public final String outputClass;
     public final boolean includeLocale;
     public final boolean failOnOverflow;
+    public final boolean interactive;
+    public final String interactor;
 
     @JsonCreator
     public Task(@JsonProperty("name") String name,
@@ -59,7 +61,18 @@ public class Task {
                 @JsonProperty("inputClass") String inputClass,
                 @JsonProperty("outputClass") String outputClass,
                 @JsonProperty("includeLocale") boolean includeLocale,
-                @JsonProperty("failOnOverflow") boolean failOnOverflow) {
+                @JsonProperty("failOnOverflow") boolean failOnOverflow,
+                @JsonProperty("interactive") boolean interactive,
+                @JsonProperty("interactor") String interactor) {
+        this(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
+                checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale,
+                failOnOverflow, null, interactive, interactor);
+    }
+
+    public Task(String name, TestType testType, StreamConfiguration input, StreamConfiguration output, Test[] tests,
+                String location, String vmArgs, String mainClass, String taskClass, String checkerClass,
+                String checkerParameters, String[] testClasses, String date, String contestName, boolean truncate,
+                String inputClass, String outputClass, boolean includeLocale, boolean failOnOverflow) {
         this(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
                 checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale,
                 failOnOverflow, null);
@@ -69,6 +82,16 @@ public class Task {
                 String location, String vmArgs, String mainClass, String taskClass, String checkerClass,
                 String checkerParameters, String[] testClasses, String date, String contestName, boolean truncate,
                 String inputClass, String outputClass, boolean includeLocale, boolean failOnOverflow, String template) {
+        this(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
+                checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale,
+                failOnOverflow, template, false, null);
+    }
+
+    public Task(String name, TestType testType, StreamConfiguration input, StreamConfiguration output, Test[] tests,
+                String location, String vmArgs, String mainClass, String taskClass, String checkerClass,
+                String checkerParameters, String[] testClasses, String date, String contestName, boolean truncate,
+                String inputClass, String outputClass, boolean includeLocale, boolean failOnOverflow, String template,
+                boolean interactive, String interactor) {
         this.name = trim(name);
         this.testType = testType;
         this.input = input;
@@ -96,6 +119,8 @@ public class Task {
                 }
             }
         }
+        this.interactive = interactive;
+        this.interactor = interactive && interactor == null ? "net.egork.chelper.tester.Interactor" : interactor;
     }
 
     private static String trim(String s) {
@@ -195,72 +220,72 @@ public class Task {
     public Task setTests(Test[] tests) {
         return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
                 checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale,
-                failOnOverflow, template);
+                failOnOverflow, template, interactive, interactor);
     }
 
     public Task setTestClasses(String[] testClasses) {
         return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
                 checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale,
-                failOnOverflow, template);
+                failOnOverflow, template, interactive, interactor);
     }
 
     public Task setTaskClass(String taskClass) {
         return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
                 checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale,
-                failOnOverflow, template);
+                failOnOverflow, template, interactive, interactor);
     }
 
     public Task setCheckerClass(String checkerClass) {
         return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
                 checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale,
-                failOnOverflow, template);
+                failOnOverflow, template, interactive, interactor);
     }
 
     public Task setLocation(String location) {
         return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
                 checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale,
-                failOnOverflow, template);
+                failOnOverflow, template, interactive, interactor);
     }
 
     public Task setTestType(TestType testType) {
         return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
                 checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale,
-                failOnOverflow, template);
+                failOnOverflow, template, interactive, interactor);
     }
 
     public Task setContestName(String contestName) {
         return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
                 checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale,
-                failOnOverflow, template);
+                failOnOverflow, template, interactive, interactor);
     }
 
     public Task setName(String name) {
         return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
                 checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale,
-                failOnOverflow, template);
+                failOnOverflow, template, interactive, interactor);
     }
 
     public Task setFailOnIntegerOverflow(boolean failOnOverflow) {
         return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
                 checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale,
-                failOnOverflow, template);
+                failOnOverflow, template, interactive, interactor);
     }
 
     public Task setDate(String date) {
         return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
                 checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale,
-                failOnOverflow, template);
+                failOnOverflow, template, interactive, interactor);
     }
 
     public Task setInputOutputClasses(String inputClass, String outputClass) {
         return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
                 checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale,
-                failOnOverflow, template);
+                failOnOverflow, template, interactive, interactor);
     }
 
     public Task setTemplate(String template) {
         return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
                 checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale,
-                failOnOverflow, template);
+                failOnOverflow, template, interactive, interactor);
     }
 }

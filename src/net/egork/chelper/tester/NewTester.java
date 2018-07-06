@@ -25,6 +25,10 @@ public class NewTester {
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .enable(SerializationFeature.INDENT_OUTPUT);
 
+    private static boolean ok;
+    private static long maximalTime;
+    private static volatile Throwable lastException;
+
     public static void main(String[] args) throws InterruptedException, InvocationTargetException,
             ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         test(args);
@@ -34,8 +38,8 @@ public class NewTester {
             NoSuchMethodException, InstantiationException, IllegalAccessException, InterruptedException, IOException {
         Locale.setDefault(Locale.US);
         List<Verdict> verdicts = new ArrayList<Verdict>();
-        long maximalTime = 0;
-        boolean ok = true;
+        maximalTime = 0;
+        ok = true;
         String taskFileName = args[0];
         int singleTest = -1;
         if (args.length > 1) {
@@ -76,6 +80,7 @@ public class NewTester {
         Class writerClass = Class.forName(writerFQN);
         Class taskClass = Class.forName(fqn);
         Class checkerClass = Class.forName(task.checkerClass);
+        Class interactorClass = task.interactor == null ? null : Class.forName(task.interactor);
         TestType testType = task.testType;
         boolean truncate = task.truncate;
         if (task.contestName.isEmpty()) {
@@ -93,37 +98,10 @@ public class NewTester {
                 continue;
             }
             System.out.println("Test #" + test.index + ":");
-            Object in = readerClass.getConstructor(InputStream.class).newInstance(new StringInputStream(test.input));
-            StringWriter writer = new StringWriter(test.output == null ? 16 : test.output.length());
-            Object out = writerClass.getConstructor(Writer.class).newInstance(writer);
-            System.out.println("Input:");
-            print(test.input, truncate);
-            System.out.println("Expected output:");
-            print(test.output, truncate);
-            System.out.println("Execution result:");
-            long time = System.currentTimeMillis();
-            try {
-                run(in, out, taskClass, readerClass, writerClass, testType);
-                time = System.currentTimeMillis() - time;
-                maximalTime = Math.max(time, maximalTime);
-                String result = writer.getBuffer().toString();
-                print(result, truncate);
-                System.out.print("Verdict: ");
-                Verdict checkResult = check(checkerClass, test.input, test.output, result, task.checkerParameters);
-                verdicts.add(checkResult);
-                System.out.print(checkResult);
-                System.out.printf(" in %.3f s.\n", time / 1000.);
-                if (checkResult.type != Verdict.VerdictType.OK && checkResult.type != Verdict.VerdictType.UNDECIDED) {
-                    ok = false;
-                }
-            } catch (Throwable e) {
-                if (e instanceof InvocationTargetException) {
-                    e = e.getCause();
-                }
-                System.out.println("Exception thrown:");
-                e.printStackTrace(System.out);
-                verdicts.add(new Verdict(Verdict.VerdictType.RTE, e.getClass().getSimpleName()));
-                ok = false;
+            if (task.interactive) {
+                runInteractiveTask(verdicts, task, readerClass, writerClass, taskClass, interactorClass, test, truncate);
+            } else {
+                runClassicTask(verdicts, task, readerClass, writerClass, taskClass, checkerClass, testType, truncate, test);
             }
             System.out.println("------------------------------------------------------------------");
         }
@@ -157,6 +135,91 @@ public class NewTester {
         }
         Thread.currentThread().join(100L);
         return ok;
+    }
+
+    private static void runInteractiveTask(List<Verdict> verdicts, Task task, Class readerClass, Class writerClass,
+                                           Class taskClass, Class interactorClass, Test test, boolean truncate) throws IOException,
+            NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        PipedInputStream interactorToSolutionInputStream = new PipedInputStream();
+        PipedOutputStream interactorToSolutionOutputStream = new PipedOutputStream(interactorToSolutionInputStream);
+        PipedInputStream solutionToInteractorInputStream = new PipedInputStream();
+        PipedOutputStream solutionToInteractorOutputStream = new PipedOutputStream(solutionToInteractorInputStream);
+        Object in = readerClass.getConstructor(InputStream.class).newInstance(interactorToSolutionInputStream);
+        Object out = writerClass.getConstructor(OutputStream.class).newInstance(solutionToInteractorOutputStream);
+        Object interactor = interactorClass.newInstance();
+        Object solution = taskClass.newInstance();
+        InputStream input = new StringInputStream(test.input);
+        System.out.println("Input:");
+        print(test.input, truncate);
+        System.out.println("Expected output:");
+        print(test.output, truncate);
+        System.out.println("Interaction:");
+        State<Boolean> state = new State<>(true);
+        long time = System.currentTimeMillis();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    taskClass.getMethod("solve", int.class, readerClass, writerClass).invoke(solution, 1, in, out);
+                } catch (Throwable e) {
+                    lastException = e;
+                }
+                state.setState(false);
+            }
+        }, "SolutionThread").start();
+        Verdict verdict = (Verdict) interactorClass.getMethod("interact", InputStream.class, InputStream.class, OutputStream.class,
+                State.class).invoke(interactor, input, solutionToInteractorInputStream,
+                interactorToSolutionOutputStream, state);
+        if (lastException != null) {
+            System.out.println("Exception thrown:");
+            lastException.printStackTrace(System.out);
+            verdict = new Verdict(Verdict.VerdictType.RTE, lastException.getMessage());
+            lastException = null;
+        }
+        verdicts.add(verdict);
+        time = System.currentTimeMillis() - time;
+        maximalTime = Math.max(time, maximalTime);
+        System.out.print("Verdict: ");
+        System.out.print(verdict);
+        System.out.printf(" in %.3f s.\n", time / 1000.);
+        if (verdict.type != Verdict.VerdictType.OK && verdict.type != Verdict.VerdictType.UNDECIDED) {
+            ok = false;
+        }
+    }
+
+    private static void runClassicTask(List<Verdict> verdicts, Task task, Class readerClass, Class writerClass, Class taskClass, Class checkerClass, TestType testType, boolean truncate, Test test) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        Object in = readerClass.getConstructor(InputStream.class).newInstance(new StringInputStream(test.input));
+        StringWriter writer = new StringWriter(test.output == null ? 16 : test.output.length());
+        Object out = writerClass.getConstructor(Writer.class).newInstance(writer);
+        System.out.println("Input:");
+        print(test.input, truncate);
+        System.out.println("Expected output:");
+        print(test.output, truncate);
+        System.out.println("Execution result:");
+        long time = System.currentTimeMillis();
+        try {
+            run(in, out, taskClass, readerClass, writerClass, testType);
+            time = System.currentTimeMillis() - time;
+            maximalTime = Math.max(time, maximalTime);
+            String result = writer.getBuffer().toString();
+            print(result, truncate);
+            System.out.print("Verdict: ");
+            Verdict checkResult = check(checkerClass, test.input, test.output, result, task.checkerParameters);
+            verdicts.add(checkResult);
+            System.out.print(checkResult);
+            System.out.printf(" in %.3f s.\n", time / 1000.);
+            if (checkResult.type != Verdict.VerdictType.OK && checkResult.type != Verdict.VerdictType.UNDECIDED) {
+                ok = false;
+            }
+        } catch (Throwable e) {
+            if (e instanceof InvocationTargetException) {
+                e = e.getCause();
+            }
+            System.out.println("Exception thrown:");
+            e.printStackTrace(System.out);
+            verdicts.add(new Verdict(Verdict.VerdictType.RTE, e.getClass().getSimpleName()));
+            ok = false;
+        }
     }
 
     private static void print(String s, boolean truncate) {

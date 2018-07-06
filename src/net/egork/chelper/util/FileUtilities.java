@@ -339,6 +339,17 @@ public class FileUtilities {
         return fqn;
     }
 
+    public static String createInteractorClass(Project project, String path, String name, Task task) {
+        String mainClass = CodeGenerationUtilities.createInteractorStub(path, name, project, task);
+        VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, path);
+        writeTextFile(directory, name + ".java", mainClass);
+        PsiDirectory psiDirectory = getPsiDirectory(project, path);
+        String aPackage = getPackage(psiDirectory);
+        String fqn = aPackage + "." + name;
+        Utilities.openElement(project, Utilities.getPsiElement(project, fqn));
+        return fqn;
+    }
+
     public static String createTestClass(Project project, String path, String name, Task task) {
         String mainClass = CodeGenerationUtilities.createTestStub(path, name, project, task);
         VirtualFile directory = FileUtilities.createDirectoryIfMissing(project, path);

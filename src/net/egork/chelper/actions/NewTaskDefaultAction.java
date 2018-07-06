@@ -42,7 +42,7 @@ public class NewTaskDefaultAction extends AnAction {
             Messenger.publishMessage("defaultDirectory should be under source and in non-default package", NotificationType.WARNING);
             return;
         }
-        PsiElement[] result = NewTaskAction.createTask(task == null ? null : task.name, directory, task, true);
+        PsiElement[] result = NewTaskAction.createTask(task == null ? null : task.name, directory, task);
         for (PsiElement element : result) {
             Utilities.openElement(project, element);
         }

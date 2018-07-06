@@ -34,6 +34,18 @@ public class CodeGenerationUtilities {
                 inputClass, "OutputClass", outputClassShort, "OutputClassFQN", outputClass, "CheckerClass", name);
     }
 
+    public static String createInteractorStub(String location, String name, Project project, Task task) {
+        PsiDirectory directory = FileUtilities.getPsiDirectory(project, location);
+        String inputClass = task.inputClass;
+        String inputClassShort = inputClass.substring(inputClass.lastIndexOf('.') + 1);
+        String outputClass = task.outputClass;
+        String outputClassShort = outputClass.substring(outputClass.lastIndexOf('.') + 1);
+        String packageName = FileUtilities.getPackage(directory);
+        String template = createInteractorClassTemplateIfNeeded(project);
+        return new Template(template).apply("package", packageName, "InputClass", inputClassShort, "InputClassFQN",
+                inputClass, "OutputClass", outputClassShort, "OutputClassFQN", outputClass, "InteractorClass", name);
+    }
+
     public static String createStub(Task task, String location, String name, Project project) {
         PsiDirectory directory = FileUtilities.getPsiDirectory(project, location);
         String inputClass = task.inputClass;
@@ -93,6 +105,27 @@ public class CodeGenerationUtilities {
                 "    }\n" +
                 "}\n";
         FileUtilities.writeTextFile(project.getBaseDir(), "CheckerClass.template", template);
+        return template;
+    }
+
+    public static String createInteractorClassTemplateIfNeeded(Project project) {
+        VirtualFile file = FileUtilities.getFile(project, "InteractorClass.template");
+        if (file != null) {
+            return FileUtilities.readTextFile(file);
+        }
+        String template = "package %package%;\n" +
+                "\n" +
+                "import net.egork.chelper.tester.Verdict;\n" +
+                "import net.egork.chelper.tester.State;\n" +
+                "import java.io.InputStream;\n" +
+                "import java.io.OutputStream;\n" +
+                "\n" +
+                "public class %InteractorClass% {\n" +
+                "    public Verdict interact(InputStream input, InputStream solutionOutput, OutputStream solutionInput, State<Boolean> state) {\n" +
+                "        return Verdict.UNDECIDED;\n" +
+                "    }\n" +
+                "}\n";
+        FileUtilities.writeTextFile(project.getBaseDir(), "InteractorClass.template", template);
         return template;
     }
 

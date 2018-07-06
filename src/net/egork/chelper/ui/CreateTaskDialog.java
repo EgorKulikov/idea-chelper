@@ -23,7 +23,7 @@ public class CreateTaskDialog extends JDialog {
     private JButton basicAdvanced;
     private TaskConfigurationPanel panel;
 
-    public CreateTaskDialog(Task task, boolean canEditName, Project project) {
+    public CreateTaskDialog(Task task, boolean isNewTask, Project project) {
         super(null, "Task", ModalityType.APPLICATION_MODAL);
         setIconImage(Utilities.iconToImage(IconLoader.getIcon("/icons/newTask.png")));
         setAlwaysOnTop(true);
@@ -55,7 +55,7 @@ public class CreateTaskDialog extends JDialog {
                 pack();
             }
         });
-        panel = new TaskConfigurationPanel(task, canEditName, project, new TaskConfigurationPanel.SizeChangeListener() {
+        panel = new TaskConfigurationPanel(task, isNewTask, project, new TaskConfigurationPanel.SizeChangeListener() {
             public void onSizeChanged() {
                 pack();
             }
@@ -68,7 +68,7 @@ public class CreateTaskDialog extends JDialog {
         setLocation(center);
     }
 
-    public static Task showDialog(PsiDirectory directory, String defaultName, Task template, boolean allowNameChange) {
+    public static Task showDialog(PsiDirectory directory, String defaultName, Task template, boolean isNewTask) {
         Task defaultTask = template == null ? Utilities.getDefaultTask() : template;
         String name = defaultName == null ? "Task" : defaultName;
         Project project = directory.getProject();
@@ -85,8 +85,9 @@ public class CreateTaskDialog extends JDialog {
                 defaultTask.vmArgs, defaultTask.mainClass, defaultTask.taskClass == null ? TaskUtilities.createClassName(name) : defaultTask.taskClass,
                 defaultTask.checkerClass, defaultTask.checkerParameters, defaultTask.testClasses,
                 defaultTask.date, defaultTask.contestName, defaultTask.truncate, defaultTask.inputClass,
-                defaultTask.outputClass, defaultTask.includeLocale, defaultTask.failOnOverflow, defaultTask.template);
-        CreateTaskDialog dialog = new CreateTaskDialog(task, allowNameChange, project);
+                defaultTask.outputClass, defaultTask.includeLocale, defaultTask.failOnOverflow, defaultTask.template,
+                defaultTask.interactive, defaultTask.interactor);
+        CreateTaskDialog dialog = new CreateTaskDialog(task, isNewTask, project);
         dialog.setVisible(true);
         Utilities.updateDefaultTask(dialog.task);
         if (dialog.task != null) {

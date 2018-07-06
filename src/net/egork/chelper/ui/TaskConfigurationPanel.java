@@ -1,6 +1,7 @@
 package net.egork.chelper.ui;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.VerticalFlowLayout;
 import net.egork.chelper.task.StreamConfiguration;
 import net.egork.chelper.task.Task;
@@ -25,10 +26,10 @@ public class TaskConfigurationPanel extends JPanel {
 
     //basic
     private JTextField name;
-    private JComboBox testType;
-    private JComboBox inputType;
+    private ComboBox<TestType> testType;
+    private ComboBox<StreamConfiguration.StreamType> inputType;
     private JTextField inputFileName;
-    private JComboBox outputType;
+    private ComboBox<StreamConfiguration.StreamType> outputType;
     private JTextField outputFileName;
     private JButton tests;
     private FileSelector template;
@@ -48,8 +49,12 @@ public class TaskConfigurationPanel extends JPanel {
     private JCheckBox truncate;
     private int panelWidth = new JTextField(27).getPreferredSize().width;
     private JCheckBox includeLocale;
+    private JPanel testInputOutputParameters;
+    private JPanel interactorSettings;
+    private JCheckBox isInteractive;
+    private SelectOrCreateClass interactor;
 
-    public TaskConfigurationPanel(final Task task, boolean firstEdit, final Project project, final SizeChangeListener listener, JPanel buttonPanel) {
+    public TaskConfigurationPanel(final Task task, boolean isNewTask, final Project project, final SizeChangeListener listener, JPanel buttonPanel) {
         super(new BorderLayout(5, 5));
         this.task = task;
         this.project = project;
@@ -63,7 +68,7 @@ public class TaskConfigurationPanel extends JPanel {
         };
         basic.add(new JLabel("Name:"));
         name = new JTextField(task.name);
-        name.setEnabled(firstEdit);
+        name.setEnabled(isNewTask);
         name.getDocument().addDocumentListener(new DocumentListener() {
             String lastText = TaskUtilities.createClassName(name.getText());
 
@@ -90,12 +95,15 @@ public class TaskConfigurationPanel extends JPanel {
         basic.add(new JLabel("Contest name:"));
         contestName = new JTextField(task.contestName);
         basic.add(contestName);
-        basic.add(new JLabel("Test type:"));
-        testType = new JComboBox(TestType.values());
+        isInteractive = new JCheckBox("Interactive task", task.interactive);
+        basic.add(isInteractive);
+        testInputOutputParameters = new JPanel(new VerticalFlowLayout(0, 5));
+        testInputOutputParameters.add(new JLabel("Test type:"));
+        testType = new ComboBox<>(TestType.values());
         testType.setSelectedItem(task.testType);
-        basic.add(testType);
-        basic.add(new JLabel("Input:"));
-        inputType = new JComboBox(StreamConfiguration.StreamType.values());
+        testInputOutputParameters.add(testType);
+        testInputOutputParameters.add(new JLabel("Input:"));
+        inputType = new ComboBox<>(StreamConfiguration.StreamType.values());
         inputType.setSelectedItem(task.input.type);
         inputType.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -105,13 +113,13 @@ public class TaskConfigurationPanel extends JPanel {
                 }
             }
         });
-        basic.add(inputType);
+        testInputOutputParameters.add(inputType);
         inputFileName = new JTextField(task.input.type.hasStringParameter ? task.input.fileName :
                 "input.txt");
         inputFileName.setVisible(task.input.type.hasStringParameter);
-        basic.add(inputFileName);
-        basic.add(new JLabel("Output:"));
-        outputType = new JComboBox(StreamConfiguration.OUTPUT_TYPES);
+        testInputOutputParameters.add(inputFileName);
+        testInputOutputParameters.add(new JLabel("Output:"));
+        outputType = new ComboBox<>(StreamConfiguration.OUTPUT_TYPES);
         outputType.setSelectedItem(task.output.type);
         outputType.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -121,14 +129,49 @@ public class TaskConfigurationPanel extends JPanel {
                 }
             }
         });
-        basic.add(outputType);
+        testInputOutputParameters.add(outputType);
         outputFileName = new JTextField(task.output.type.hasStringParameter ?
                 task.output.fileName : "output.txt");
         outputFileName.setVisible(task.output.type.hasStringParameter);
-        basic.add(outputFileName);
+        testInputOutputParameters.add(outputFileName);
+        testInputOutputParameters.setVisible(!task.interactive);
+        basic.add(testInputOutputParameters);
+        interactorSettings = new JPanel(new VerticalFlowLayout(0, 5));
+        interactorSettings.add(new JLabel("Interactor"));
+        Provider<String> locationProvider = new Provider<String>() {
+            public String provide() {
+                return location.getText();
+            }
+        };
+        interactor = new SelectOrCreateClass(task.interactor != null ? task.interactor : "net.egork.chelper.tester.Interactor", project, locationProvider, new FileCreator() {
+            @Override
+            public String createFile(Project project, String path, String name) {
+                return FileUtilities.createInteractorClass(project, path, name, task);
+            }
+
+            @Override
+            public boolean isValid(String name) {
+                return FileUtilities.isValidClassName(name);
+            }
+        });
+        interactorSettings.add(interactor);
+        interactorSettings.setVisible(task.interactive);
+        basic.add(interactorSettings);
+        isInteractive.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                interactorSettings.setVisible(isInteractive.isSelected());
+                testInputOutputParameters.setVisible(!isInteractive.isSelected());
+                if (listener != null) {
+                    listener.onSizeChanged();
+                }
+            }
+        });
         template = new FileSelector(project, task.template, "template", false);
-        basic.add(new JLabel("Template:"));
-        basic.add(template);
+        if (isNewTask) {
+            basic.add(new JLabel("Template:"));
+            basic.add(template);
+        }
         tests = new JButton("Edit tests");
         tests.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -151,17 +194,12 @@ public class TaskConfigurationPanel extends JPanel {
         };
         leftAdvanced.add(new JLabel("Location:"));
         location = new DirectorySelector(project, task.location);
-        location.setEnabled(firstEdit);
+        location.setEnabled(isNewTask);
         leftAdvanced.add(location);
         leftAdvanced.add(new JLabel("Main class name:"));
         mainClass = new JTextField(task.mainClass);
         leftAdvanced.add(mainClass);
         leftAdvanced.add(new JLabel("Task class:"));
-        Provider<String> locationProvider = new Provider<String>() {
-            public String provide() {
-                return location.getText();
-            }
-        };
         taskClass = new SelectOrCreateClass(task.taskClass, project, locationProvider, new FileCreator() {
             public String createFile(Project project, String path, String name) {
                 return FileUtilities.createTaskClass(task, project, path, name);
@@ -257,7 +295,7 @@ public class TaskConfigurationPanel extends JPanel {
                 task.tests, location.getText(), vmArgs.getText(), mainClass.getText(),
                 taskClass.getText(), checkerClass.getText(), checkerParameters.getText(), getTestClass(),
                 date.getText(), contestName.getText(), truncate.isSelected(), task.inputClass, task.outputClass,
-                includeLocale.isSelected(), failOnOverflow.isSelected(), template.getText());
+                includeLocale.isSelected(), failOnOverflow.isSelected(), template.getText(), isInteractive.isSelected(), interactor.getText());
     }
 
     private String[] getTestClass() {

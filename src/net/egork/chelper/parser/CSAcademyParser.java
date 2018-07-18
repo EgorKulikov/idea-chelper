@@ -48,8 +48,7 @@ public class CSAcademyParser implements Parser {
             String prefix = parser.advance(true, "<div class=\"text-center\"><h1>");
             String taskName = parser.advance(false, "</h1>");
             parser.advance(true, "<br>Memory limit: <em>");
-            String memoryLimit = parser.advance(false, " ");
-            memoryLimit += "M";
+            String memoryLimit = parser.advance(false, "B").replace(" ", "");
             StreamConfiguration input = StreamConfiguration.STANDARD;
             StreamConfiguration output = StreamConfiguration.STANDARD;
             List<Test> tests = new ArrayList<Test>();

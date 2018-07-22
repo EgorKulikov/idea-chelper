@@ -64,7 +64,7 @@ public class FacebookParser implements Parser {
                     regex.toString());
             StreamConfiguration output = new StreamConfiguration(StreamConfiguration.StreamType.CUSTOM,
                     taskName.toLowerCase().replaceAll(" ", "") + ".out");
-            parser.advance(true, "<span class=\"fsm\">Example input</span>");
+            parser.advance(true, "<span class=\"fsm\">Example input</span>", "<span class=\"fsm\">Sample input</span>");
             parser.advance(true, "<pre");
             parser.advance(true, ">");
             String testInput = StringEscapeUtils.unescapeHtml(parser.advance(false, "</pre>"));

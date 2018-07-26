@@ -1,5 +1,7 @@
 package net.egork.chelper.configurations;
 
+import com.intellij.compiler.options.MakeProjectStepBeforeRun;
+import com.intellij.execution.BeforeRunTask;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.*;
@@ -26,8 +28,10 @@ import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.InputMismatchException;
+import java.util.List;
 
 /**
  * @author Egor Kulikov (kulikov@devexperts.com)
@@ -39,6 +43,14 @@ public class TopCoderConfiguration extends ModuleBasedConfiguration<JavaRunConfi
         super(name, new JavaRunConfigurationModule(project, false), factory);
         this.configuration = configuration;
         saveConfiguration(configuration);
+    }
+
+    @NotNull
+    @Override
+    public List<BeforeRunTask> getBeforeRunTasks() {
+        List<BeforeRunTask> result = new ArrayList<>(super.getBeforeRunTasks());
+        result.add(new MakeProjectStepBeforeRun.MakeProjectBeforeRunTask());
+        return result;
     }
 
     @Override

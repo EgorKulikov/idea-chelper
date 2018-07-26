@@ -1,7 +1,7 @@
 <idea-plugin>
     <name>CHelper</name>
     <description>Inlines library code and provides testing framework</description>
-    <version>4.4.1b4</version>
+    <version>4.4.1b5</version>
     <vendor>Egor Kulikov</vendor>
     <idea-version since-build="139.0"/>
 
@@ -30,7 +30,6 @@
         </action>
         <action id="editTests" class="net.egork.chelper.actions.EditTestsAction" text="Edit Tests"
                 description="Edit tests for current task" icon="/icons/editTests.png">
-            <add-to-group group-id="RunMenu" anchor="first"/>
             <keyboard-shortcut keymap="$default" first-keystroke="alt F5"/>
         </action>
         <action id="archiveTask" class="net.egork.chelper.actions.ArchiveAction" text="Archive Task"
@@ -68,13 +67,13 @@
         <group id="CHelper.Group" text="CHelper"
                class="com.intellij.openapi.actionSystem.DefaultActionGroup">
             <separator/>
-            <reference ref="editProjectProperties"/>
-            <reference ref="newTaskCustom"/>
-            <reference ref="deleteTask"/>
-            <reference ref="editTask"/>
+            <reference ref="newTask"/>
             <reference ref="editTests"/>
             <reference ref="copySource"/>
+            <reference ref="editTask"/>
+            <reference ref="editProjectProperties"/>
             <reference ref="archiveTask"/>
+            <reference ref="deleteTask"/>
             <reference ref="unarchiveTask"/>
             <reference ref="codeforces"/>
             <reference ref="launchArena"/>

@@ -59,6 +59,11 @@ public class DeleteTaskAction extends AnAction {
                         if (checkerFile != null && mainFile != null && checkerFile.getParent().equals(mainFile.getParent())) {
                             checkerFile.delete(this);
                         }
+                        PsiElement interactor = task.interactor == null ? null : JavaPsiFacade.getInstance(project).findClass(task.interactor, GlobalSearchScope.allScope(project));
+                        VirtualFile interactorFile = interactor == null ? null : interactor.getContainingFile() == null ? null : interactor.getContainingFile().getVirtualFile();
+                        if (interactorFile != null && mainFile != null && interactorFile.getParent().equals(mainFile.getParent())) {
+                            interactorFile.delete(this);
+                        }
                         for (String testClass : task.testClasses) {
                             PsiElement test = JavaPsiFacade.getInstance(project).findClass(testClass, GlobalSearchScope.allScope(project));
                             VirtualFile testFile = test == null ? null : test.getContainingFile() == null ? null : test.getContainingFile().getVirtualFile();

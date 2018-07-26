@@ -69,6 +69,12 @@ public class ArchiveAction extends AnAction {
                             VfsUtil.copyFile(this, checkerFile, directory);
                             checkerFile.delete(this);
                         }
+                        PsiElement interactor = task.interactor == null ? null : JavaPsiFacade.getInstance(project).findClass(task.interactor, GlobalSearchScope.allScope(project));
+                        VirtualFile interactorFile = interactor == null ? null : interactor.getContainingFile() == null ? null : interactor.getContainingFile().getVirtualFile();
+                        if (interactorFile != null && mainFile != null && interactorFile.getParent().equals(mainFile.getParent())) {
+                            VfsUtil.copyFile(this, interactorFile, directory);
+                            interactorFile.delete(this);
+                        }
                         for (String testClass : task.testClasses) {
                             VirtualFile testFile = FileUtilities.getFileByFQN(testClass, project);
                             if (testFile != null) {

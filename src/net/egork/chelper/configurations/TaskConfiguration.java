@@ -1,5 +1,7 @@
 package net.egork.chelper.configurations;
 
+import com.intellij.compiler.options.MakeProjectStepBeforeRun;
+import com.intellij.execution.BeforeRunTask;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.*;
@@ -25,8 +27,7 @@ import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.InputMismatchException;
+import java.util.*;
 
 /**
  * @author Egor Kulikov (kulikov@devexperts.com)
@@ -35,9 +36,17 @@ public class TaskConfiguration extends ModuleBasedConfiguration<JavaRunConfigura
     private Task configuration;
 
     public TaskConfiguration(String name, Project project, Task configuration, ConfigurationFactory factory) {
-        super(name, new JavaRunConfigurationModule(project, false), factory);
+        super(name, new JavaRunConfigurationModule(project, true), factory);
         this.configuration = configuration;
         saveConfiguration(configuration);
+    }
+
+    @NotNull
+    @Override
+    public List<BeforeRunTask> getBeforeRunTasks() {
+        List<BeforeRunTask> result = new ArrayList<>(super.getBeforeRunTasks());
+        result.add(new MakeProjectStepBeforeRun.MakeProjectBeforeRunTask());
+        return result;
     }
 
     @Override

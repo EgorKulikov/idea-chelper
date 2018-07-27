@@ -227,6 +227,15 @@ public class CodeGenerationUtilities {
             FileUtilities.writeTextFile(directory, checkerClassSimple + ".java", checkerContent);
             task = task.setCheckerClass(packageName + "." + checkerClassSimple);
         }
+        PsiElement interactor = task.interactor == null ? null : JavaPsiFacade.getInstance(project).findClass(task.interactor, GlobalSearchScope.allScope(project));
+        VirtualFile interactorFile = interactor == null ? null : interactor.getContainingFile() == null ? null : interactor.getContainingFile().getVirtualFile();
+        if (interactorFile != null && mainFile != null && interactorFile.getParent().equals(mainFile.getParent())) {
+            String interactorContent = FileUtilities.readTextFile(interactorFile);
+            interactorContent = changePackage(interactorContent, packageName);
+            String interactorClassSimple = getSimpleName(task.interactor);
+            FileUtilities.writeTextFile(directory, interactorClassSimple + ".java", interactorContent);
+            task = task.setInteractor(packageName + "." + interactorClassSimple);
+        }
         String[] testClasses = Arrays.copyOf(task.testClasses, task.testClasses.length);
         for (int i = 0; i < testClasses.length; i++) {
             PsiElement test = JavaPsiFacade.getInstance(project).findClass(task.testClasses[i], GlobalSearchScope.allScope(project));

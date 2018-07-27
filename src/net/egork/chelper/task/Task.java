@@ -241,6 +241,12 @@ public class Task {
                 failOnOverflow, template, interactive, interactor);
     }
 
+    public Task setInteractor(String interactor) {
+        return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
+                checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale,
+                failOnOverflow, template, interactive, interactor);
+    }
+
     public Task setLocation(String location) {
         return new Task(name, testType, input, output, tests, location, vmArgs, mainClass, taskClass, checkerClass,
                 checkerParameters, testClasses, date, contestName, truncate, inputClass, outputClass, includeLocale,

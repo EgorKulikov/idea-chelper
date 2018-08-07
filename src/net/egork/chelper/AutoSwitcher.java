@@ -5,7 +5,6 @@ import com.intellij.execution.RunnerAndConfigurationSettings;
 import com.intellij.execution.configurations.RunConfiguration;
 import com.intellij.execution.impl.RunManagerImpl;
 import com.intellij.execution.impl.RunnerAndConfigurationSettingsImpl;
-import com.intellij.openapi.application.TransactionGuard;
 import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.FileEditorManagerEvent;
@@ -18,6 +17,7 @@ import net.egork.chelper.configurations.TaskConfiguration;
 import net.egork.chelper.configurations.TopCoderConfiguration;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.TopCoderTask;
+import net.egork.chelper.util.ExecuteUtils;
 import net.egork.chelper.util.FileUtilities;
 import net.egork.chelper.util.TaskUtilities;
 import net.egork.chelper.util.Utilities;
@@ -122,7 +122,7 @@ public class AutoSwitcher implements ProjectComponent {
                     toOpen = FileUtilities.getFileByFQN(((TaskConfiguration) configuration).getConfiguration().taskClass, configuration.getProject());
                 if (toOpen != null) {
                     final VirtualFile finalToOpen = toOpen;
-                    TransactionGuard.getInstance().submitTransactionAndWait(new Runnable() {
+                    ExecuteUtils.executeStrictWriteActionAndWait(new Runnable() {
                         @Override
                         public void run() {
                             FileEditorManager.getInstance(project).openFile(finalToOpen, true);

@@ -1,13 +1,13 @@
 package net.egork.chelper;
 
 import com.intellij.notification.NotificationType;
-import com.intellij.openapi.application.TransactionGuard;
 import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.WindowManager;
 import net.egork.chelper.actions.NewTaskDefaultAction;
 import net.egork.chelper.parser.*;
 import net.egork.chelper.task.Task;
+import net.egork.chelper.util.ExecuteUtils;
 import net.egork.chelper.util.Messenger;
 import net.egork.chelper.util.Utilities;
 import org.jetbrains.annotations.NotNull;
@@ -98,7 +98,8 @@ public class ChromeParser implements ProjectComponent {
                                 while ((s = reader.readLine()) != null)
                                     builder.append(s).append('\n');
                                 final String page = builder.toString();
-                                TransactionGuard.getInstance().submitTransactionAndWait(new Runnable() {
+                                ExecuteUtils.executeStrictWriteActionAndWait(new Runnable() {
+                                    @Override
                                     public void run() {
                                         if (TASK_PARSERS.containsKey(type)) {
                                             System.err.println(page);

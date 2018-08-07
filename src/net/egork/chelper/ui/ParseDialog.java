@@ -1,7 +1,6 @@
 package net.egork.chelper.ui;
 
 import com.intellij.notification.NotificationType;
-import com.intellij.openapi.application.TransactionGuard;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.VerticalFlowLayout;
 import com.intellij.openapi.util.IconLoader;
@@ -13,6 +12,7 @@ import net.egork.chelper.parser.Parser;
 import net.egork.chelper.parser.ParserTask;
 import net.egork.chelper.task.Task;
 import net.egork.chelper.task.TestType;
+import net.egork.chelper.util.ExecuteUtils;
 import net.egork.chelper.util.FileUtilities;
 import net.egork.chelper.util.Messenger;
 import net.egork.chelper.util.Utilities;
@@ -133,6 +133,7 @@ public class ParseDialog extends JDialog {
         contestList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         contestList.setLayoutOrientation(JList.VERTICAL);
         contestList.addListSelectionListener(new ListSelectionListener() {
+            @Override
             public void valueChanged(ListSelectionEvent e) {
                 if (taskReceiver != null) {
                     taskReceiver.stop();
@@ -149,7 +150,7 @@ public class ParseDialog extends JDialog {
                     protected void processNewDescriptions(final Collection<Description> descriptions) {
                         final Receiver receiver = this;
                         final boolean shouldMark = firstTime;
-                        TransactionGuard.getInstance().submitTransactionAndWait(new Runnable() {
+                        ExecuteUtils.executeStrictWriteAction(new Runnable() {
                             public void run() {
                                 if (taskReceiver != receiver) {
                                     return;
@@ -250,7 +251,8 @@ public class ParseDialog extends JDialog {
             @Override
             protected void processNewDescriptions(final Collection<Description> descriptions) {
                 final Receiver receiver = this;
-                TransactionGuard.getInstance().submitTransactionAndWait(new Runnable() {
+                ExecuteUtils.executeStrictWriteActionAndWait(new Runnable() {
+                    @Override
                     public void run() {
                         if (contestReceiver != receiver) {
                             return;

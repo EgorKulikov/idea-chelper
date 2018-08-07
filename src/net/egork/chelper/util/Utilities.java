@@ -157,15 +157,15 @@ public class Utilities {
     }
 
     public static void openElement(Project project, PsiElement element) {
+        if (element instanceof PsiClass) {
+            element = element.getContainingFile();
+        }
         if (element instanceof PsiFile) {
             VirtualFile virtualFile = ((PsiFile) element).getVirtualFile();
             if (virtualFile == null) {
                 return;
             }
             FileEditorManager.getInstance(project).openFile(virtualFile, true);
-        } else if (element instanceof PsiClass) {
-            FileEditorManager.getInstance(project).openFile(FileUtilities.getFile(project,
-                    getData(project).defaultDirectory + "/" + ((PsiClass) element).getName() + ".java"), true);
         }
     }
 

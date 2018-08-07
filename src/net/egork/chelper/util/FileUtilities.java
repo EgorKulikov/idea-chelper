@@ -71,7 +71,7 @@ public class FileUtilities {
     }
 
     public static VirtualFile writeTextFile(final VirtualFile location, final String fileName, final String fileContent) {
-        ApplicationManager.getApplication().runWriteAction(new Runnable() {
+        ExecuteUtils.executeStrictWriteActionAndWait(new Runnable() {
             public void run() {
                 if (location == null) {
                     return;
@@ -115,6 +115,9 @@ public class FileUtilities {
     }
 
     public static VirtualFile getFile(Project project, String location) {
+        if (location == null) {
+            return null;
+        }
         VirtualFile baseDir = project.getBaseDir();
         if (baseDir == null) {
             return null;
@@ -169,7 +172,7 @@ public class FileUtilities {
     }
 
     public static VirtualFile createDirectoryIfMissing(final Project project, final String location) {
-        ApplicationManager.getApplication().runWriteAction(new Runnable() {
+        ExecuteUtils.executeStrictWriteActionAndWait(new Runnable() {
             public void run() {
                 VirtualFile baseDir = project.getBaseDir();
                 if (baseDir == null) {
@@ -246,7 +249,7 @@ public class FileUtilities {
     }
 
     public static void saveConfiguration(String fileName, Task configuration, VirtualFile location) {
-        ApplicationManager.getApplication().runWriteAction(new Runnable() {
+        ExecuteUtils.executeStrictWriteAction(new Runnable() {
             public void run() {
                 OutputStream stream = null;
                 try {
@@ -278,7 +281,7 @@ public class FileUtilities {
     }
 
     public static void saveConfiguration(String fileName, TopCoderTask configuration, VirtualFile location) {
-        ApplicationManager.getApplication().runWriteAction(new Runnable() {
+        ExecuteUtils.executeStrictWriteAction(new Runnable() {
             public void run() {
                 OutputStream stream = null;
                 try {

@@ -23,7 +23,7 @@ public class NewGCJParser implements Parser {
     }
 
     public String getName() {
-        return "CS Academy";
+        return "Google Code Jam";
     }
 
     public void getContests(DescriptionReceiver receiver) {

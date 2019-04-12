@@ -1,7 +1,7 @@
 <idea-plugin>
     <name>CHelper</name>
     <description>Inlines library code and provides testing framework</description>
-    <version>4.4.3b2</version>
+    <version>4.4.3b3</version>
     <vendor>Egor Kulikov</vendor>
     <idea-version since-build="139.0"/>
 
@@ -27,6 +27,11 @@
         <action id="newTaskCustom" class="net.egork.chelper.actions.NewTaskAction" text="Task"
                 icon="/icons/taskIcon.png" description="New task creation">
             <add-to-group group-id="NewGroup" anchor="first"/>
+        </action>
+        <action class="net.egork.chelper.actions.InlineCodeAction" id="inlineCodeAction"
+                description="Inline code" text="Inline code">
+            <add-to-group group-id="ProjectViewPopupMenu"/>
+            <add-to-group group-id="EditorPopupMenu"/>
         </action>
         <action id="editTests" class="net.egork.chelper.actions.EditTestsAction" text="Edit Tests"
                 description="Edit tests for current task" icon="/icons/editTests.png">

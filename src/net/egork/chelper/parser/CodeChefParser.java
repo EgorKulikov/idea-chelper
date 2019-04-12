@@ -177,12 +177,11 @@ public class CodeChefParser implements Parser {
             String taskID = getTaskID(taskName);
             List<Test> tests = new ArrayList<Test>();
             int index = 0;
-            if (parser.advanceIfPossible(true, "<h3>Example</h3>") != null) {
-                parser = new StringParser(parser.advance(true, "<h3>", "<!--.problem-statement-->"));
-                while (parser.advanceIfPossible(true, "</b>") != null) {
-                    String input = StringEscapeUtils.unescapeHtml(parser.advance(false, "<b>")).trim();
-                    parser.advance(true, "</b>");
-                    String output = StringEscapeUtils.unescapeHtml(parser.advance(false, "</pre>")).trim();
+            if (parser.advanceIfPossible(true, "id=\"exampleinput\"") != null) {
+                while (parser.advanceIfPossible(true, "<code class=\" mathjax-support\">") != null) {
+                    String input = StringEscapeUtils.unescapeHtml(parser.advance(false, "</code>")).trim();
+                    parser.advance(true, "<code class=\" mathjax-support\">");
+                    String output = StringEscapeUtils.unescapeHtml(parser.advance(false, "</code>")).trim();
                     tests.add(new Test(input + "\n", output + "\n", index));
                 }
             } else {

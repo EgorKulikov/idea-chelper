@@ -2,7 +2,7 @@ function checkForValidUrl(tabId, changeInfo, tab) {
     if (/^https:\/\/.*[.]kattis[.]com\/(contests\/.+\/)?problems\/.*$/.test(tab.url) ||
         /^https:\/\/.*contest2?[.]yandex[.](ru|com)\/.*contest\/\d*\/problems.*$/.test(tab.url) ||
         /^https?:\/\/codeforces[.](ru|com)\/(contest|problemset|gym)\/(\d*\/problem|problem\/\d*)\/.+$/.test(tab.url) ||
-        /^https:\/\/(www[.])?hackerrank[.]com\/(contests\/.+\/)?challenges\/[^/]+$/.test(tab.url) ||
+        /^https:\/\/(www[.])?hackerrank[.]com\/(contests\/.+\/)?challenges\/.+$/.test(tab.url) ||
         /^https:\/\/www[.]facebook[.]com\/hackercup\/problem\/\d+\/$/.test(tab.url) ||
         /^http:\/\/(www[.])?usaco[.]org\/(current\/)?index[.]php[?]page[=]viewproblem.*$/.test(tab.url) ||
         /^https:\/\/code[.]google[.]com\/codejam\/contest\/\d*\/dashboard.*$/.test(tab.url) ||
@@ -10,8 +10,9 @@ function checkForValidUrl(tabId, changeInfo, tab) {
         /^https?:\/\/(www[.])?codechef[.]com\/(.*\/)?problems\/.*$/.test(tab.url) ||
         /^https?:\/\/(www[.])?hackerearth[.]com\/(.*\/)?(algorithm|approximate)\/.*$/.test(tab.url) ||
         /^https:\/\/csacademy[.]com\/contest\/.*\/task\/.*$/.test(tab.url) ||
-        /^https:\/\/.*[.]contest[.]atcoder[.]jp\/tasks\/.*$/.test(tab.url) ||
-        /^https:\/\/codejam[.]withgoogle[.]com\/.*\/challenges\/.*$/.test(tab.url))
+        /^https:\/\/atcoder[.]jp\/contests\/.*\/tasks\/.*$/.test(tab.url) ||
+        /^https:\/\/codejam[.]withgoogle[.]com\/.*\/challenges\/.*$/.test(tab.url) ||
+        /^https:\/\/codingcompetitions[.]withgoogle[.]com\/codejam\/round\/.*$/.test(tab.url))
     {
         chrome.pageAction.show(tabId);
     } else {
@@ -26,7 +27,7 @@ function parseTask(tab) {
         chrome.tabs.sendMessage(tab.id, 'yandex');
     } else if (/^https?:\/\/codeforces[.](ru|com)\/(contest|problemset|gym)\/(\d*\/problem|problem\/\d*)\/.+$/.test(tab.url)) {
         chrome.tabs.sendMessage(tab.id, 'codeforces');
-    } else if (/^https:\/\/(www[.])?hackerrank[.]com\/(contests\/.+\/)?challenges\/[^/]+$/.test(tab.url)) {
+    } else if (/^https:\/\/(www[.])?hackerrank[.]com\/(contests\/.+\/)?challenges\/.+$/.test(tab.url)) {
         chrome.tabs.sendMessage(tab.id, 'hackerrank');
     } else if (/^https:\/\/www[.]facebook[.]com\/hackercup\/problem\/\d+\/$/.test(tab.url)) {
         chrome.tabs.sendMessage(tab.id, 'facebook');
@@ -44,10 +45,12 @@ function parseTask(tab) {
         chrome.tabs.sendMessage(tab.id, 'codechef');
     } else if (/^https?:\/\/(www[.])?hackerearth[.]com\/(.*\/)?(algorithm|approximate)\/.*$/.test(tab.url)) {
         chrome.tabs.sendMessage(tab.id, 'hackerearth');
-    } else if (/^https:\/\/.*[.]contest[.]atcoder[.]jp\/tasks\/.*$/.test(tab.url)) {
+    } else if (/^https:\/\/atcoder[.]jp\/contests\/.*\/tasks\/.*$/.test(tab.url)) {
         chrome.tabs.sendMessage(tab.id, 'atcoder');
     } else if (/^https:\/\/csacademy[.]com\/contest\/.*\/task\/.*$/.test(tab.url)) {
         chrome.tabs.sendMessage(tab.id, 'csacademy');
+    } else if (/^https:\/\/codingcompetitions[.]withgoogle[.]com\/codejam\/round\/.*$/.test(tab.url)) {
+        chrome.tabs.sendMessage(tab.id, 'gcj3');
     }
 }
 

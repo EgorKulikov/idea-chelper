@@ -157,27 +157,33 @@ public class CodeforcesParser implements Parser {
             parser.advance(true, "</div>", "</DIV>");
             String inputFileName = parser.advance(false, "</div>", "</DIV>");
             StreamConfiguration inputType;
-            if (inputFileName.indexOf(' ') != -1)
+            if (inputFileName.indexOf(' ') != -1) {
                 inputType = StreamConfiguration.STANDARD;
-            else
+            } else {
                 inputType = new StreamConfiguration(StreamConfiguration.StreamType.CUSTOM, inputFileName);
+            }
             parser.advance(false, "<div class=\"output-file\">", "<DIV class=\"output-file\">");
             parser.advance(true, "</div>", "</DIV>");
             String outputFileName = parser.advance(false, "</div>", "</DIV>");
             StreamConfiguration outputType;
-            if (outputFileName.indexOf(' ') != -1)
+            if (outputFileName.indexOf(' ') != -1) {
                 outputType = StreamConfiguration.STANDARD;
-            else
+            } else {
                 outputType = new StreamConfiguration(StreamConfiguration.StreamType.CUSTOM, outputFileName);
+            }
             List<Test> tests = new ArrayList<Test>();
             while (true) {
                 try {
                     parser.advance(false, "<div class=\"input\">", "<DIV class=\"input\">");
-                    parser.advanceRegex(true, "<pre [^>]+>", "<PRE [^>]+>");
-                    String testInput = parser.advance(false, "</pre>", "</PRE>").replace("<br />", "\n").replace("<br>", "\n").replace("<BR/>", "\n");
+                    parser.advanceRegex(true, "<pre[^>]*>", "<PRE[^>]*>");
+                    String testInput = parser.advance(false, "</pre>", "</PRE>")
+                            .replace("<br />", "\n").replace("<br>", "\n")
+                            .replace("<BR/>", "\n").trim() + "\n";
                     parser.advance(false, "<div class=\"output\">", "<DIV class=\"output\">");
-                    parser.advanceRegex(true, "<pre [^>]+>", "<PRE [^>]+>");
-                    String testOutput = parser.advance(false, "</pre>", "</PRE>").replace("<br />", "\n").replace("<br>", "\n").replace("<BR/>", "\n");
+                    parser.advanceRegex(true, "<pre[^>]*>", "<PRE[^>]*>");
+                    String testOutput = parser.advance(false, "</pre>", "</PRE>")
+                            .replace("<br />", "\n").replace("<br>", "\n")
+                            .replace("<BR/>", "\n").trim() + "\n";
                     tests.add(new Test(StringEscapeUtils.unescapeHtml(testInput),
                             StringEscapeUtils.unescapeHtml(testOutput), tests.size()));
                 } catch (ParseException e) {

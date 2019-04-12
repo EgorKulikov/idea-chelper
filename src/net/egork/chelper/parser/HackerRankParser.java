@@ -45,13 +45,9 @@ public class HackerRankParser implements Parser {
     public Collection<Task> parseTaskFromHTML(String html) {
         StringParser parser = new StringParser(html);
         try {
-            parser.advance(true, "data-analytics=\"Breadcrumb\"");
             List<String> breadCrumbs = new ArrayList<>();
-            while (parser.advanceIfPossible(true, "data-analytics=\"Breadcrumb\"") != null) {
-                if (parser.advanceIfPossible(true, "data-attr1=\"") != null) {
-                    breadCrumbs.add(parser.advance(true, "\""));
-                }
-
+            while (parser.advanceIfPossible(true, "class=\"breadcrumb-item-text\">") != null) {
+                breadCrumbs.add(parser.advance(false, "</span>"));
             }
             String contestName = breadCrumbs.get(breadCrumbs.size() - 2);
             String taskName = breadCrumbs.get(breadCrumbs.size() - 1);

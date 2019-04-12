@@ -1,12 +1,15 @@
 package net.egork.chelper.codegeneration;
 
 import com.intellij.codeInsight.actions.ReformatCodeProcessor;
+import com.intellij.lang.jvm.JvmModifier;
+import com.intellij.lang.jvm.JvmParameter;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
+import com.intellij.psi.search.GlobalSearchScope;
 import net.egork.chelper.task.*;
 import net.egork.chelper.util.FileUtilities;
 import net.egork.chelper.util.Messenger;
@@ -410,7 +413,7 @@ public class SolutionGenerator {
                 return;
             }
             String qualifiedName = aClass.getQualifiedName();
-            if (qualifiedName != null && !qualifiedName.startsWith("_")) {
+            if (qualifiedName != null && !qualifiedName.startsWith("_") && qualifiedName.indexOf('.') != -1) {
                 classesToImport.add(qualifiedName);
             }
         } else if (!toInline.contains(element)) {
@@ -429,6 +432,9 @@ public class SolutionGenerator {
         if (qualifiedName == null || qualifiedName.startsWith("_")) {
             //TODO
             return false;
+        }
+        if (qualifiedName.indexOf('.') == -1) {
+            return containingClass.equals(entryPoint.getContainingClass());
         }
         for (String aPackage : excludedPackages) {
             if (qualifiedName.startsWith(aPackage)) {
@@ -580,6 +586,32 @@ public class SolutionGenerator {
                 FileUtilities.synchronizeFile(file);
             }
         });
+    }
+
+    public static String inlineCode(Project project, PsiClass aClass) {
+        PsiMethod[] methods = aClass.getMethods();
+        PsiMethod mainMethod = null;
+        PsiArrayType stringArrayType = PsiType.getJavaLangString(PsiManager.getInstance(project),
+                GlobalSearchScope.allScope(project)).createArrayType();
+        for (PsiMethod method : methods) {
+            JvmParameter[] parameters = method.getParameters();
+            if ("main".equals(method.getName()) && method.hasModifier(JvmModifier.STATIC) &&
+                    PsiType.VOID.equals(method.getReturnType()) && parameters.length == 1 &&
+                    stringArrayType.equals(parameters[0].getType()))
+            {
+                mainMethod = method;
+                break;
+            }
+        }
+        if (mainMethod == null) {
+            return null;
+        }
+        SolutionGenerator generator = new SolutionGenerator(
+                new HashSet<String>(Arrays.asList(Utilities.getData(project).excludedPackages)),
+                new MainFileTemplate("%IMPORTS%\npublic %INLINED_SOURCE%", Collections.<PsiElement>singleton(mainMethod),
+                        Collections.<String>emptySet()), false, mainMethod);
+        return generator.createInlinedSource();
+
     }
 
     public static void createSourceFile(final Project project, final TopCoderTask task) {

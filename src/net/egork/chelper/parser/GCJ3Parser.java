@@ -17,13 +17,13 @@ import java.util.List;
 /**
  * @author egorku@yandex-team.ru
  */
-public class AtCoderParser implements Parser {
+public class GCJ3Parser implements Parser {
     public Icon getIcon() {
         throw new UnsupportedOperationException();
     }
 
     public String getName() {
-        return "AtCoder";
+        return "Google Code Jam";
     }
 
     public void getContests(DescriptionReceiver receiver) {
@@ -39,43 +39,31 @@ public class AtCoderParser implements Parser {
     }
 
     public TestType defaultTestType() {
-        return TestType.SINGLE;
+        return TestType.MULTI_NUMBER;
     }
 
     public Collection<Task> parseTaskFromHTML(String html) {
         StringParser parser = new StringParser(html);
         try {
-            parser.advance(true, "a class=\"contest-title\"");
+            parser.advance(true, "<p class=\"headline-5\">");
+            String contestName = parser.advance(false, "</p>");
+            parser.advance(true, "aria-labelledby=\"problem-select-selected-text\"");
             parser.advance(true, ">");
-            String contestName = parser.advance(false, "</a>");
-            parser.advance(true, "<span class=\"h2\">");
-            String taskName = parser.advance(false, "</span>");
-            parser.advance(true, "Memory Limit: ");
-            String memoryLimit = parser.advance(false, "</p>");
-            memoryLimit = memoryLimit.substring(0, memoryLimit.length() - 1).replace(" ", "");
+            String taskName = parser.advance(false, " (");
+            parser.advance(true, "<h3>Limits</h3>");
+            parser.advance(true, "Memory limit: ");
+            String memoryLimit = parser.advance(false, "B").replace(" ", "");
             StreamConfiguration input = StreamConfiguration.STANDARD;
             StreamConfiguration output = StreamConfiguration.STANDARD;
             List<Test> tests = new ArrayList<Test>();
-            while (parser.advanceIfPossible(true, "<pre id=\"pre-sample") != null) {
-                parser.advance(true, ">");
-                String testInput = StringEscapeUtils.unescapeHtml(parser.advance(false, "</pre>"));
-                parser.advance(true, "<pre id=\"pre-sample");
-                parser.advance(true, ">");
-                String testOutput = StringEscapeUtils.unescapeHtml(parser.advance(false, "</pre>"));
-                boolean found = false;
-                for (Test test : tests) {
-                    if (testInput.equals(test.input) && testOutput.equals(test.output)) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    tests.add(new Test(testInput, testOutput, tests.size()));
-                }
+            if (parser.advanceIfPossible(true, "<pre class=\"io-content\">") != null) {
+                String testInput = StringEscapeUtils.unescapeHtml(parser.advance(false, "</pre></td>"));
+                parser.advance(true, "<pre class=\"io-content\">");
+                String testOutput = StringEscapeUtils.unescapeHtml(parser.advance(false, "</pre></td>"));
+                tests.add(new Test(testInput, testOutput, tests.size()));
             }
-            String letter = Character.toString(taskName.charAt(0));
             return Collections.singleton(new Task(taskName, defaultTestType(), input, output, tests.toArray(new Test[tests.size()]), null,
-                    "-Xmx" + memoryLimit, "Main", "Task" + letter, TokenChecker.class.getCanonicalName(), "",
+                    "-Xmx" + memoryLimit, "Solution", CodeChefParser.getTaskID(taskName), TokenChecker.class.getCanonicalName(), "",
                     new String[0], null, contestName, true, null, null, false, false));
         } catch (ParseException e) {
             return Collections.emptyList();

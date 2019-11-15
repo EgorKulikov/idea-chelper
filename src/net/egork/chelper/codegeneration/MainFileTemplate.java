@@ -3,9 +3,11 @@ package net.egork.chelper.codegeneration;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.util.FileContentUtil;
 import net.egork.chelper.util.Utilities;
 
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * @author egor@egork.net
@@ -36,6 +38,7 @@ public class MainFileTemplate extends Template {
     }
 
     public static PsiClass getClass(Project project, String fqn) {
+        FileContentUtil.reparseFiles(project, Collections.singleton(project.getBaseDir()), true);
         return JavaPsiFacade.getInstance(project).findClass(fqn, GlobalSearchScope.allScope(project));
     }
 
